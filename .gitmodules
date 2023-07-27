@@ -1,0 +1,3 @@
+[submodule "deps/js-levenshtein"]
+	path = deps/js-levenshtein
+	url = https://github.com/gustf/js-levenshtein
