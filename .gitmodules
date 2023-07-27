@@ -4,3 +4,6 @@
 [submodule "deps/js-cuint"]
 	path = deps/js-cuint
 	url = https://github.com/pierrec/js-cuint
+[submodule "deps/yespower"]
+	path = deps/yespower
+	url = https://github.com/openwall/yespower
