@@ -7,3 +7,6 @@
 [submodule "deps/yespower"]
 	path = deps/yespower
 	url = https://github.com/openwall/yespower
+[submodule "deps/secp256k1"]
+	path = deps/secp256k1
+	url = https://github.com/bitcoin-core/secp256k1
