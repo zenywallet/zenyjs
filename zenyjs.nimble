@@ -31,3 +31,9 @@ task secp256k1, "make secp256k1":
     exec "./autogen.sh"
     exec "./configure"
     exec "make -j$(nproc)"
+
+task wasmSecp256k1, "make wasm-secp256k1":
+  withDir "deps/wasm-secp256k1":
+    exec "./autogen.sh"
+    exec emsdkEnv("emconfigure ./configure")
+    exec emsdkEnv("emmake make -j$(nproc)")
