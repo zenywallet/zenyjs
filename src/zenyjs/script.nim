@@ -1,7 +1,7 @@
 # Copyright (c) 2020 zenywallet
 
 import json
-import ../opcodes, bytes, reader
+import dotdot/opcodes, bytes, reader
 import arraylib
 
 type

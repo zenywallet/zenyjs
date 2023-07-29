@@ -18,18 +18,18 @@ type
 
 import os, macros
 macro includeConfig: untyped =
-  const configFile = currentSourcePath().parentDir() / ".." / "config.nim"
+  const configFile = currentSourcePath().parentDir() / "dotdot" / "config.nim"
   var existTest = staticExec("test -f \"" & configFile & "\" && echo \"find\"")
   if existTest.len > 0:
     nnkStmtList.newTree(
       nnkIncludeStmt.newTree(
-        newIdentNode("../config")
+        newIdentNode("dotdot/config")
       )
     )
   else:
     nnkStmtList.newTree(
       nnkIncludeStmt.newTree(
-        newIdentNode("../config_default")
+        newIdentNode("dotdot/config_default")
       )
     )
 includeConfig()
@@ -66,8 +66,8 @@ else:
 
   import strutils, nimcrypto
   import script
-  import ../segwit
-  import ../opcodes
+  import dotdot/segwit
+  import dotdot/opcodes
   import bytes
   import utils
   import base58
