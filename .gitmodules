@@ -16,3 +16,6 @@
 [submodule "deps/emsdk"]
 	path = deps/emsdk
 	url = https://github.com/emscripten-core/emsdk
+[submodule "deps/ed25519"]
+	path = deps/ed25519
+	url = https://github.com/orlp/ed25519
