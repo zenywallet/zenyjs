@@ -17,4 +17,4 @@ task emsdk, "Emscripten SDK install":
     exec "git pull"
     exec "./emsdk install latest"
     exec "./emsdk activate latest"
-    exec ". ./emsdk_env.sh"
+    exec ". ./emsdk_env.sh" # For testing, does not effect the current terminal
