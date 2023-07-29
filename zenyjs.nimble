@@ -37,3 +37,10 @@ task wasmSecp256k1, "make wasm-secp256k1":
     exec "./autogen.sh"
     exec emsdkEnv("emconfigure ./configure --enable-module-ecdh --disable-shared --enable-static --disable-tests --disable-benchmark --disable-openssl-tests --disable-exhaustive-tests")
     exec emsdkEnv("emmake make -j$(nproc)")
+
+task zbar, "make zbar":
+  withDir "deps/zbar":
+    exec "sed -i \"s/ -Werror//\" $(pwd)/configure.ac"
+    exec "autoreconf -vfi"
+    exec emsdkEnv("emconfigure ./configure CPPFLAGS=-DNDEBUG=1 --without-x --without-jpeg --without-imagemagick --without-npapi --without-gtk --without-python --without-qt --without-xshm --disable-video --disable-pthread --enable-codes=all")
+    exec emsdkEnv("emmake make -j$(nproc)")
