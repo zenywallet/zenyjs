@@ -34,7 +34,7 @@ when defined(js):
     console.log(seedData)
 
 else:
-  import ../seed_native
+  import dotdot/seed_native
   import arraylib
 
   proc cryptSeed*(buf: ptr UncheckedArray[byte], size: int): int {.importc: "crypt_seed".}
