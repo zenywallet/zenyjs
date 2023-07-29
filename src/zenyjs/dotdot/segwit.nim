@@ -1,9 +1,9 @@
 import os
 
-const libbtcPath = splitPath(currentSourcePath()).head / "../deps/libbtc"
+const libbtcPath = splitPath(currentSourcePath()).head / "../../../deps/libbtc"
 
 {.passC: "-I\"" & libbtcPath / "include\"".}
-{.compile: libbtcPath / "src/segwit_addr.c".}
+{.compile: libbtcPath / "src/trezor-crypto/segwit_addr.c".}
 
 #const BTC_ECKEY_UNCOMPRESSED_LENGTH* = 65
 const BTC_ECKEY_COMPRESSED_LENGTH* = 33
