@@ -22,3 +22,6 @@
 [submodule "deps/lz4"]
 	path = deps/lz4
 	url = https://github.com/lz4/lz4
+[submodule "deps/zbar"]
+	path = deps/zbar
+	url = https://github.com/mchehab/zbar
