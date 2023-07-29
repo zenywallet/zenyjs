@@ -29,7 +29,7 @@ task emsdk, "Emscripten SDK install":
 task secp256k1, "make secp256k1":
   withDir "deps/secp256k1":
     exec "./autogen.sh"
-    exec "./configure"
+    exec "./configure --enable-module-ecdh --disable-shared --enable-static --disable-tests --disable-benchmark --disable-openssl-tests --disable-exhaustive-tests"
     exec "make -j$(nproc)"
 
 task wasmSecp256k1, "make wasm-secp256k1":
