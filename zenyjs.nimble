@@ -35,5 +35,5 @@ task secp256k1, "make secp256k1":
 task wasmSecp256k1, "make wasm-secp256k1":
   withDir "deps/wasm-secp256k1":
     exec "./autogen.sh"
-    exec emsdkEnv("emconfigure ./configure")
+    exec emsdkEnv("emconfigure ./configure --enable-module-ecdh --disable-shared --enable-static --disable-tests --disable-benchmark --disable-openssl-tests --disable-exhaustive-tests")
     exec emsdkEnv("emmake make -j$(nproc)")
