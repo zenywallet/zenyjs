@@ -1,4 +1,7 @@
 nimcache/
 nimblecache/
 htmldocs/
+*
+!*.*
+!*/
 src/zenyjs/bin/
