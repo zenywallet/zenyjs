@@ -12,6 +12,13 @@ srcDir        = "src"
 requires "nim >= 1.6.4"
 
 
+import std/os
+
+template emsdkEnv(cmd: string): string =
+  let emsdkDir = currentSourcePath().parentDir() / "deps/emsdk"
+  let curDir = getCurrentDir()
+  "cd " & emsdkDir & " && . ./emsdk_env.sh && cd " & curDir & " && " & cmd
+
 task emsdk, "Emscripten SDK install":
   withDir "deps/emsdk":
     exec "git pull"
