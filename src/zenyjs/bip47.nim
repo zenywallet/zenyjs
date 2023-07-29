@@ -1,8 +1,8 @@
 # Copyright (c) 2021 zenywallet
 
 import bip32, bytes, base58
-import ../secp256k1
-import ../secp256k1_ecdh
+import dotdot/secp256k1
+import dotdot/secp256k1_ecdh
 import sequtils
 import eckey
 import arraylib
@@ -36,7 +36,7 @@ when isMainModule:
   import script
   import nimcrypto
   import tx
-  import ../opcodes
+  import dotdot/opcodes
   import custom
 
   echo "###Alice's wallet:"
