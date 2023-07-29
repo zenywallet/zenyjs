@@ -25,3 +25,9 @@ task emsdk, "Emscripten SDK install":
     exec "./emsdk install latest"
     exec "./emsdk activate latest"
     exec ". ./emsdk_env.sh" # For testing, does not effect the current terminal
+
+task secp256k1, "make secp256k1":
+  withDir "deps/secp256k1":
+    exec "./autogen.sh"
+    exec "./configure"
+    exec "make -j$(nproc)"
