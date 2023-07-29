@@ -1,6 +1,6 @@
 # Copyright (c) 2021 zenywallet
 
-import ../secp256k1
+import dotdot/secp256k1
 import arraylib
 
 type
