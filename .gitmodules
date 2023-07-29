@@ -25,3 +25,6 @@
 [submodule "deps/zbar"]
 	path = deps/zbar
 	url = https://github.com/mchehab/zbar
+[submodule "deps/libbtc"]
+	path = deps/libbtc
+	url = https://github.com/libbtc/libbtc
