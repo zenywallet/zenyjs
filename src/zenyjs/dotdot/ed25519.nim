@@ -4,7 +4,7 @@ import os
 import seed as seedNative
 export cryptSeed
 
-const ed25519Path = currentSourcePath().parentDir()  / "../deps/ed25519"
+const ed25519Path = currentSourcePath().parentDir()  / "../../../deps/ed25519"
 
 {.passC: "-I\"" / ed25519Path / "src\"" & " -DED25519_NO_SEED".}
 
