@@ -765,7 +765,7 @@ proc LZ4_resetStream*(streamPtr: ptr LZ4_stream_t) {.importc.}
 
 import os
 
-const lz4Path = currentSourcePath().parentDir() / "../deps/lz4/lib"
+const lz4Path = currentSourcePath().parentDir() / "../../../deps/lz4/lib"
 
 {.passC: "-I\"" & lz4Path  & "\"".}
 
