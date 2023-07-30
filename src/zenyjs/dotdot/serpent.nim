@@ -2,7 +2,7 @@
 
 import os
 
-{.compile: currentSourcePath().parentDir() / "../deps/serpent/serpent_threadsafe.c".}
+{.compile: currentSourcePath().parentDir() / "../../../deps/serpent/serpent_threadsafe.c".}
 
 proc cipher_name*(): cstringArray {.importc: "serpent_cipher_name".}
 proc set_key*(in_key: ptr uint32; key_len: uint32, l_key: ptr array[140, uint32]): ptr uint32 {.importc: "serpent_set_key", discardable.}
