@@ -141,10 +141,10 @@ when defined(js):
 
 
 elif defined(emscripten):
-  import ../bytes
-  import ../deoxy
-  import ../ed25519
-  import ../lz4
+  import dotdot/bytes
+  import dotdot/deoxy
+  import dotdot/ed25519
+  import dotdot/lz4
 
   const EXPORTED_FUNCTIONS* = ["_cipher_create", "_cipher_free", "_cipher_process", "_cipher_encrypt"]
 
