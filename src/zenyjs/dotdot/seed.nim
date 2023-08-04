@@ -1,6 +1,6 @@
 # Copyright (c) 2021 zenywallet
 
-include seed_native
+import seed_native
 
 proc cryptSeed*(buf: ptr UncheckedArray[byte], size: int): int {.importc: "crypt_seed".}
 
