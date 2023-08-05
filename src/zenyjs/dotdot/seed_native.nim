@@ -1,3 +1,4 @@
+{.used.}
 when defined(emscripten):
   proc crypt_seed*(seed: pointer, size: int): int {.exportc.} =
     {.emit:"""
