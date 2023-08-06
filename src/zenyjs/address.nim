@@ -45,13 +45,6 @@ when defined(js):
     Module = module
     AddressMod.checkAddress = Module.cwrap("address_checkAddress", NumVar, [NumVar])
 
-  template withStack*(body: untyped) =
-    block stackBlock:
-      var stack = Module.stackSave()
-      defer:
-        Module.stackRestore(stack)
-      body
-
   proc checkAddress*(networkId: int, address: cstring): bool =
     withStack:
       var addressUint8Array = strToUint8Array(address)
