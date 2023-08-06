@@ -11,24 +11,8 @@ import strformat
 import times
 import deoxy
 
-let ui {.compileTime, used.} = true
-import os, macros
-macro includeConfig: untyped =
-  const configFile = currentSourcePath().parentDir() / ".." / "config.nim"
-  let existTest = staticExec("test -f \"" & configFile & "\" && echo \"find\"")
-  if existTest.len > 0:
-    nnkStmtList.newTree(
-      nnkIncludeStmt.newTree(
-        newIdentNode("../config")
-      )
-    )
-  else:
-    nnkStmtList.newTree(
-      nnkIncludeStmt.newTree(
-        newIdentNode("../config_default")
-      )
-    )
-includeConfig()
+const WEBSOCKET_PROTOCOL = "deoxy-0.1"
+const WEBSOCKET_ENTRY_URL = "ws://localhost:8000/ws"
 
 import address
 include karax / prelude
