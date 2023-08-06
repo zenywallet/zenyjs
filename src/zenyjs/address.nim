@@ -1,38 +1,15 @@
 # Copyright (c) 2020 zenywallet
 
-type
-  Network* = object
-    pubKeyPrefix*: uint8
-    scriptPrefix*: uint8
-    wif*: uint8
-    bech32*: string
-    bech32Extra*: seq[string]
-    testnet*: bool
+import config
+export config
 
+type
   AddressType* {.pure.} = enum
     Unknown
     P2PKH
     P2SH
     P2SH_P2WPKH
     P2WPKH
-
-import os, macros
-macro includeConfig: untyped =
-  const configFile = currentSourcePath().parentDir() / "dotdot" / "config.nim"
-  var existTest = staticExec("test -f \"" & configFile & "\" && echo \"find\"")
-  if existTest.len > 0:
-    nnkStmtList.newTree(
-      nnkIncludeStmt.newTree(
-        newIdentNode("dotdot/config")
-      )
-    )
-  else:
-    nnkStmtList.newTree(
-      nnkIncludeStmt.newTree(
-        newIdentNode("dotdot/config_default")
-      )
-    )
-includeConfig()
 
 when defined(js):
   import jsffi
