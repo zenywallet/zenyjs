@@ -84,6 +84,8 @@ when defined(js):
         base58.init(module)
       when declared(random):
         random.init(module)
+      when declared(eckey):
+        eckey.init(module)
       discard (proc() {.async.} = body)()
     )
 
@@ -95,6 +97,7 @@ elif defined(emscripten):
   import address
   import base58
   import random
+  import eckey
 
   const ZENYJS_MODULE_NAME = "ZenyJS"
   {.passL: "-s EXPORT_NAME=" & ZENYJS_MODULE_NAME.}
@@ -128,6 +131,9 @@ elif defined(emscripten):
         bracket.add(newLit(functionName))
     when declared(random.EXPORTED_FUNCTIONS):
       for functionName in random.EXPORTED_FUNCTIONS:
+        bracket.add(newLit(functionName))
+    when declared(eckey.EXPORTED_FUNCTIONS):
+      for functionName in eckey.EXPORTED_FUNCTIONS:
         bracket.add(newLit(functionName))
     result.add(
       nnkConstSection.newTree(
