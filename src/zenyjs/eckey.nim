@@ -4,9 +4,9 @@ import dotdot/secp256k1
 import arraylib
 
 type
-  PrivateKey* = distinct Array[byte]
-  PublicKey* = distinct Array[byte]
-  PublicKeyObj* = distinct Array[byte]
+  PrivateKey* {.borrow: `.`.} = distinct Array[byte]
+  PublicKey* {.borrow: `.`.} = distinct Array[byte]
+  PublicKeyObj* {.borrow: `.`.} = distinct Array[byte]
 
   EcError* = object of CatchableError
 
