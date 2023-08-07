@@ -30,6 +30,7 @@ proc init*() {.inline.} =
 
 proc free*() {.inline.} =
   secp256k1_context_destroy(secp256k1_ctx)
+  secp256k1_ctx = nil
 
 proc ctx*(): ptr secp256k1_context =
   if secp256k1_ctx.isNil:
