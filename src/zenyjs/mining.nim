@@ -11,6 +11,8 @@ import strformat
 import times
 import deoxy
 
+import os, macros
+
 const WEBSOCKET_PROTOCOL = "deoxy-0.1"
 const WEBSOCKET_ENTRY_URL = "ws://localhost:8000/ws"
 
