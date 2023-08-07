@@ -4,10 +4,7 @@ when defined(js):
   import jsffi
   import jslib except Array
   import arraylib
-
-  type
-    PrivateKey* = distinct Array[byte]
-    PublicKey* = distinct Array[byte]
+  import eckey
 
   var RandomMod = JsObject{}
   var Module: JsObject
