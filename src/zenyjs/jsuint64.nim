@@ -25,6 +25,9 @@ type
 
 proc newUint64(jsMod: JsObject, val: uint): Uint64 {.importcpp: "new #(#)".}
 
+proc newUint64*(uint64obj: var Uint64, val: uint = 0) =
+  uint64obj = ModuleUINT64.newUint64(val)
+
 proc newUint64*(val: uint = 0): Uint64 = ModuleUINT64.newUint64(val)
 
 proc newUint64*(sval: cstring): Uint64 =
@@ -99,3 +102,7 @@ when isMainModule:
     echo jsTypeOf(x)
     var y = newUint64(x)
     console.log(y.toString)
+
+  var c: Uint64
+  c.newUint64(6)
+  console.log(c.toString)
