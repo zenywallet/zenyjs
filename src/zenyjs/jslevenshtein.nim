@@ -3,12 +3,15 @@
 import jsffi
 import os
 
-var module {.importc, nodecl.}: JsObject
+{.emit: """
+var levenshteinModule = {};
+(function(module) {
+""" & staticRead(currentSourcePath().parentDir() / "../../deps/js-levenshtein/index.js") & """
+})(levenshteinModule);
+""".}
 
-# https://github.com/gustf/js-levenshtein
-{.emit: staticRead(currentSourcePath().parentDir() / "../../deps/js-levenshtein/index.js").}
-
-var Module = JsObject{levenshtein: module.exports}
+var levenshteinModule {.importc, nodecl.}: JsObject
+var Module = JsObject{levenshtein: levenshteinModule.exports}
 
 proc levenshtein*(a, b: cstring): int = Module.levenshtein(a, b).to(int)
 
