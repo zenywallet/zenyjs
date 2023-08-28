@@ -19,14 +19,19 @@ when defined(js):
   proc init*(module: JsObject) =
     Module = module
     EckeyMod.pub = Module.cwrap("eckey_pub", jsNull, [NumVar, NumVar])
+    EckeyMod.sign = Module.cwrap("eckey_sign", jsNull, [NumVar, NumVar, NumVar, NumVar])
 
   proc pub*(privateKey: PrivateKey): PublicKey =
     result = newArray[byte]().PublicKey
     EckeyMod.pub(privateKey.handle, result.handle)
 
+  proc sign*(privateKey: PrivateKey, hash32: Array[byte], grind: bool = true): Array[byte] =
+    result = newArray[byte]()
+    EckeyMod.sign(privateKey.handle, hash32.handle, grind, result.handle)
+
 else:
   when defined(emscripten):
-    const EXPORTED_FUNCTIONS* = ["_eckey_pub"]
+    const EXPORTED_FUNCTIONS* = ["_eckey_pub", "_eckey_sign"]
 
   import dotdot/secp256k1
   import custom
@@ -133,6 +138,8 @@ else:
     if secp256k1_ecdsa_signature_serialize_der(ctx(), cast[ptr uint8](addr der[0]), addr derLen, addr sig) != 1:
       raise newException(EcError, "secp256k1_ecdsa_signature_serialize_der")
     result = der[0..<derLen]
+
+  proc sign*(privateKey: PrivateKey, hash32: Array[byte], grind: bool = true): Array[byte] {.returnToLastParam, exportc: "eckey_$1".}
 
   proc verify*(publicKeyObj: PublicKeyObj, hash: Array[byte], der: Array[byte]): bool =
     var sig: secp256k1_ecdsa_signature
