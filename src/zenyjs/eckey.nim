@@ -20,6 +20,7 @@ when defined(js):
     Module = module
     EckeyMod.pub = Module.cwrap("eckey_pub", jsNull, [NumVar, NumVar])
     EckeyMod.sign = Module.cwrap("eckey_sign", jsNull, [NumVar, NumVar, NumVar, NumVar])
+    EckeyMod.verify = Module.cwrap("eckey_verify", NumVar, [NumVar, NumVar, NumVar])
 
   proc pub*(privateKey: PrivateKey): PublicKey =
     result = newArray[byte]().PublicKey
@@ -29,9 +30,12 @@ when defined(js):
     result = newArray[byte]()
     EckeyMod.sign(privateKey.handle, hash32.handle, grind, result.handle)
 
+  proc verify*(publicKey: PublicKey, hash: Array[byte], der: Array[byte]): bool =
+    (EckeyMod.verify(publicKey.handle, hash.handle, der.handle) > 0.toJs).to(bool)
+
 else:
   when defined(emscripten):
-    const EXPORTED_FUNCTIONS* = ["_eckey_pub", "_eckey_sign"]
+    const EXPORTED_FUNCTIONS* = ["_eckey_pub", "_eckey_sign", "_eckey_verify"]
 
   import dotdot/secp256k1
   import custom
@@ -150,7 +154,7 @@ else:
     let pubkey = cast[ptr secp256k1_pubkey](addr cast[ptr Array[byte]](unsafeAddr publicKeyObj)[][0])
     result = secp256k1_ecdsa_verify(ctx(), addr sig, cast[ptr uint8](unsafeAddr hash[0]), pubkey) == 1
 
-  proc verify*(publicKey: PublicKey, hash: Array[byte], der: Array[byte]): bool {.inline.} =
+  proc verify*(publicKey: PublicKey, hash: Array[byte], der: Array[byte]): bool {.exportc: "eckey_$1".} =
     publicKey.pubObj.verify(hash, der)
 
   proc tweakAdd*(privateKey: PrivateKey, tweak: Array[byte]): PrivateKey =
