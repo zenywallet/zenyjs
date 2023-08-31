@@ -6,3 +6,4 @@ htmldocs/
 !*/
 src/zenyjs/bin/
 src/nimcache/
+src/zenyjs/deps/
