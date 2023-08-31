@@ -51,3 +51,8 @@ task jsLevenshtein, "copy js-levenshtein":
   withDir "src/zenyjs":
     exec "mkdir -p deps/js-levenshtein"
     exec "cp ../../deps/js-levenshtein/index.js deps/js-levenshtein/"
+
+task jsCuint, "copy js-cuint":
+  withDir "src/zenyjs":
+    exec "mkdir -p deps/js-cuint/lib"
+    exec "cp ../../deps/js-cuint/lib/uint64.js deps/js-cuint/lib/"
