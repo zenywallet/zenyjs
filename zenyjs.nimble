@@ -57,6 +57,15 @@ task jsCuint, "copy js-cuint":
     exec "mkdir -p deps/js-cuint/lib"
     exec "cp ../../deps/js-cuint/lib/uint64.js deps/js-cuint/lib/"
 
+task deps, "Build deps":
+  exec "git submodule update --init"
+  emsdkTask()
+  secp256k1Task()
+  wasmSecp256k1Task()
+  zbarTask()
+  jsLevenshteinTask()
+  jsCuintTask()
+
 before install:
   exec "git submodule update --init deps/js-levenshtein deps/js-cuint"
   jsLevenshteinTask()
