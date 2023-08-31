@@ -46,3 +46,8 @@ task zbar, "make zbar":
     exec "autoreconf -vfi"
     exec emsdkEnv("emconfigure ./configure CPPFLAGS=-DNDEBUG=1 --without-x --without-jpeg --without-imagemagick --without-npapi --without-gtk --without-python --without-qt --without-xshm --disable-video --disable-pthread --enable-codes=all")
     exec emsdkEnv("emmake make -j$(nproc)")
+
+task jsLevenshtein, "copy js-levenshtein":
+  withDir "src/zenyjs":
+    exec "mkdir -p deps/js-levenshtein"
+    exec "cp ../../deps/js-levenshtein/index.js deps/js-levenshtein/"
