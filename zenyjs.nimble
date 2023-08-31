@@ -56,3 +56,8 @@ task jsCuint, "copy js-cuint":
   withDir "src/zenyjs":
     exec "mkdir -p deps/js-cuint/lib"
     exec "cp ../../deps/js-cuint/lib/uint64.js deps/js-cuint/lib/"
+
+before install:
+  exec "git submodule update --init deps/js-levenshtein deps/js-cuint"
+  jsLevenshteinTask()
+  jsCuintTask()
