@@ -8,7 +8,7 @@ var this {.importc, nodecl.}: JsObject
 var module {.importc, nodecl.}: JsObject
 
 # https://github.com/pierrec/js-cuint
-{.emit: staticRead(currentSourcePath().parentDir() / "../../deps/js-cuint/lib/uint64.js").}
+{.emit: staticRead(currentSourcePath().parentDir() / "deps/js-cuint/lib/uint64.js").}
 
 var ModuleUINT64: JsObject
 
