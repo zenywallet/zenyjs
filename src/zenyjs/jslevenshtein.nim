@@ -6,7 +6,7 @@ import os
 {.emit: """
 var levenshteinModule = {};
 (function(module) {
-""" & staticRead(currentSourcePath().parentDir() / "../../deps/js-levenshtein/index.js") & """
+""" & staticRead(currentSourcePath().parentDir() / "deps/js-levenshtein/index.js") & """
 })(levenshteinModule);
 """.}
 
