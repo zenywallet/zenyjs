@@ -59,6 +59,7 @@ task jsCuint, "copy js-cuint":
 
 task deps, "Build deps":
   exec "git submodule update --init"
+  exec "git submodule update --remote deps/emsdk"
   emsdkTask()
   secp256k1Task()
   wasmSecp256k1Task()
