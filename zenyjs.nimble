@@ -67,6 +67,6 @@ task deps, "Build deps":
   jsCuintTask()
 
 before install:
-  exec "git submodule update --init deps/js-levenshtein deps/js-cuint"
-  jsLevenshteinTask()
-  jsCuintTask()
+  depsTask()
+  withDir "src/zenyjs":
+    exec emsdkEnv("nim c -d:release -d:emscripten --noMain:on --gc:orc --forceBuild:on -o:zenyjs.js zenyjs.nim")
