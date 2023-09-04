@@ -2,6 +2,7 @@
 
 const ZenyJsExterns* = """
 var zenyjsexterns = {
+  ZenyJS: {},
   zenyjsMod: {
     onRuntimeInitialized: function() {},
     preRun: [],
@@ -72,7 +73,8 @@ var nodejs = {
     versions: {
       node: 0
     },
-    on: function() {}
+    on: function() {},
+    argv: []
   }
 };
 
