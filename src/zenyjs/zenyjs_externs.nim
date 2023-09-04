@@ -76,7 +76,8 @@ var nodejs = {
     on: function() {},
     argv: [],
     exitCode: 0
-  }
+  },
+  randomBytes: function() {}
 };
 
 var jq = {
