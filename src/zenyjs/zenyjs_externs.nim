@@ -74,7 +74,8 @@ var nodejs = {
       node: 0
     },
     on: function() {},
-    argv: []
+    argv: [],
+    exitCode: 0
   }
 };
 
