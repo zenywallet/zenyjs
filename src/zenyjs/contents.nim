@@ -7,7 +7,7 @@ import exec
 template staticScript*(body: untyped): string =
   block:
     const srcFile = instantiationInfo(-1, true).filename
-    const (srcFileDir, srcFieName, srcFileExt) = splitFile(srcFile)
+    const srcFileDir = splitFile(srcFile).dir
 
     macro staticScriptMacro(bodyMacro: untyped): string =
       return nnkStmtList.newTree(
@@ -18,7 +18,7 @@ template staticScript*(body: untyped): string =
 template scriptMinifier*(code, extern: string): string =
   block:
     const srcFile = instantiationInfo(-1, true).filename
-    const (srcFileDir, srcFieName, srcFileExt) = splitFile(srcFile)
+    const srcFileDir = splitFile(srcFile).dir
 
     macro scriptMinifierMacro(): string =
       return nnkStmtList.newTree(
@@ -43,7 +43,7 @@ proc generateExternCode(externKeyword: seq[string]): string {.compileTime.} =
 template scriptMinifier*(code: string, extern: seq[string]): string =
   block:
     const srcFile = instantiationInfo(-1, true).filename
-    const (srcFileDir, srcFieName, srcFileExt) = splitFile(srcFile)
+    const srcFileDir = splitFile(srcFile).dir
     const externCode = generateExternCode(extern)
 
     macro scriptMinifierMacro(): string =
