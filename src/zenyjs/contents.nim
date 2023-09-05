@@ -1,7 +1,7 @@
 # Copyright (c) 2021 zenywallet
 
-import macros
-import os
+import std/macros
+import std/os
 import exec
 
 template staticScript*(body: untyped): string =
