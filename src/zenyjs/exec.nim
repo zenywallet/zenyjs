@@ -86,6 +86,7 @@ proc compileJsCode*(srcFileDir: string, code: string, rstr: string): string {.co
   let tmpNameFile = srcFileDir / srcFileName & "_tmp" & $tmpFileId & rstr
   let tmpSrcFile = tmpNameFile & srcFileExt
   let tmpJsFile = tmpNameFile & ".js"
+  echo code
   writeFile(tmpSrcFile, code)
   echo staticExec("nim js -d:release --mm:orc -o:" & tmpJsFile & " " & tmpSrcFile)
   if not fileExists(tmpJsFile):
@@ -109,7 +110,7 @@ proc minifyJsCode*(srcFileDir: string, code: string, extern: string, rstr: strin
   writeFile(tmpSrcFile, code)
   writeFile(tmpExtFile, extern & basicExtern(tmpSrcFile))
   let srcPath = currentSourcePath().parentDir()
-  let downloadClosureCompiler = staticExec fmt"""
+  discard staticExec fmt"""
 if [ -x "$(command -v google-closure-compiler)" ]; then
   echo "download closure-compiler skip"
 elif ls "{srcPath}"/closure-compiler-*.jar 1> /dev/null 2>&1; then
