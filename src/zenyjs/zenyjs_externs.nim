@@ -23,15 +23,6 @@ var zenyjsexterns = {
   HEAPU8: {},
   HEAPU32: {},
   buffer: 0,
-  _mmap_js: function() {},
-  _munmap_js: function() {},
-  abort: function() {},
-  emscripten_asm_const_int: function() {},
-  emscripten_resize_heap: function() {},
-  exit: function() {},
-  fd_close: function() {},
-  fd_seek: function() {},
-  fd_write: function() {},
   sig: {},
   isAsync: function() {}
 };

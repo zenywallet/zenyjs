@@ -63,3 +63,18 @@ elif paramCount() == 2:
     res.add("};\n")
 
     echo res
+
+
+    var wasmImportsMatch = d.find(re"var wasmImports = \{\n((.+)\n)+\};")
+    if wasmImportsMatch.isSome:
+      var wasmImportsStr = $wasmImportsMatch.get
+
+      var wasmImportsExtern: string
+      for s in wasmImportsStr.splitLines:
+        var pos = s.find(":")
+        if pos > 0:
+          wasmImportsExtern.add(s[0..pos] & " function() {}" & (if s[^1] == ',': ",\n" else: "\n"))
+        else:
+          wasmImportsExtern.add(s & "\n")
+
+      echo wasmImportsExtern
