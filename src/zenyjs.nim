@@ -1,7 +1,17 @@
-# This is just an example to get you started. A typical library package
-# exports the main API in this file. Note that you cannot rename this file
-# but you can remove it if you wish.
+# Copyright (c) 2023 zenywallet
 
-proc add*(x, y: int): int =
-  ## Adds two files together.
-  return x + y
+when defined(js):
+  import zenyjs/zenyjs
+  export zenyjs
+
+else:
+  import std/os
+  import zenyjs/contents
+  import zenyjs/zenyjs_externs
+  export contents
+
+  const ZenyWasm = staticRead(currentSourcePath().parentDir() / "zenyjs/zenyjs.wasm")
+
+  proc staticZenyJs*(src: static string): tuple[js: string, wasm: string] {.compileTime.} =
+    let minJs = scriptMinifier(src, extern = ZenyJsExterns)
+    (js: minJs, wasm: ZenyWasm)
