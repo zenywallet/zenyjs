@@ -8,7 +8,6 @@ else:
   import std/os
   import zenyjs/contents
   import zenyjs/zenyjs_externs
-  export contents
 
   const ZenyWasm = staticRead(currentSourcePath().parentDir() / "zenyjs/zenyjs.wasm")
 
