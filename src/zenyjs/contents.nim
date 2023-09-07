@@ -28,7 +28,7 @@ template scriptMinifier*(code, extern: string): string =
 
 var externKeywordId {.compileTime.}: int
 
-proc generateExternCode(externKeyword: seq[string]): string {.compileTime.} =
+proc generateExternCode*(externKeyword: seq[string]): string {.compileTime.} =
   inc(externKeywordId)
   result = "var externKeyword" & $externKeywordId & " = {\n"
   for i, s in externKeyword:
