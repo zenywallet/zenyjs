@@ -67,7 +67,10 @@ task deps, "Build deps":
   jsLevenshteinTask()
   jsCuintTask()
 
-before install:
-  depsTask()
+task zenyjs, "Build zenyjs":
   withDir "src/zenyjs":
     exec emsdkEnv("nim c -d:release -d:emscripten --noMain:on --gc:orc --forceBuild:on -o:zenyjs.js zenyjs.nim")
+
+before install:
+  depsTask()
+  zenyjsTask()
