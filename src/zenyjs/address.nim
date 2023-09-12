@@ -13,7 +13,9 @@ type
 
 when defined(js):
   import jsffi
-  import jslib
+  import jslib except Array
+  import arraylib
+  import eckey
 
   var AddressMod = JsObject{}
   var Module: JsObject
@@ -21,6 +23,8 @@ when defined(js):
   proc init*(module: JsObject) =
     Module = module
     AddressMod.checkAddress = Module.cwrap("address_checkAddress", NumVar, [NumVar])
+    AddressMod.getAddress = Module.cwrap("getAddress", NumVar, [NumVar, NumVar])
+    AddressMod.getSegwitAddress = Module.cwrap("getSegwitAddress", NumVar, [NumVar, NumVar])
 
   proc checkAddress*(networkId: int, address: cstring): bool =
     withStack:
@@ -30,9 +34,19 @@ when defined(js):
       Module.HEAPU8[p.to(int) + addressUint8Array.length.to(int)] = 0
       result = AddressMod.checkAddress(networkId, p).to(bool)
 
+  proc getAddress*(networkId: int, pub: PublicKey): cstring =
+    var p = AddressMod.getAddress(networkId, pub.handle)
+    var a = newUint8Array(Module.HEAPU8.buffer, p.to(int), 256)
+    result = a.slice(0, a.indexOf(0)).uint8ArrayToStr()
+
+  proc getSegwitAddress*(networkId: int, pub: PublicKey): cstring =
+    var p = AddressMod.getSegwitAddress(networkId, pub.handle)
+    var a = newUint8Array(Module.HEAPU8.buffer, p.to(int), 256)
+    result = a.slice(0, a.indexOf(0)).uint8ArrayToStr()
+
 else:
   when defined(emscripten):
-    const EXPORTED_FUNCTIONS* = ["_address_checkAddress"]
+    const EXPORTED_FUNCTIONS* = ["_address_checkAddress", "_getAddress", "_getSegwitAddress"]
 
   import strutils, nimcrypto
   import script
@@ -95,6 +109,12 @@ else:
 
   proc getSegwitAddress*(network: NetWork | NetworkId, pub: Array[byte]): string {.inline.} =
     network.p2wpkh_address(ripemd160hash(pub))
+
+  proc getAddress*(networkId: NetworkId, pub: Array[byte]): cstring {.exportc: "$1".} =
+    getNetwork[networkId].p2pkh_address(ripemd160hash(pub)).cstring
+
+  proc getSegwitAddress*(networkId: NetworkId, pub: Array[byte]): cstring {.exportc: "$1".} =
+    getNetwork[networkId].p2wpkh_address(ripemd160hash(pub)).cstring
 
   proc getAddress*(network: NetWork | NetworkId, hash160: Hash160, addressType: AddressType): string =
     case addressType
