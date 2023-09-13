@@ -29,7 +29,6 @@ else:
   when defined(emscripten):
     const EXPORTED_FUNCTIONS* = ["_random_key"]
 
-  import arraylib
   import eckey
   import seed
   import custom
