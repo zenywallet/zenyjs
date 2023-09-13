@@ -23,8 +23,8 @@ when defined(js):
   proc init*(module: JsObject) =
     Module = module
     AddressMod.checkAddress = Module.cwrap("address_checkAddress", NumVar, [NumVar])
-    AddressMod.getAddress = Module.cwrap("getAddress", NumVar, [NumVar, NumVar])
-    AddressMod.getSegwitAddress = Module.cwrap("getSegwitAddress", NumVar, [NumVar, NumVar])
+    AddressMod.getAddress = Module.cwrap("getAddress_c", NumVar, [NumVar, NumVar])
+    AddressMod.getSegwitAddress = Module.cwrap("getSegwitAddress_c", NumVar, [NumVar, NumVar])
 
   proc checkAddress*(networkId: int, address: cstring): bool =
     withStack:
@@ -46,7 +46,7 @@ when defined(js):
 
 else:
   when defined(emscripten):
-    const EXPORTED_FUNCTIONS* = ["_address_checkAddress", "_getAddress", "_getSegwitAddress"]
+    const EXPORTED_FUNCTIONS* = ["_address_checkAddress", "_getAddress_c", "_getSegwitAddress_c"]
 
   import strutils, nimcrypto
   import script
@@ -110,10 +110,10 @@ else:
   proc getSegwitAddress*(network: NetWork | NetworkId, pub: Array[byte]): string {.inline.} =
     network.p2wpkh_address(ripemd160hash(pub))
 
-  proc getAddress*(networkId: NetworkId, pub: Array[byte]): cstring {.exportc: "$1".} =
+  proc getAddress_c*(networkId: NetworkId, pub: Array[byte]): cstring {.exportc: "$1".} =
     getNetwork[networkId].p2pkh_address(ripemd160hash(pub)).cstring
 
-  proc getSegwitAddress*(networkId: NetworkId, pub: Array[byte]): cstring {.exportc: "$1".} =
+  proc getSegwitAddress_c*(networkId: NetworkId, pub: Array[byte]): cstring {.exportc: "$1".} =
     getNetwork[networkId].p2wpkh_address(ripemd160hash(pub)).cstring
 
   proc getAddress*(network: NetWork | NetworkId, hash160: Hash160, addressType: AddressType): string =
