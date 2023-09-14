@@ -19,19 +19,17 @@ var Networks*: Array[Network]
 var curNetworkId {.compileTime.} = 0
 
 macro networks*(networkConfig: untyped): untyped =
-  var networkStmt = newStmtList()
+  result = newStmtList()
   for n in networkConfig:
     var networkId = n[0]
-    networkStmt.add quote do:
-      const `networkId`* = `curNetworkId`.NetworkId
     inc(curNetworkId)
     var networkObj = nnkObjConstr.newTree(newIdentNode("Network"))
     for c in n[1]:
       networkObj.add(nnkExprColonExpr.newTree(c[0], c[1][0]))
     var Networks = ident("Networks")
-    networkStmt.add quote do:
+    result.add quote do:
+      const `networkId`* = `curNetworkId`.NetworkId
       `Networks`.add(`networkObj`)
-  result = networkStmt
 
 networks:
   BitZeny_mainnet:
