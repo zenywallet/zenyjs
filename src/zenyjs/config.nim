@@ -14,7 +14,10 @@ type
 
   NetworkId* = int
 
-var Networks*: Array[Network]
+when defined(js):
+  var Networks*: seq[Network]
+else:
+  var Networks*: Array[Network]
 
 var curNetworkId {.compileTime.} = 0
 
