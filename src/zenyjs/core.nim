@@ -3,7 +3,7 @@
 when defined(js):
   import std/asyncjs
   import std/jsffi except `.=`
-  import zenyjs/jslib except Array
+  import jslib except Array
 
   export asyncjs
   export jsffi
