@@ -71,15 +71,8 @@ when defined(js):
 
   proc toBytes*(uint8Array: Uint8Array): Array[byte] =
     var arrayLen = uint8Array.length
-    var arrayBuf = Module.malloc(arrayLen)
-    Module.HEAPU8.set(uint8Array, arrayBuf)
-    var arrayData = newUint32Array(3)
-    arrayData[0] = arrayLen
-    arrayData[1] = arrayLen
-    arrayData[2] = arrayBuf
-    result.handle = Module.malloc(12)
-    discard Module.HEAPU8.set(newUint8Array(arrayData.buffer), result.handle)
-
+    result = newArray(arrayLen)
+    discard Module.HEAPU8.set(uint8Array, result.data.cint)
 
   proc toBytes*(s: cstring): Array[byte] =
     var uint8Array = strToUint8Array(s)
