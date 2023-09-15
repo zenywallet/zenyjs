@@ -17,7 +17,12 @@ when defined(js):
 
   proc init*(module: JsObject) =
     Module = module
+    ArrayMod.newArrayByte = Module.cwrap("array_new", jsNull, [NumVar, NumVar])
     ArrayMod.destroy = Module.cwrap("array_destroy", jsNull, [NumVar])
+
+  proc newArray*(len: int or cint or JsObject): Array[byte] =
+    result.handle = Module.malloc(12)
+    discard ArrayMod.newArrayByte(len, result.handle)
 
   proc `=destroy`*[T](x: var Array[T]) =
     if not x.handle.isNull:
@@ -75,6 +80,7 @@ when defined(js):
     result.handle = Module.malloc(12)
     discard Module.HEAPU8.set(newUint8Array(arrayData.buffer), result.handle)
 
+
   proc toBytes*(s: cstring): Array[byte] =
     var uint8Array = strToUint8Array(s)
     uint8Array.toBytes
@@ -86,7 +92,7 @@ when defined(js):
 
 else:
   when defined(emscripten):
-    const EXPORTED_FUNCTIONS* = ["_array_destroy"]
+    const EXPORTED_FUNCTIONS* = ["_array_new", "_array_destroy"]
 
   import json
 
@@ -120,9 +126,6 @@ else:
     a.len = b.len
     a.cap = b.cap
     a.data = b.data
-
-  when defined(emscripten):
-    proc destroy*(x: var Array[byte]) {.exportc: "array_destroy".} = `=destroy`(x)
 
   template nextCap(cap: int): int =
     if cap <= 16:
@@ -363,3 +366,9 @@ else:
     copyMem(addr result[0], x.data, xlen)
 
   proc `%`*[T](a: Array[T]): JsonNode = %a.toSeq
+
+  when defined(emscripten):
+    proc newArrayByte*(len: int, result: var Array[byte]) {.exportc: "array_new".} =
+      result = newArray[byte](len)
+
+    proc destroy*(x: var Array[byte]) {.exportc: "array_destroy".} = `=destroy`(x)
