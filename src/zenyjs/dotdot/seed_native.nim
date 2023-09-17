@@ -23,7 +23,7 @@ try {
 } catch(e) {
   return 1;
 }
-, seed, size);
+, `seed`, `size`);
 return ret;
 """.}
 else:
