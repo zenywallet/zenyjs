@@ -34,7 +34,9 @@ when defined(js):
     raise newException(ArrayError, "unsupported =copy")
 
   proc `=sink`*[T](a: var Array[T]; b: Array[T]) =
-    raise newException(ArrayError, "unsupported =sink")
+    `=destroy`(a)
+    wasMoved(a)
+    a.handle = b.handle
 
   proc init*[T](x: var Array[T]) =
     `=destroy`(x)
