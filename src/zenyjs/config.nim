@@ -31,21 +31,23 @@ macro networks*(networkConfig: untyped): untyped =
       networkObj.add(nnkExprColonExpr.newTree(c[0], c[1][0]))
     var Networks = ident("Networks")
     result.add quote do:
-      const `networkId`* = `curNetworkId`.NetworkId
+      when not defined(emscripten):
+        const `networkId`* = `curNetworkId`.NetworkId
       `Networks`.add(`networkObj`)
 
-networks:
-  BitZeny_mainnet:
-    pubKeyPrefix: 81'u8
-    scriptPrefix: 5'u8
-    wif: 128'u8
-    bech32: "sz"
-    bech32Extra: @["bz"]
-    testnet: false
+when not declared(emscripten):
+  networks:
+    BitZeny_mainnet:
+      pubKeyPrefix: 81'u8
+      scriptPrefix: 5'u8
+      wif: 128'u8
+      bech32: "sz"
+      bech32Extra: @["bz"]
+      testnet: false
 
-  BitZeny_testnet:
-    pubKeyPrefix: 111'u8
-    scriptPrefix: 196'u8
-    wif: 239'u8
-    bech32: "tz"
-    testnet: true
+    BitZeny_testnet:
+      pubKeyPrefix: 111'u8
+      scriptPrefix: 196'u8
+      wif: 239'u8
+      bech32: "tz"
+      testnet: true
