@@ -25,7 +25,6 @@ macro networks*(networkConfig: untyped): untyped =
   result = newStmtList()
   for n in networkConfig:
     var networkId = n[0]
-    inc(curNetworkId)
     var networkObj = nnkObjConstr.newTree(newIdentNode("Network"))
     for c in n[1]:
       networkObj.add(nnkExprColonExpr.newTree(c[0], c[1][0]))
@@ -34,6 +33,7 @@ macro networks*(networkConfig: untyped): untyped =
       when not defined(emscripten):
         const `networkId`* = `curNetworkId`.NetworkId
       `Networks`.add(`networkObj`)
+    inc(curNetworkId)
 
 when not declared(emscripten):
   networks:
