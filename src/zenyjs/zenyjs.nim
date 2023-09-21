@@ -79,6 +79,8 @@ when defined(js):
         deoxy.init(module)
       when declared(tx):
         tx.init(module)
+      when declared(config):
+        config.init(module)
       when declared(address):
         address.init(module)
       when declared(base58):
@@ -93,6 +95,7 @@ elif defined(emscripten):
   import bip32
   import deoxy
   import tx
+  import config
   import address
   import base58
   import eckey
@@ -120,6 +123,9 @@ elif defined(emscripten):
         bracket.add(newLit(functionName))
     when declared(tx.EXPORTED_FUNCTIONS):
       for functionName in tx.EXPORTED_FUNCTIONS:
+        bracket.add(newLit(functionName))
+    when declared(config.EXPORTED_FUNCTIONS):
+      for functionName in config.EXPORTED_FUNCTIONS:
         bracket.add(newLit(functionName))
     when declared(address.EXPORTED_FUNCTIONS):
       for functionName in address.EXPORTED_FUNCTIONS:

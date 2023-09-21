@@ -51,3 +51,43 @@ when not declared(emscripten):
       wif: 239'u8
       bech32: "tz"
       testnet: true
+
+when defined(js):
+  import std/json
+  import std/jsffi
+  import jslib except Array
+
+  var ConfigMod = JsObject{}
+  var Module: JsObject
+
+  proc setNetworks*(networks: seq[Network]) =
+    withStack:
+      var networksString = cstring($(%networks))
+      var networksStringUint8Array = strToUint8Array(networksString)
+      var p = Module.stackAlloc(networksStringUint8Array.length.to(int) + 1)
+      Module.HEAPU8.set(networksStringUint8Array, p)
+      Module.HEAPU8[p.to(int) + networksStringUint8Array.length.to(int)] = 0
+      ConfigMod.setNetworks(p)
+
+  proc init*(module: JsObject) =
+    Module = module
+    ConfigMod.setNetworks = Module.cwrap("setNetworks", jsNull, [NumVar])
+    setNetworks(Networks)
+
+elif defined(emscripten):
+  const EXPORTED_FUNCTIONS* = ["_setNetworks"]
+
+  import std/json
+
+  proc to[T](node: JsonNode; t: typedesc[Array[T]]): Array[T] =
+    for n in node:
+      result.add(n.to(T))
+
+  proc setNetworks(networksString: cstring) {.exportc: "setNetworks".} =
+    try:
+      var networksJson = parseJson($networksString) # requires nim >= 2.0
+      Networks.clear()
+      Networks = networksJson.to(Array[Network])
+    except Exception as e:
+      echo e.name, ": ", e.msg
+      echo e.getStackTrace()
