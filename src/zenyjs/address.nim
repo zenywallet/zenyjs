@@ -1,7 +1,6 @@
 # Copyright (c) 2020 zenywallet
 
 import config
-export config
 
 type
   AddressType* {.pure.} = enum
