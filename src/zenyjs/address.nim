@@ -111,10 +111,10 @@ else:
     network.p2wpkh_address(ripemd160hash(pub))
 
   proc getAddress_c*(networkId: NetworkId, pub: Array[byte]): cstring {.exportc: "$1".} =
-    getNetwork[networkId].p2pkh_address(ripemd160hash(pub)).cstring
+    networkId.getNetwork.p2pkh_address(ripemd160hash(pub)).cstring
 
   proc getSegwitAddress_c*(networkId: NetworkId, pub: Array[byte]): cstring {.exportc: "$1".} =
-    getNetwork[networkId].p2wpkh_address(ripemd160hash(pub)).cstring
+    networkId.getNetwork.p2wpkh_address(ripemd160hash(pub)).cstring
 
   proc getAddress*(network: NetWork | NetworkId, hash160: Hash160, addressType: AddressType): string =
     case addressType
