@@ -1,8 +1,6 @@
 # Copyright (c) 2023 zenywallet
 
 when defined(js):
-  import jsffi
-  import jslib except Array
   import arraylib
   import eckey
   import seed
