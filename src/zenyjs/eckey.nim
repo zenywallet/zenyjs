@@ -101,6 +101,10 @@ when defined(js):
     result = newArray[byte]().PublicKeyObj
     EckeyMod.tweakAdd_pubobj(publicKeyObj.handle, tweak.handle, result.handle)
 
+  proc `$`*(data: PrivateKey | PublicKey): string = $data.toHex
+
+  converter toCstring*(data: PrivateKey | PublicKey): cstring = data.toHex
+
 else:
   when defined(emscripten):
     const EXPORTED_FUNCTIONS* = ["_eckey_ecPubKeyCreate", "_eckey_ecPubKeySerializeCompressed",
