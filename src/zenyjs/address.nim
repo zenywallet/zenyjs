@@ -313,7 +313,7 @@ else:
 
 
   when isMainModule:
-    var bitzeny_test = NetworkId.BitZeny_testnet
+    var bitzeny_test = BitZeny_testnet
     var hash160_p2pkh = bitzeny_test.getHash160("mnfJyrnDZSDnaNUkognbRsbQNUanoNHArK")
     assert bitzeny_test.p2pkh_address(hash160_p2pkh) == "mnfJyrnDZSDnaNUkognbRsbQNUanoNHArK"
     assert bitzeny_test.p2sh_address(hash160_p2pkh) == "2MzPag67humcG6DL7tM6geXjGsMUyCcAU7B"
