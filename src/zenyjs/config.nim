@@ -5,6 +5,7 @@ import arraylib
 
 type
   Network* = object
+    name: string
     pubKeyPrefix*: uint8
     scriptPrefix*: uint8
     wif*: uint8
@@ -26,6 +27,7 @@ macro networks*(networkConfig: untyped): untyped =
   for n in networkConfig:
     var networkId = n[0]
     var networkObj = nnkObjConstr.newTree(newIdentNode("Network"))
+    networkObj.add(nnkExprColonExpr.newTree(newIdentNode("name"), newLit($networkId)))
     for c in n[1]:
       networkObj.add(nnkExprColonExpr.newTree(c[0], c[1][0]))
     var networkList = ident("networkList")
@@ -34,6 +36,8 @@ macro networks*(networkConfig: untyped): untyped =
         const `networkId`* = `curNetworkId`.NetworkId
       `networkList`.add(`networkObj`)
     inc(curNetworkId)
+
+template name*(nid: NetworkId): string = networkList[nid].name
 
 when not declared(emscripten):
   networks:
