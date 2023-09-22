@@ -39,6 +39,8 @@ macro networks*(networkConfig: untyped): untyped =
 
 template name*(nid: NetworkId): string = networkList[nid.int].name
 
+proc `$`*(nid: NetworkId): string = nid.name
+
 when not declared(emscripten):
   networks:
     BitZeny_mainnet:
