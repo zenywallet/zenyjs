@@ -15,9 +15,9 @@ type
   NetworkId* = int
 
 when defined(js):
-  var Networks*: seq[Network]
+  var networkList*: seq[Network]
 else:
-  var Networks*: Array[Network]
+  var networkList*: Array[Network]
 
 var curNetworkId {.compileTime.} = 0
 
@@ -28,11 +28,11 @@ macro networks*(networkConfig: untyped): untyped =
     var networkObj = nnkObjConstr.newTree(newIdentNode("Network"))
     for c in n[1]:
       networkObj.add(nnkExprColonExpr.newTree(c[0], c[1][0]))
-    var Networks = ident("Networks")
+    var networkList = ident("networkList")
     result.add quote do:
       when not defined(emscripten):
         const `networkId`* = `curNetworkId`.NetworkId
-      `Networks`.add(`networkObj`)
+      `networkList`.add(`networkObj`)
     inc(curNetworkId)
 
 when not declared(emscripten):
@@ -72,7 +72,7 @@ when defined(js):
   proc init*(module: JsObject) =
     Module = module
     ConfigMod.setNetworks = Module.cwrap("setNetworks", jsNull, [NumVar])
-    setNetworks(Networks)
+    setNetworks(networkList)
 
 elif defined(emscripten):
   const EXPORTED_FUNCTIONS* = ["_setNetworks"]
@@ -86,8 +86,8 @@ elif defined(emscripten):
   proc setNetworks(networksString: cstring) {.exportc: "setNetworks".} =
     try:
       var networksJson = parseJson($networksString) # requires nim >= 2.0
-      Networks.clear()
-      Networks = networksJson.to(Array[Network])
+      networkList.clear()
+      networkList = networksJson.to(Array[Network])
     except Exception as e:
       echo e.name, ": ", e.msg
       echo e.getStackTrace()

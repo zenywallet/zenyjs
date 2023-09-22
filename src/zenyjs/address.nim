@@ -56,7 +56,7 @@ else:
   import base58
   import arraylib
 
-  template getNetwork*(networkId: NetworkId): Network = Networks[networkId.int]
+  template getNetwork*(networkId: NetworkId): Network = networkList[networkId.int]
 
   proc ripemd160hash*(pub: Array[byte]): Hash160 =
     Hash160(ripemd160.digest(sha256s(pub)).data.toArray)
