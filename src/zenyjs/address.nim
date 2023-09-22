@@ -26,7 +26,7 @@ when defined(js):
     AddressMod.getSegwitAddress = Module.cwrap("getSegwitAddress_c", NumVar, [NumVar, NumVar])
     AddressMod.wif = Module.cwrap("wif_c", NumVar, [NumVar, NumVar])
 
-  proc checkAddress*(networkId: int, address: cstring): bool =
+  proc checkAddress*(networkId: NetworkId, address: cstring): bool =
     withStack:
       var addressUint8Array = strToUint8Array(address)
       var p = Module.stackAlloc(addressUint8Array.length.to(int) + 1)
@@ -34,17 +34,17 @@ when defined(js):
       Module.HEAPU8[p.to(int) + addressUint8Array.length.to(int)] = 0
       result = AddressMod.checkAddress(networkId, p).to(bool)
 
-  proc getAddress*(networkId: int, pub: PublicKey): cstring =
+  proc getAddress*(networkId: NetworkId, pub: PublicKey): cstring =
     var p = AddressMod.getAddress(networkId, pub.handle)
     var a = newUint8Array(Module.HEAPU8.buffer, p.to(int), 256)
     result = a.slice(0, a.indexOf(0)).uint8ArrayToStr()
 
-  proc getSegwitAddress*(networkId: int, pub: PublicKey): cstring =
+  proc getSegwitAddress*(networkId: NetworkId, pub: PublicKey): cstring =
     var p = AddressMod.getSegwitAddress(networkId, pub.handle)
     var a = newUint8Array(Module.HEAPU8.buffer, p.to(int), 256)
     result = a.slice(0, a.indexOf(0)).uint8ArrayToStr()
 
-  proc wif*(networkId: int, prv: PrivateKey): cstring =
+  proc wif*(networkId: NetworkId, prv: PrivateKey): cstring =
     var p = AddressMod.wif(networkId, prv.handle)
     var a = newUint8Array(Module.HEAPU8.buffer, p.to(int), 256)
     result = a.slice(0, a.indexOf(0)).uint8ArrayToStr()

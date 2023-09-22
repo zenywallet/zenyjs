@@ -13,7 +13,7 @@ type
     bech32Extra*: seq[string]
     testnet*: bool
 
-  NetworkId* = int
+  NetworkId* = distinct int
 
 when defined(js):
   var networkList*: seq[Network]
@@ -37,7 +37,7 @@ macro networks*(networkConfig: untyped): untyped =
       `networkList`.add(`networkObj`)
     inc(curNetworkId)
 
-template name*(nid: NetworkId): string = networkList[nid].name
+template name*(nid: NetworkId): string = networkList[nid.int].name
 
 when not declared(emscripten):
   networks:
