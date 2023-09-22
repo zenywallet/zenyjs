@@ -24,6 +24,7 @@ when defined(js):
     AddressMod.checkAddress = Module.cwrap("address_checkAddress", NumVar, [NumVar])
     AddressMod.getAddress = Module.cwrap("getAddress_c", NumVar, [NumVar, NumVar])
     AddressMod.getSegwitAddress = Module.cwrap("getSegwitAddress_c", NumVar, [NumVar, NumVar])
+    AddressMod.wif = Module.cwrap("wif_c", NumVar, [NumVar, NumVar])
 
   proc checkAddress*(networkId: int, address: cstring): bool =
     withStack:
@@ -43,9 +44,14 @@ when defined(js):
     var a = newUint8Array(Module.HEAPU8.buffer, p.to(int), 256)
     result = a.slice(0, a.indexOf(0)).uint8ArrayToStr()
 
+  proc wif*(networkId: int, prv: PrivateKey): cstring =
+    var p = AddressMod.wif(networkId, prv.handle)
+    var a = newUint8Array(Module.HEAPU8.buffer, p.to(int), 256)
+    result = a.slice(0, a.indexOf(0)).uint8ArrayToStr()
+
 else:
   when defined(emscripten):
-    const EXPORTED_FUNCTIONS* = ["_address_checkAddress", "_getAddress_c", "_getSegwitAddress_c"]
+    const EXPORTED_FUNCTIONS* = ["_address_checkAddress", "_getAddress_c", "_getSegwitAddress_c", "_wif_c"]
 
   import strutils, nimcrypto
   import script
@@ -310,6 +316,15 @@ else:
 
   proc checkAddress*(networkId: NetworkId, address: cstring): bool {.exportc: "address_$1".} =
     checkAddress(networkId, $address)
+
+  proc wif*(networkId: NetworkId, prv: Array[byte]): string =
+    let wifPrvCompress = (networkId.getNetwork.wif, prv, 0x01'u8).toBytes
+    let checkSum = sha256d(wifPrvCompress)[0..3]
+    let wifRaw = (wifPrvCompress, checkSum).toBytes
+    result = base58.enc(wifRaw)
+
+  proc wif_c*(networkId: NetworkId, prv: Array[byte]): cstring {.exportc: "$1".} =
+    wif(networkId, prv).cstring
 
 
   when isMainModule:
