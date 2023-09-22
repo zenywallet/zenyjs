@@ -42,21 +42,22 @@ template name*(nid: NetworkId): string = networkList[nid.int].name
 proc `$`*(nid: NetworkId): string = nid.name
 
 when not declared(emscripten):
-  networks:
-    BitZeny_mainnet:
-      pubKeyPrefix: 81'u8
-      scriptPrefix: 5'u8
-      wif: 128'u8
-      bech32: "sz"
-      bech32Extra: @["bz"]
-      testnet: false
+  template networksDefault*() =
+    networks:
+      BitZeny_mainnet:
+        pubKeyPrefix: 81'u8
+        scriptPrefix: 5'u8
+        wif: 128'u8
+        bech32: "sz"
+        bech32Extra: @["bz"]
+        testnet: false
 
-    BitZeny_testnet:
-      pubKeyPrefix: 111'u8
-      scriptPrefix: 196'u8
-      wif: 239'u8
-      bech32: "tz"
-      testnet: true
+      BitZeny_testnet:
+        pubKeyPrefix: 111'u8
+        scriptPrefix: 196'u8
+        wif: 239'u8
+        bech32: "tz"
+        testnet: true
 
 when defined(js):
   import std/json
