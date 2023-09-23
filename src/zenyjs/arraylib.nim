@@ -85,6 +85,8 @@ when defined(js):
     var uint8Array = newUint8Array(Module.HEAPU8.buffer, arrayObj[2].to(int), arrayObj[0].to(int)).slice()
     result = uint8ArrayToHex(uint8Array)
 
+  proc `$`*(x: Array[byte]): string = $x.toHex
+
 else:
   when defined(emscripten):
     const EXPORTED_FUNCTIONS* = ["_array_new", "_array_destroy"]
