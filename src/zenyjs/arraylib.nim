@@ -10,6 +10,8 @@ when defined(js):
 
     ArrayByte* = Array[byte]
 
+    Hex* = distinct string
+
     ArrayError* = object of CatchableError
 
   var ArrayMod = JsObject{}
@@ -99,6 +101,8 @@ else:
       data*: ptr UncheckedArray[T]
 
     ArrayByte* = Array[byte]
+
+    Hex* = distinct string
 
   proc `=destroy`*[T](x: var Array[T]) =
     if x.data != nil:

@@ -21,8 +21,6 @@ type
 
   PushData* = distinct Array[byte]
 
-  Hex* = distinct string
-
 
 proc toBytes*(x: SomeOrdinal | SomeFloat): Array[byte] =
   when sizeof(x) == 1:
