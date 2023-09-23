@@ -82,6 +82,8 @@ when defined(js):
     var uint8Array = strToUint8Array(s)
     uint8Array.toBytes
 
+  proc toBytes*(x: Hex): Array[byte] = x.cstring.hexToUint8Array.toBytes
+
   proc toHex*(x: Array[byte]): cstring =
     var arrayObj = newUint32Array(newUint8Array(Module.HEAPU8.buffer, x.handle.to(cint), 12).slice().buffer, 0, 3)
     var uint8Array = newUint8Array(Module.HEAPU8.buffer, arrayObj[2].to(int), arrayObj[0].to(int)).slice()
