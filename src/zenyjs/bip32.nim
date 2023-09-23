@@ -136,6 +136,7 @@ else:
   import sequtils
   import eckey
   import utils
+  import config
   import address
   import arraylib
 
