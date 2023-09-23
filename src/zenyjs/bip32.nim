@@ -2,7 +2,8 @@
 
 when defined(js):
   import jsffi
-  import jslib
+  import jslib except Array
+  import arraylib
 
   type
     HDNode* = object
@@ -15,7 +16,8 @@ when defined(js):
     Module = module
     Bip32Mod.free = Module.cwrap("bip32_free", jsNull, [NumVar])
     Bip32Mod.duplicate = Module.cwrap("bip32_duplicate", NumVar, [NumVar])
-    Bip32Mod.master = Module.cwrap("bip32_master", NumVar, [NumVar, NumVar, NumVar])
+    Bip32Mod.master = Module.cwrap("bip32_master", NumVar, [NumVar, NumVar])
+    Bip32Mod.masterBuf = Module.cwrap("bip32_master_buf", NumVar, [NumVar, NumVar, NumVar])
     Bip32Mod.xprv = Module.cwrap("bip32_xprv", NumVar, [NumVar])
     Bip32Mod.xpub = Module.cwrap("bip32_xpub", NumVar, [NumVar])
     Bip32Mod.node = Module.cwrap("bip32_node", NumVar, [NumVar, NumVar])
@@ -47,10 +49,13 @@ when defined(js):
     if not b.handle.isNil:
       a.handle = b.handle
 
+  proc master*(seed: Array[byte], testnet: bool = false): HDNode =
+    result.handle = Bip32Mod.master(seed.handle, false)
+
   proc master*(seed: Uint8Array, testnet: bool = false): HDNode =
     var pdata = Module.malloc(seed.length.to(int))
     Module.HEAPU8.set(seed, pdata)
-    result.handle = Bip32Mod.master(pdata, seed.length.to(int), false)
+    result.handle = Bip32Mod.masterBuf(pdata, seed.length.to(int), false)
     Module.free(pdata)
     return result
 
@@ -125,7 +130,8 @@ when defined(js):
 
 else:
   when defined(emscripten):
-    const EXPORTED_FUNCTIONS* = ["_bip32_free", "_bip32_master", "_bip32_xprv", "_bip32_xpub", "_bip32_node",
+    const EXPORTED_FUNCTIONS* = ["_bip32_free", "_bip32_master", "_bip32_master_buf",
+                                "_bip32_xprv", "_bip32_xpub", "_bip32_node",
                                 "_bip32_hardened", "_bip32_derive", "_bip32_address", "_bip32_segwitAddress",
                                 "_bip32_duplicate", "_bip32_xprv_ex", "_bip32_xpub_ex",
                                 "_bip32_address_ex", "_bip32_segwitAddress_ex"]
@@ -206,13 +212,13 @@ else:
     result.versionPub = versionPub
     result.versionPrv = versionPrv
 
-  proc master*(seed: Array[byte], testnet: bool = false): HDNode =
+  proc master*(seed: Array[byte], testnet: bool = false): HDNode {.exportc: "bip32_$1".} =
     if testnet:
       result = master(seed, VersionTestnetPublic, VersionTestnetPrivate)
     else:
       result = master(seed, VersionMainnetPublic, VersionMainnetPrivate)
 
-  proc master*(seedBuf: ptr UncheckedArray[byte], seedSize: int, testnet: bool = false): HDNode {.exportc: "bip32_$1".} =
+  proc master*(seedBuf: ptr UncheckedArray[byte], seedSize: int, testnet: bool = false): HDNode {.exportc: "bip32_$1_buf".} =
     var seed = seedBuf.toBytes(seedSize)
     result = master(seed, testnet)
 
