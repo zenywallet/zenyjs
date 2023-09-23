@@ -4,6 +4,7 @@ when defined(js):
   import jsffi
   import jslib except Array
   import arraylib
+  import config
 
   type
     HDNode* = object
@@ -100,29 +101,29 @@ when defined(js):
   proc derive*(node: HDNode, index: int): HDNode =
     result.handle = Bip32Mod.derive(node.handle, index)
 
-  proc address*(node: HDNode, networkId: int = 0): cstring =
-    var p = Bip32Mod.address(node.handle, networkId)
+  proc address*(node: HDNode, networkId: NetworkId = 0.NetworkId): cstring =
+    var p = Bip32Mod.address(node.handle, networkId.int)
     var a = newUint8Array(Module.HEAPU8.buffer, p.to(int), 256)
     var s = a.slice(0, a.indexOf(0)).uint8ArrayToStr()
     return s
 
-  proc segwitAddress*(node: HDNode, networkId: int = 0): cstring =
-    var p = Bip32Mod.segwitAddress(node.handle, networkId)
+  proc segwitAddress*(node: HDNode, networkId: NetworkId = 0.NetworkId): cstring =
+    var p = Bip32Mod.segwitAddress(node.handle, networkId.int)
     var a = newUint8Array(Module.HEAPU8.buffer, p.to(int), 256)
     var s = a.slice(0, a.indexOf(0)).uint8ArrayToStr()
     return s
 
-  proc addressEx*(node: HDNode, networkId: int = 0): cstring =
+  proc addressEx*(node: HDNode, networkId: NetworkId = 0.NetworkId): cstring =
     var p = Module.malloc(4)
-    var size = Bip32Mod.addressEx(node.handle, networkId, p)
+    var size = Bip32Mod.addressEx(node.handle, networkId.int, p)
     var outBuf = newUint32Array(Module.HEAPU32.buffer, p.to(int), 1)[0]
     var a = newUint8Array(Module.HEAPU8.buffer, outBuf.to(int), size.to(int)).slice()
     var s = a.uint8ArrayToStr()
     return s
 
-  proc segwitAddressEx*(node: HDNode, networkId: int = 0): cstring =
+  proc segwitAddressEx*(node: HDNode, networkId: NetworkId = 0.NetworkId): cstring =
     var p = Module.malloc(4)
-    var size = Bip32Mod.segwitAddressEx(node.handle, networkId, p)
+    var size = Bip32Mod.segwitAddressEx(node.handle, networkId.int, p)
     var outBuf = newUint32Array(Module.HEAPU32.buffer, p.to(int), 1)[0]
     var a = newUint8Array(Module.HEAPU8.buffer, outBuf.to(int), size.to(int)).slice()
     var s = a.uint8ArrayToStr()
