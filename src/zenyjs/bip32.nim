@@ -362,6 +362,16 @@ else:
     deriveNode.versionPrv = node.versionPrv
     result = deriveNode
 
+  proc getAddress*(networkId: NetworkId, node: HDNode): string =
+    var network = getNetwork(networkId)
+    var s = node.publicKey.toBytes.PublicKey.toAddress(network)
+    $node.address.set(s)
+
+  proc getSegwitAddress*(networkId: NetworkId, node: HDNode): string =
+    var network = getNetwork(networkId)
+    var s = node.publicKey.toBytes.PublicKey.toSegwitAddress(network)
+    $node.segwitAddress.set(s)
+
   proc address*(node: HDNode, networkId: NetworkId): cstring {.exportc: "bip32_$1".} =
     var network = getNetwork(networkId)
     var s = node.publicKey.toBytes.PublicKey.toAddress(network)
