@@ -90,8 +90,10 @@ when defined(js):
 
   proc node*(x: cstring, testnet: bool = false): HDNode =
     var a = strToUint8Array(x)
-    var size = a.length.to(cint)
+    var size = a.length.to(cint) + 1
+    var zeroData = newUint8Array(size)
     var p = Module.malloc(size)
+    Module.HEAPU8.set(zeroData, p)
     Module.HEAPU8.set(a, p)
     result.handle = Bip32Mod.node(p, testnet)
 
