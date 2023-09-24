@@ -103,6 +103,18 @@ when defined(js):
   proc derive*(node: HDNode, index: int): HDNode =
     result.handle = Bip32Mod.derive(node.handle, index)
 
+  proc getAddress*(networkId: NetworkId, node: HDNode): cstring =
+    var p = Bip32Mod.address(node.handle, networkId.int)
+    var a = newUint8Array(Module.HEAPU8.buffer, p.to(int), 256)
+    var s = a.slice(0, a.indexOf(0)).uint8ArrayToStr()
+    return s
+
+  proc getSegwitAddress*(networkId: NetworkId, node: HDNode): cstring =
+    var p = Bip32Mod.segwitAddress(node.handle, networkId.int)
+    var a = newUint8Array(Module.HEAPU8.buffer, p.to(int), 256)
+    var s = a.slice(0, a.indexOf(0)).uint8ArrayToStr()
+    return s
+
   proc address*(node: HDNode, networkId: NetworkId = 0.NetworkId): cstring =
     var p = Bip32Mod.address(node.handle, networkId.int)
     var a = newUint8Array(Module.HEAPU8.buffer, p.to(int), 256)
