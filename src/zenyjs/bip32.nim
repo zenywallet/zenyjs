@@ -291,8 +291,12 @@ else:
       raise newException(HdError, "invalid serialization format")
     var node = cast[HDNode](allocShared0(sizeof(HDNodeObj)))
     node.depth = d[4]
-    node.fingerprint = d[5].toUint32BE
-    node.childNumber = d[9].toUint32BE
+    when defined(emscripten):
+      node.fingerprint = d[5..8].toUint32BE
+      node.childNumber = d[9..12].toUint32BE
+    else: # wasm SAFE_HEAP=1 alignfault
+      node.fingerprint = d[5].toUint32BE
+      node.childNumber = d[9].toUint32BE
     node.chainCode = d[13..44].toBytes
     var ver = d.toUint32BE
     if testnet:
