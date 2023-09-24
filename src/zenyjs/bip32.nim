@@ -10,6 +10,8 @@ when defined(js):
     HDNode* = object
       handle*: JsObject
 
+    HdError* = object of CatchableError
+
   var Bip32Mod = JsObject{}
   var Module: JsObject
 
@@ -62,12 +64,16 @@ when defined(js):
 
   proc xprv*(node: HDNode): cstring =
     var p = Bip32Mod.xprv(node.handle)
+    if p.to(int) == 0:
+      raise newException(HdError, "xprv privateKey len=0")
     var a = newUint8Array(Module.HEAPU8.buffer, p.to(int), 256)
     var s = a.slice(0, a.indexOf(0)).uint8ArrayToStr()
     return s
 
   proc xpub*(node: HDNode): cstring =
     var p = Bip32Mod.xpub(node.handle)
+    if p.to(int) == 0:
+      raise newException(HdError, "xprv privateKey len=0")
     var a = newUint8Array(Module.HEAPU8.buffer, p.to(int), 256)
     var s = a.slice(0, a.indexOf(0)).uint8ArrayToStr()
     return s
@@ -75,6 +81,8 @@ when defined(js):
   proc xprvEx*(node: HDNode): cstring =
     var p = Module.malloc(4)
     var size = Bip32Mod.xprvEx(node.handle, p)
+    if size.to(int) == 0:
+      raise newException(HdError, "xprv privateKey len=0")
     var outBuf = newUint32Array(Module.HEAPU32.buffer, p.to(int), 1)[0]
     var a = newUint8Array(Module.HEAPU8.buffer, outBuf.to(int), size.to(int)).slice()
     var s = a.uint8ArrayToStr()
@@ -96,9 +104,13 @@ when defined(js):
     Module.HEAPU8.set(zeroData, p)
     Module.HEAPU8.set(a, p)
     result.handle = Bip32Mod.node(p, testnet)
+    if result.handle.to(int) == 0:
+      raise newException(HdError, "node unknown error")
 
   proc hardened*(node: HDNode, index: uint32): HDNode =
     result.handle = Bip32Mod.hardened(node.handle, index)
+    if result.handle.to(int) == 0:
+      raise newException(HdError, "derive privateKey len=0")
 
   proc derive*(node: HDNode, index: uint32): HDNode =
     result.handle = Bip32Mod.derive(node.handle, index)
@@ -185,7 +197,12 @@ else:
 
     HDNode* = ptr HDNodeObj
 
-    HdError* = object of CatchableError
+
+  const HdErrorExceptionDisabled = defined(emscripten)
+
+  when not HdErrorExceptionDisabled:
+    type
+      HdError* = object of CatchableError
 
   converter toBytes*(o: ChainCode): Array[byte] = cast[Array[byte]](o)
   converter toChainCode*(s: Array[byte]): ChainCode {.inline.} = ChainCode(s)
@@ -255,7 +272,10 @@ else:
 
   proc xprv*(node: HDNode): cstring {.exportc: "bip32_$1".} =
     if node.privateKey.len != 32:
-      raise newException(HdError, "xprv privateKey len=" & $node.privateKey.len)
+      when HdErrorExceptionDisabled:
+        return
+      else:
+        raise newException(HdError, "xprv privateKey len=" & $node.privateKey.len)
     var d = (node.versionPrv, node.depth, node.fingerprint, node.childNumber,
             node.chainCode, 0x00'u8, node.privateKey.toBytes).toBytesBE.addCheck
     var s = base58.enc(d)
@@ -269,7 +289,10 @@ else:
 
   proc xprv*(node: HDNode, xprv: ptr cstring): cint {.exportc: "bip32_$1_ex".} =
     if node.privateKey.len != 32:
-      raise newException(HdError, "xprv privateKey len=" & $node.privateKey.len)
+      when HdErrorExceptionDisabled:
+        return
+      else:
+        raise newException(HdError, "xprv privateKey len=" & $node.privateKey.len)
     var d = (node.versionPrv, node.depth, node.fingerprint, node.childNumber,
             node.chainCode, 0x00'u8, node.privateKey.toBytes).toBytesBE.addCheck
     var s = base58.enc(d)
@@ -288,7 +311,10 @@ else:
   proc node*(x: cstring, testnet: bool = false): HDNode {.exportc: "bip32_$1".} =
     var d = base58.dec(toString(cast[ptr UncheckedArray[byte]](x), x.len))
     if not check(d):
-      raise newException(HdError, "invalid serialization format")
+      when HdErrorExceptionDisabled:
+        return
+      else:
+        raise newException(HdError, "invalid serialization format")
     var node = cast[HDNode](allocShared0(sizeof(HDNodeObj)))
     node.depth = d[4]
     when defined(emscripten):
@@ -309,7 +335,10 @@ else:
         node.versionPub = VersionTestnetPublic
         node.versionPrv = VersionTestnetPrivate
       else:
-        raise newException(HdError, "unknown version " & $ver.toBytesBE)
+        when HdErrorExceptionDisabled:
+          return
+        else:
+          raise newException(HdError, "unknown version " & $ver.toBytesBE)
     else:
       if ver == VersionMainnetPublic:
         node.publicKey = d[45..77].toBytes
@@ -320,12 +349,18 @@ else:
         node.versionPub = VersionMainnetPublic
         node.versionPrv = VersionMainnetPrivate
       else:
-        raise newException(HdError, "unknown version " & $ver.toBytesBE)
+        when HdErrorExceptionDisabled:
+          return
+        else:
+          raise newException(HdError, "unknown version " & $ver.toBytesBE)
     result = node
 
   proc hardened*(node: HDNode, index: uint32): HDNode {.exportc: "bip32_$1".} =
     if node.privateKey.len != 32:
-      raise newException(HdError, "derive privateKey len=" & $node.privateKey.len)
+      when HdErrorExceptionDisabled:
+        return
+      else:
+        raise newException(HdError, "derive privateKey len=" & $node.privateKey.len)
     var childNumber = (0x80000000'u32 or index)
     var data = (0x00'u8, node.privateKey, childNumber).toBytesBE
     var I = sha512.hmac(node.chainCode.toBytes.toSeq, data.toSeq).data.toBytes
