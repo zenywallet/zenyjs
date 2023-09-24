@@ -97,10 +97,10 @@ when defined(js):
     Module.HEAPU8.set(a, p)
     result.handle = Bip32Mod.node(p, testnet)
 
-  proc hardened*(node: HDNode, index: int): HDNode =
+  proc hardened*(node: HDNode, index: uint32): HDNode =
     result.handle = Bip32Mod.hardened(node.handle, index)
 
-  proc derive*(node: HDNode, index: int): HDNode =
+  proc derive*(node: HDNode, index: uint32): HDNode =
     result.handle = Bip32Mod.derive(node.handle, index)
 
   proc getAddress*(networkId: NetworkId, node: HDNode): cstring =
