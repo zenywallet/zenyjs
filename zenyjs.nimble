@@ -71,6 +71,10 @@ task zenyjs, "Build zenyjs":
   withDir "src/zenyjs":
     exec emsdkEnv("nim c -d:release -d:emscripten --noMain:on --gc:orc --forceBuild:on -o:zenyjs.js zenyjs.nim")
 
+task zenyjsdebug, "Build zenyjs debug":
+  withDir "src/zenyjs":
+    exec emsdkEnv("nim c -d:emscripten --noMain:on --gc:orc --forceBuild:on -o:zenyjs.js zenyjs.nim")
+
 before install:
   depsTask()
   zenyjsTask()
