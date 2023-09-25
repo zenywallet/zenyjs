@@ -372,6 +372,6 @@ else:
 
   when defined(emscripten):
     proc newArrayByte*(len: int, result: var Array[byte]) {.exportc: "array_new".} =
-      result = newArray[byte](len)
+      result.newArray(len)
 
     proc destroy*(x: var Array[byte]) {.exportc: "array_destroy".} = `=destroy`(x)
