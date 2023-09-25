@@ -69,6 +69,7 @@ else:
   import arraylib
   import custom
   import macros
+  import config
 
   type
     Flags* = distinct uint8
