@@ -144,7 +144,7 @@ else:
 
   proc ecPubKeyCreate*(privateKey: PrivateKey): secp256k1_pubkey =
     if secp256k1_ec_pubkey_create(ctx(), addr result,
-                                  cast[ptr uint8](addr cast[ptr Array[byte]](unsafeAddr privateKey)[][0])) == 0:
+                                  cast[ptr uint8](addr cast[Array[byte]](privateKey)[0])) == 0:
       raise newException(EcError, "Impressive! verify privateKey failed")
 
   proc ecPubKeyCreate*(privateKey: PrivateKey): secp256k1_pubkey {.returnToLastParam, exportc: "eckey_$1".}
