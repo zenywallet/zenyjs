@@ -57,7 +57,7 @@ task jsCuint, "copy js-cuint":
     exec "mkdir -p deps/js-cuint/lib"
     exec "cp ../../deps/js-cuint/lib/uint64.js deps/js-cuint/lib/"
 
-task deps, "Build deps":
+task depsAll, "Build deps":
   exec "git submodule update --init"
   exec "git submodule update --remote deps/emsdk"
   emsdkTask()
@@ -76,5 +76,5 @@ task zenyjsdebug, "Build zenyjs debug":
     exec emsdkEnv("nim c --threads:off -d:emscripten --noMain:on --gc:orc --forceBuild:on -o:zenyjs.js zenyjs.nim")
 
 before install:
-  depsTask()
+  depsAllTask()
   zenyjsTask()
