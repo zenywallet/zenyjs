@@ -349,7 +349,7 @@ proc secp256k1_scratch_space_destroy*(ctx: ptr secp256k1_context;
 
 proc secp256k1_ec_pubkey_parse*(ctx: ptr secp256k1_context;
                                pubkey: ptr secp256k1_pubkey; input: ptr uint8;
-                               inputlen: csize_t): cint {.importc.}
+                               inputlen: csize_t): cint {.importc, cdecl.}
 ## * Serialize a pubkey object into a serialized byte sequence.
 ##
 ##   Returns: 1 always.
@@ -368,7 +368,7 @@ proc secp256k1_ec_pubkey_parse*(ctx: ptr secp256k1_context;
 
 proc secp256k1_ec_pubkey_serialize*(ctx: ptr secp256k1_context; output: ptr uint8;
                                    outputlen: ptr csize_t;
-                                   pubkey: ptr secp256k1_pubkey; flags: cuint): cint {.importc.}
+                                   pubkey: ptr secp256k1_pubkey; flags: cuint): cint {.importc, cdecl.}
 ## * Parse an ECDSA signature in compact (64 bytes) format.
 ##
 ##   Returns: 1 when the signature could be parsed, 0 otherwise.
@@ -386,7 +386,7 @@ proc secp256k1_ec_pubkey_serialize*(ctx: ptr secp256k1_context; output: ptr uint
 ##
 
 proc secp256k1_ecdsa_signature_parse_compact*(ctx: ptr secp256k1_context;
-    sig: ptr secp256k1_ecdsa_signature; input64: ptr uint8): cint {.importc.}
+    sig: ptr secp256k1_ecdsa_signature; input64: ptr uint8): cint {.importc, cdecl.}
 ## * Parse a DER ECDSA signature.
 ##
 ##   Returns: 1 when the signature could be parsed, 0 otherwise.
@@ -404,7 +404,7 @@ proc secp256k1_ecdsa_signature_parse_compact*(ctx: ptr secp256k1_context;
 ##
 
 proc secp256k1_ecdsa_signature_parse_der*(ctx: ptr secp256k1_context;
-    sig: ptr secp256k1_ecdsa_signature; input: ptr uint8; inputlen: csize_t): cint {.importc.}
+    sig: ptr secp256k1_ecdsa_signature; input: ptr uint8; inputlen: csize_t): cint {.importc, cdecl.}
 ## * Serialize an ECDSA signature in DER format.
 ##
 ##   Returns: 1 if enough space was available to serialize, 0 otherwise
@@ -418,7 +418,7 @@ proc secp256k1_ecdsa_signature_parse_der*(ctx: ptr secp256k1_context;
 ##
 
 proc secp256k1_ecdsa_signature_serialize_der*(ctx: ptr secp256k1_context;
-    output: ptr uint8; outputlen: ptr csize_t; sig: ptr secp256k1_ecdsa_signature): cint {.importc.}
+    output: ptr uint8; outputlen: ptr csize_t; sig: ptr secp256k1_ecdsa_signature): cint {.importc, cdecl.}
 ## * Serialize an ECDSA signature in compact (64 byte) format.
 ##
 ##   Returns: 1
@@ -430,7 +430,7 @@ proc secp256k1_ecdsa_signature_serialize_der*(ctx: ptr secp256k1_context;
 ##
 
 proc secp256k1_ecdsa_signature_serialize_compact*(ctx: ptr secp256k1_context;
-    output64: ptr uint8; sig: ptr secp256k1_ecdsa_signature): cint {.importc.}
+    output64: ptr uint8; sig: ptr secp256k1_ecdsa_signature): cint {.importc, cdecl.}
 ## * Verify an ECDSA signature.
 ##
 ##   Returns: 1: correct signature
@@ -459,7 +459,7 @@ proc secp256k1_ecdsa_signature_serialize_compact*(ctx: ptr secp256k1_context;
 
 proc secp256k1_ecdsa_verify*(ctx: ptr secp256k1_context;
                             sig: ptr secp256k1_ecdsa_signature;
-                            msghash32: ptr uint8; pubkey: ptr secp256k1_pubkey): cint {.importc.}
+                            msghash32: ptr uint8; pubkey: ptr secp256k1_pubkey): cint {.importc, cdecl.}
 ## * Convert a signature to a normalized lower-S form.
 ##
 ##   Returns: 1 if sigin was not normalized, 0 if it already was.
@@ -504,7 +504,7 @@ proc secp256k1_ecdsa_verify*(ctx: ptr secp256k1_context;
 ##
 
 proc secp256k1_ecdsa_signature_normalize*(ctx: ptr secp256k1_context;
-    sigout: ptr secp256k1_ecdsa_signature; sigin: ptr secp256k1_ecdsa_signature): cint {.importc, discardable.}
+    sigout: ptr secp256k1_ecdsa_signature; sigin: ptr secp256k1_ecdsa_signature): cint {.importc, cdecl, discardable.}
 ## * An implementation of RFC6979 (using HMAC-SHA256) as nonce generation function.
 ##  If a data pointer is passed, it is assumed to be a pointer to 32 bytes of
 ##  extra entropy.
@@ -534,7 +534,7 @@ var secp256k1_nonce_function_default*: secp256k1_nonce_function
 proc secp256k1_ecdsa_sign*(ctx: ptr secp256k1_context;
                           sig: ptr secp256k1_ecdsa_signature;
                           msghash32: ptr uint8; seckey: ptr uint8;
-                          noncefp: secp256k1_nonce_function; ndata: pointer): cint {.importc.}
+                          noncefp: secp256k1_nonce_function; ndata: pointer): cint {.importc, cdecl.}
 ## * Verify an ECDSA secret key.
 ##
 ##   A secret key is valid if it is not 0 and less than the secp256k1 curve order
@@ -548,7 +548,7 @@ proc secp256k1_ecdsa_sign*(ctx: ptr secp256k1_context;
 ##   In:      seckey: pointer to a 32-byte secret key (cannot be NULL)
 ##
 
-proc secp256k1_ec_seckey_verify*(ctx: ptr secp256k1_context; seckey: ptr uint8): cint {.importc.}
+proc secp256k1_ec_seckey_verify*(ctx: ptr secp256k1_context; seckey: ptr uint8): cint {.importc, cdecl.}
 ## * Compute the public key for a secret key.
 ##
 ##   Returns: 1: secret was valid, public key stores
@@ -559,7 +559,7 @@ proc secp256k1_ec_seckey_verify*(ctx: ptr secp256k1_context; seckey: ptr uint8):
 ##
 
 proc secp256k1_ec_pubkey_create*(ctx: ptr secp256k1_context;
-                                pubkey: ptr secp256k1_pubkey; seckey: ptr uint8): cint {.importc.}
+                                pubkey: ptr secp256k1_pubkey; seckey: ptr uint8): cint {.importc, cdecl.}
 ## * Negates a secret key in place.
 ##
 ##   Returns: 0 if the given secret key is invalid according to
@@ -572,11 +572,11 @@ proc secp256k1_ec_pubkey_create*(ctx: ptr secp256k1_context;
 ##                   NULL)
 ##
 
-proc secp256k1_ec_seckey_negate*(ctx: ptr secp256k1_context; seckey: ptr uint8): cint {.importc.}
+proc secp256k1_ec_seckey_negate*(ctx: ptr secp256k1_context; seckey: ptr uint8): cint {.importc, cdecl.}
 ## * Same as secp256k1_ec_seckey_negate, but DEPRECATED. Will be removed in
 ##   future versions.
 
-proc secp256k1_ec_privkey_negate*(ctx: ptr secp256k1_context; seckey: ptr uint8): cint {.importc.}
+proc secp256k1_ec_privkey_negate*(ctx: ptr secp256k1_context; seckey: ptr uint8): cint {.importc, cdecl.}
 ## * Negates a public key in place.
 ##
 ##   Returns: 1 always
@@ -585,7 +585,7 @@ proc secp256k1_ec_privkey_negate*(ctx: ptr secp256k1_context; seckey: ptr uint8)
 ##
 
 proc secp256k1_ec_pubkey_negate*(ctx: ptr secp256k1_context;
-                                pubkey: ptr secp256k1_pubkey): cint {.importc.}
+                                pubkey: ptr secp256k1_pubkey): cint {.importc, cdecl.}
 ## * Tweak a secret key by adding tweak to it.
 ##
 ##   Returns: 0 if the arguments are invalid or the resulting secret key would be
@@ -603,12 +603,12 @@ proc secp256k1_ec_pubkey_negate*(ctx: ptr secp256k1_context;
 ##
 
 proc secp256k1_ec_seckey_tweak_add*(ctx: ptr secp256k1_context; seckey: ptr uint8;
-                                   tweak32: ptr uint8): cint {.importc.}
+                                   tweak32: ptr uint8): cint {.importc, cdecl.}
 ## * Same as secp256k1_ec_seckey_tweak_add, but DEPRECATED. Will be removed in
 ##   future versions.
 
 proc secp256k1_ec_privkey_tweak_add*(ctx: ptr secp256k1_context; seckey: ptr uint8;
-                                    tweak32: ptr uint8): cint {.importc.}
+                                    tweak32: ptr uint8): cint {.importc, cdecl.}
 ## * Tweak a public key by adding tweak times the generator to it.
 ##
 ##   Returns: 0 if the arguments are invalid or the resulting public key would be
@@ -626,7 +626,7 @@ proc secp256k1_ec_privkey_tweak_add*(ctx: ptr secp256k1_context; seckey: ptr uin
 
 proc secp256k1_ec_pubkey_tweak_add*(ctx: ptr secp256k1_context;
                                    pubkey: ptr secp256k1_pubkey;
-                                   tweak32: ptr uint8): cint {.importc.}
+                                   tweak32: ptr uint8): cint {.importc, cdecl.}
 ## * Tweak a secret key by multiplying it by a tweak.
 ##
 ##   Returns: 0 if the arguments are invalid. 1 otherwise.
@@ -642,12 +642,12 @@ proc secp256k1_ec_pubkey_tweak_add*(ctx: ptr secp256k1_context;
 ##
 
 proc secp256k1_ec_seckey_tweak_mul*(ctx: ptr secp256k1_context; seckey: ptr uint8;
-                                   tweak32: ptr uint8): cint {.importc.}
+                                   tweak32: ptr uint8): cint {.importc, cdecl.}
 ## * Same as secp256k1_ec_seckey_tweak_mul, but DEPRECATED. Will be removed in
 ##   future versions.
 
 proc secp256k1_ec_privkey_tweak_mul*(ctx: ptr secp256k1_context; seckey: ptr uint8;
-                                    tweak32: ptr uint8): cint {.importc.}
+                                    tweak32: ptr uint8): cint {.importc, cdecl.}
 ## * Tweak a public key by multiplying it by a tweak value.
 ##
 ##   Returns: 0 if the arguments are invalid. 1 otherwise.
@@ -663,7 +663,7 @@ proc secp256k1_ec_privkey_tweak_mul*(ctx: ptr secp256k1_context; seckey: ptr uin
 
 proc secp256k1_ec_pubkey_tweak_mul*(ctx: ptr secp256k1_context;
                                    pubkey: ptr secp256k1_pubkey;
-                                   tweak32: ptr uint8): cint  {.importc.}
+                                   tweak32: ptr uint8): cint  {.importc, cdecl.}
 ## * Updates the context randomization to protect against side-channel leakage.
 ##   Returns: 1: randomization successfully updated or nothing to randomize
 ##            0: error
@@ -690,7 +690,7 @@ proc secp256k1_ec_pubkey_tweak_mul*(ctx: ptr secp256k1_context;
 ##  secp256k1_context_clone, resp.), and you may call this repeatedly afterwards.
 ##
 
-proc secp256k1_context_randomize*(ctx: ptr secp256k1_context; seed32: ptr uint8): cint {.importc.}
+proc secp256k1_context_randomize*(ctx: ptr secp256k1_context; seed32: ptr uint8): cint {.importc, cdecl.}
 ## * Add a number of public keys together.
 ##
 ##   Returns: 1: the sum of the public keys is valid.
@@ -704,7 +704,7 @@ proc secp256k1_context_randomize*(ctx: ptr secp256k1_context; seed32: ptr uint8)
 
 proc secp256k1_ec_pubkey_combine*(ctx: ptr secp256k1_context;
                                  `out`: ptr secp256k1_pubkey;
-                                 ins: ptr ptr secp256k1_pubkey; n: csize_t): cint {.importc.}
+                                 ins: ptr ptr secp256k1_pubkey; n: csize_t): cint {.importc, cdecl.}
 
 
 import os
