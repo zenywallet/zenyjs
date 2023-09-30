@@ -8,3 +8,8 @@ when defined(js):
   export asyncjs
   export jsffi
   export jslib
+
+import arraylib
+import bytes
+export arraylib
+export bytes
