@@ -4,6 +4,7 @@ when defined(js):
   import arraylib
   import eckey
   import seed
+  export seed
 
   proc randomKey*(): tuple[prv: PrivateKey, pub: PublicKey] =
     while true:
@@ -22,6 +23,7 @@ else:
   import eckey
   import seed
   import custom
+  export seed
 
   proc randomKey*(): tuple[prv: PrivateKey, pub: PublicKey] =
     while true:
