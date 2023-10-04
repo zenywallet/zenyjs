@@ -1,6 +1,7 @@
 # Copyright (c) 2020 zenywallet
 
 import config
+export config except init
 
 type
   AddressType* {.pure.} = enum
@@ -25,6 +26,8 @@ when defined(js):
     AddressMod.getAddress = Module.cwrap("getAddress_c", NumVar, [NumVar, NumVar])
     AddressMod.getSegwitAddress = Module.cwrap("getSegwitAddress_c", NumVar, [NumVar, NumVar])
     AddressMod.wif = Module.cwrap("wif_c", NumVar, [NumVar, NumVar])
+
+    config.init(module)
 
   proc checkAddress*(networkId: NetworkId, address: cstring): bool =
     withStack:

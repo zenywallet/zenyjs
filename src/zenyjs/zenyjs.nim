@@ -79,8 +79,6 @@ when defined(js):
         deoxy.init(module)
       when declared(tx):
         tx.init(module)
-      when declared(config):
-        config.init(module)
       when declared(address):
         address.init(module)
       when declared(base58):
