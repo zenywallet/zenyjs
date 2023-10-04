@@ -1,10 +1,10 @@
 # Copyright (c) 2021 zenywallet
 
 when defined(js):
-  import jsffi
+  import std/jsffi
   import jslib except Array
   import arraylib
-  import config
+  import address
 
   type
     HDNode* = object
@@ -163,15 +163,14 @@ else:
                                 "_bip32_duplicate", "_bip32_xprv_ex", "_bip32_xpub_ex",
                                 "_bip32_address_ex", "_bip32_segwitAddress_ex"]
 
+  import std/sequtils
+  import nimcrypto
+  import arraylib
   import bytes
   import base58
-  import nimcrypto
-  import sequtils
   import eckey
   import utils
-  import config
   import address
-  import arraylib
 
   const VersionMainnetPublic* = 0x0488B21E'u32
   const VersionMainnetPrivate* = 0x0488ADE4'u32
