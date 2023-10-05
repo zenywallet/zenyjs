@@ -93,6 +93,16 @@ when defined(js):
 
   proc `$`*(x: Array[byte]): string = $x.toHex
 
+  proc `==`*[T](x: Array[T], y: Array[T]): bool =
+    if x.len != y.len:
+      return false
+    let xa = x.toUint8Array
+    let ya = y.toUint8Array
+    for f in 0..<x.len:
+      if xa[f] != ya[f]:
+        return false
+    result = true
+
 else:
   when defined(emscripten):
     const EXPORTED_FUNCTIONS* = ["_array_new", "_array_destroy"]
