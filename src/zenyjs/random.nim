@@ -9,8 +9,7 @@ when defined(js):
   proc randomKey*(): tuple[prv: PrivateKey, pub: PublicKey] =
     while true:
       try:
-        let s = cryptSeed(32)
-        let prv = s.PrivateKey
+        let prv = cryptSeed(32).PrivateKey
         let pub = prv.pub
         return (prv, pub)
       except SeedError:
