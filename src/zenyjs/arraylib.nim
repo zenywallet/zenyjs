@@ -73,6 +73,8 @@ when defined(js):
     let textdec = newTextDecoder()
     result = textdec.decode(uint8Array).to(cstring)
 
+  proc toBytes*(x: Array[byte]): Array[byte] = x
+
   proc toBytes*(uint8Array: Uint8Array): Array[byte] =
     var arrayLen = uint8Array.length
     result = newArray(arrayLen)
