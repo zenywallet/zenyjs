@@ -10,7 +10,7 @@ when defined(js):
     while true:
       try:
         let s = cryptSeed(32)
-        let prv = s.toBytes.PrivateKey
+        let prv = s.PrivateKey
         let pub = prv.pub
         return (prv, pub)
       except SeedError:
