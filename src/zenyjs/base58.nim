@@ -18,6 +18,11 @@ when defined(js):
     discard Basd58Mod.enc(src.handle, dst.handle)
     result = dst.toString()
 
+  proc enc*(src: Uint8Array): cstring =
+    var dst = newArray[byte]()
+    discard Basd58Mod.enc(src.toBytes.handle, dst.handle)
+    result = dst.toString()
+
   proc dec*(src: cstring): Array[byte] =
     result.init()
     var a = src.toBytes
