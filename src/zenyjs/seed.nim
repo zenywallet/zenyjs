@@ -5,13 +5,14 @@ type
 
 when defined(js):
   import jsffi
-  import jslib
+  import jslib except Array
+  import arraylib
 
   var global {.importc, nodecl.}: JsObject
 
   proc isDefined[T](x: T): bool {.noSideEffect, importjs: "(typeof # !== 'undefined')".}
 
-  proc cryptSeed*(size: int): Uint8Array =
+  proc cryptSeedUint8Array*(size: int): Uint8Array =
     try:
       if window.isDefined():
         if not window.crypto.isNil and not window.crypto.getRandomValues.isNil:
@@ -28,6 +29,7 @@ when defined(js):
     except:
       raise newException(SeedError, getCurrentExceptionMsg())
 
+  proc cryptSeed*(size: int): Array[byte] = cryptSeedUint8Array(size).toBytes
 
   when isMainModule:
     var seedData = cryptSeed(32)
