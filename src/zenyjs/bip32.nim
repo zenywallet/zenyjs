@@ -429,13 +429,11 @@ else:
 
   proc getAddress*(networkId: NetworkId, node: HDNode): string =
     var network = getNetwork(networkId)
-    var s = node.publicKey.toAddress(network)
-    $node.address.set(s)
+    result = node.publicKey.toAddress(network)
 
   proc getSegwitAddress*(networkId: NetworkId, node: HDNode): string =
     var network = getNetwork(networkId)
-    var s = node.publicKey.toSegwitAddress(network)
-    $node.segwitAddress.set(s)
+    result = node.publicKey.toSegwitAddress(network)
 
   proc address*(node: HDNode, networkId: NetworkId): cstring {.exportc: "bip32_$1".} =
     var network = getNetwork(networkId)
