@@ -172,10 +172,10 @@ else:
   import utils
   import address
 
-  const VersionMainnetPublic* = 0x0488B21E'u32
-  const VersionMainnetPrivate* = 0x0488ADE4'u32
-  const VersionTestnetPublic* = 0x043587CF'u32
   const VersionTestnetPrivate* = 0x04358394'u32
+  const VersionTestnetPublic* = 0x043587CF'u32
+  const VersionMainnetPrivate* = 0x0488ADE4'u32
+  const VersionMainnetPublic* = 0x0488B21E'u32
 
   type
     ChainCode* = distinct Array[byte]
@@ -187,8 +187,8 @@ else:
       chainCode*: ChainCode
       privateKey*: PrivateKey
       publicKey*: PublicKey
-      versionPub: uint32
       versionPrv: uint32
+      versionPub: uint32
       xprv: cstring
       xpub: cstring
       address: cstring
@@ -228,10 +228,10 @@ else:
     result.chainCode = node.chainCode
     result.privateKey = node.privateKey
     result.publicKey = node.publicKey
-    result.versionPub = node.versionPub
     result.versionPrv = node.versionPrv
+    result.versionPub = node.versionPub
 
-  proc master*(seed: Array[byte], versionPub: uint32, versionPrv: uint32): HDNode =
+  proc master*(seed: Array[byte], versionPrv: uint32, versionPub: uint32): HDNode =
     result = cast[HDNode](allocShared0(sizeof(HDNodeObj)))
     var I = sha512.hmac("Bitcoin seed", seed.toSeq).data
     result.depth = 0
@@ -240,14 +240,14 @@ else:
     result.chainCode = I[32..63].toBytes
     result.privateKey = I[0..31].toBytes
     result.publicKey = result.privateKey.toBytes.PrivateKey.pub.toBytes
-    result.versionPub = versionPub
     result.versionPrv = versionPrv
+    result.versionPub = versionPub
 
   proc master*(seed: Array[byte], testnet: bool = false): HDNode {.exportc: "bip32_$1".} =
     if testnet:
-      result = master(seed, VersionTestnetPublic, VersionTestnetPrivate)
+      result = master(seed, VersionTestnetPrivate, VersionTestnetPublic)
     else:
-      result = master(seed, VersionMainnetPublic, VersionMainnetPrivate)
+      result = master(seed, VersionMainnetPrivate, VersionMainnetPublic)
 
   proc master*(seedBuf: ptr UncheckedArray[byte], seedSize: int, testnet: bool = false): HDNode {.exportc: "bip32_$1_buf".} =
     var seed = seedBuf.toBytes(seedSize)
@@ -331,8 +331,8 @@ else:
       elif ver == VersionTestnetPrivate:
         node.privateKey = d[46..77].toBytes
         node.publicKey = node.privateKey.toBytes.PrivateKey.pub.toBytes
-        node.versionPub = VersionTestnetPublic
         node.versionPrv = VersionTestnetPrivate
+        node.versionPub = VersionTestnetPublic
       else:
         when HdErrorExceptionDisabled:
           return
@@ -345,8 +345,8 @@ else:
       elif ver == VersionMainnetPrivate:
         node.privateKey = d[46..77].toBytes
         node.publicKey = node.privateKey.toBytes.PrivateKey.pub.toBytes
-        node.versionPub = VersionMainnetPublic
         node.versionPrv = VersionMainnetPrivate
+        node.versionPub = VersionMainnetPublic
       else:
         when HdErrorExceptionDisabled:
           return
@@ -372,8 +372,8 @@ else:
     deriveNode.chainCode = chainCode.toBytes
     deriveNode.privateKey = privateKey.tweakAdd(node.privateKey.toBytes.PrivateKey).toBytes
     deriveNode.publicKey = deriveNode.privateKey.toBytes.PrivateKey.pub.toBytes
-    deriveNode.versionPub = node.versionPub
     deriveNode.versionPrv = node.versionPrv
+    deriveNode.versionPub = node.versionPub
     result = deriveNode
 
   proc derive*(node: HDNode, index: uint32): HDNode {.exportc: "bip32_$1".} =
@@ -392,8 +392,8 @@ else:
       deriveNode.publicKey = deriveNode.privateKey.toBytes.PrivateKey.pub.toBytes
     else:
       deriveNode.publicKey = node.publicKey.toBytes.PublicKey.pubObj.tweakAdd(privateKey.toBytes.PrivateKey).pub.toBytes
-    deriveNode.versionPub = node.versionPub
     deriveNode.versionPrv = node.versionPrv
+    deriveNode.versionPub = node.versionPub
     result = deriveNode
 
   proc getAddress*(networkId: NetworkId, node: HDNode): string =
