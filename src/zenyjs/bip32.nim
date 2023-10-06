@@ -3,11 +3,11 @@
 type
   VersionPrefix* = enum
     tprv = 0x04358394'u32 #bip32
-    tpub = 0x043587CF'u32 #bip32
+    tpub = 0x043587cf'u32 #bip32
     vprv = 0x045f18bc'u32 #bip84
     vpub = 0x045f1cf6'u32 #bip84
-    xprv = 0x0488ADE4'u32 #bip32
-    xpub = 0x0488B21E'u32 #bip32
+    xprv = 0x0488ade4'u32 #bip32
+    xpub = 0x0488b21e'u32 #bip32
     zprv = 0x04b2430c'u32 #bip84
     zpub = 0x04b24746'u32 #bip84
 
