@@ -368,6 +368,8 @@ else:
         raise newException(HdError, "unknown version " & $ver.toBytes)
     result = node
 
+  proc node*(x: string): HDNode = node(x.cstring)
+
   proc hardened*(node: HDNode, index: uint32): HDNode {.exportc: "bip32_$1".} =
     if node.privateKey.len != 32:
       when HdErrorExceptionDisabled:
