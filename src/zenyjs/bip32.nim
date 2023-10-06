@@ -34,7 +34,7 @@ when defined(js):
     Bip32Mod.masterBuf = Module.cwrap("bip32_master_buf", NumVar, [NumVar, NumVar, NumVar, NumVar])
     Bip32Mod.xprv = Module.cwrap("bip32_xprv", NumVar, [NumVar])
     Bip32Mod.xpub = Module.cwrap("bip32_xpub", NumVar, [NumVar])
-    Bip32Mod.node = Module.cwrap("bip32_node", NumVar, [NumVar, NumVar])
+    Bip32Mod.node = Module.cwrap("bip32_node", NumVar, [NumVar])
     Bip32Mod.hardened = Module.cwrap("bip32_hardened", NumVar, [NumVar, NumVar])
     Bip32Mod.derive = Module.cwrap("bip32_derive", NumVar, [NumVar, NumVar])
     Bip32Mod.address = Module.cwrap("bip32_address", NumVar, [NumVar, NumVar])
@@ -109,14 +109,14 @@ when defined(js):
     var s = a.uint8ArrayToStr()
     return s
 
-  proc node*(x: cstring, testnet: bool = false): HDNode =
+  proc node*(x: cstring): HDNode =
     var a = strToUint8Array(x)
     var size = a.length.to(cint) + 1
     var zeroData = newUint8Array(size)
     var p = Module.malloc(size)
     Module.HEAPU8.set(zeroData, p)
     Module.HEAPU8.set(a, p)
-    result.handle = Bip32Mod.node(p, testnet)
+    result.handle = Bip32Mod.node(p)
     if result.handle.to(int) == 0:
       raise newException(HdError, "node unknown error")
 
@@ -311,7 +311,7 @@ else:
     xpub[] = node.xpub
     result = s.len.cint
 
-  proc node*(x: cstring, testnet: bool = false): HDNode {.exportc: "bip32_$1".} =
+  proc node*(x: cstring): HDNode {.exportc: "bip32_$1".} =
     var d = base58.dec(toString(cast[ptr UncheckedArray[byte]](x), x.len))
     if not check(d):
       when HdErrorExceptionDisabled:
@@ -328,34 +328,44 @@ else:
       node.childNumber = d[9].toUint32BE
     node.chainCode = d[13..44].toBytes
     var ver = d.toUint32BE
-    if testnet:
-      if ver == VersionPrefix.tpub.uint32:
-        node.publicKey = d[45..77].toBytes
-        node.versionPub = VersionPrefix.tpub
-      elif ver == VersionPrefix.tprv.uint32:
-        node.privateKey = d[46..77].toBytes
-        node.publicKey = node.privateKey.toBytes.PrivateKey.pub.toBytes
-        node.versionPrv = VersionPrefix.tprv
-        node.versionPub = VersionPrefix.tpub
-      else:
-        when HdErrorExceptionDisabled:
-          return
-        else:
-          raise newException(HdError, "unknown version " & $ver.toBytesBE)
+    case ver
+    of VersionPrefix.xprv.uint32:
+      node.privateKey = d[46..77].toBytes
+      node.publicKey = node.privateKey.pub
+      node.versionPrv = VersionPrefix.xprv
+      node.versionPub = VersionPrefix.xpub
+    of VersionPrefix.xpub.uint32:
+      node.publicKey = d[45..77].toBytes
+      node.versionPub = VersionPrefix.xpub
+    of VersionPrefix.zprv.uint32:
+      node.privateKey = d[46..77].toBytes
+      node.publicKey = node.privateKey.pub
+      node.versionPrv = VersionPrefix.zprv
+      node.versionPub = VersionPrefix.zpub
+    of VersionPrefix.zpub.uint32:
+      node.publicKey = d[45..77].toBytes
+      node.versionPub = VersionPrefix.zpub
+    of VersionPrefix.tprv.uint32:
+      node.privateKey = d[46..77].toBytes
+      node.publicKey = node.privateKey.pub
+      node.versionPrv = VersionPrefix.tprv
+      node.versionPub = VersionPrefix.tpub
+    of VersionPrefix.tpub.uint32:
+      node.publicKey = d[45..77].toBytes
+      node.versionPub = VersionPrefix.tpub
+    of VersionPrefix.vprv.uint32:
+      node.privateKey = d[46..77].toBytes
+      node.publicKey = node.privateKey.pub
+      node.versionPrv = VersionPrefix.vprv
+      node.versionPub = VersionPrefix.vpub
+    of VersionPrefix.vpub.uint32:
+      node.publicKey = d[45..77].toBytes
+      node.versionPub = VersionPrefix.vpub
     else:
-      if ver == VersionPrefix.xpub.uint32:
-        node.publicKey = d[45..77].toBytes
-        node.versionPub = VersionPrefix.xpub
-      elif ver == VersionPrefix.xprv.uint32:
-        node.privateKey = d[46..77].toBytes
-        node.publicKey = node.privateKey.toBytes.PrivateKey.pub.toBytes
-        node.versionPrv = VersionPrefix.xprv
-        node.versionPub = VersionPrefix.xpub
+      when HdErrorExceptionDisabled:
+        return
       else:
-        when HdErrorExceptionDisabled:
-          return
-        else:
-          raise newException(HdError, "unknown version " & $ver.toBytesBE)
+        raise newException(HdError, "unknown version " & $ver.toBytes)
     result = node
 
   proc hardened*(node: HDNode, index: uint32): HDNode {.exportc: "bip32_$1".} =
