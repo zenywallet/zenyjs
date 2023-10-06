@@ -248,7 +248,7 @@ else:
     result.childNumber = 0
     result.chainCode = I[32..63].toBytes
     result.privateKey = I[0..31].toBytes
-    result.publicKey = result.privateKey.toBytes.PrivateKey.pub.toBytes
+    result.publicKey = result.privateKey.pub
     result.versionPrv = versionPrv
     result.versionPub = versionPub
 
@@ -280,7 +280,7 @@ else:
       else:
         raise newException(HdError, "xprv privateKey len=" & $node.privateKey.len)
     var d = (node.versionPrv, node.depth, node.fingerprint, node.childNumber,
-            node.chainCode, 0x00'u8, node.privateKey.toBytes).toBytesBE.addCheck
+            node.chainCode, 0x00'u8, node.privateKey).toBytesBE.addCheck
     var s = base58.enc(d)
     node.xprv.set(s)
 
@@ -297,7 +297,7 @@ else:
       else:
         raise newException(HdError, "xprv privateKey len=" & $node.privateKey.len)
     var d = (node.versionPrv, node.depth, node.fingerprint, node.childNumber,
-            node.chainCode, 0x00'u8, node.privateKey.toBytes).toBytesBE.addCheck
+            node.chainCode, 0x00'u8, node.privateKey).toBytesBE.addCheck
     var s = base58.enc(d)
     node.xprv.set(s)
     xprv[] = node.xprv
@@ -381,11 +381,11 @@ else:
     var chainCode: ChainCode = I[32..63]
     var deriveNode = cast[HDNode](allocShared0(sizeof(HDNodeObj)))
     deriveNode.depth = node.depth + 1
-    deriveNode.fingerprint = ripemd160hash(node.publicKey.toBytes.PublicKey).toBytes.toUint32BE
+    deriveNode.fingerprint = ripemd160hash(node.publicKey).toBytes.toUint32BE
     deriveNode.childNumber = childNumber
     deriveNode.chainCode = chainCode.toBytes
-    deriveNode.privateKey = privateKey.tweakAdd(node.privateKey.toBytes.PrivateKey).toBytes
-    deriveNode.publicKey = deriveNode.privateKey.toBytes.PrivateKey.pub.toBytes
+    deriveNode.privateKey = privateKey.tweakAdd(node.privateKey)
+    deriveNode.publicKey = deriveNode.privateKey.pub
     deriveNode.versionPrv = node.versionPrv
     deriveNode.versionPub = node.versionPub
     result = deriveNode
@@ -398,48 +398,48 @@ else:
     var chainCode: ChainCode = I[32..63]
     var deriveNode = cast[HDNode](allocShared0(sizeof(HDNodeObj)))
     deriveNode.depth = node.depth + 1
-    deriveNode.fingerprint = ripemd160hash(node.publicKey.toBytes.PublicKey).toBytes.toUint32BE
+    deriveNode.fingerprint = ripemd160hash(node.publicKey).toBytes.toUint32BE
     deriveNode.childNumber = childNumber
     deriveNode.chainCode = chainCode.toBytes
     if node.privateKey.len == 32:
-      deriveNode.privateKey = privateKey.tweakAdd(node.privateKey.toBytes.PrivateKey).toBytes
-      deriveNode.publicKey = deriveNode.privateKey.toBytes.PrivateKey.pub.toBytes
+      deriveNode.privateKey = privateKey.tweakAdd(node.privateKey)
+      deriveNode.publicKey = deriveNode.privateKey.pub
     else:
-      deriveNode.publicKey = node.publicKey.toBytes.PublicKey.pubObj.tweakAdd(privateKey.toBytes.PrivateKey).pub.toBytes
+      deriveNode.publicKey = node.publicKey.pubObj.tweakAdd(privateKey).pub
     deriveNode.versionPrv = node.versionPrv
     deriveNode.versionPub = node.versionPub
     result = deriveNode
 
   proc getAddress*(networkId: NetworkId, node: HDNode): string =
     var network = getNetwork(networkId)
-    var s = node.publicKey.toBytes.PublicKey.toAddress(network)
+    var s = node.publicKey.toAddress(network)
     $node.address.set(s)
 
   proc getSegwitAddress*(networkId: NetworkId, node: HDNode): string =
     var network = getNetwork(networkId)
-    var s = node.publicKey.toBytes.PublicKey.toSegwitAddress(network)
+    var s = node.publicKey.toSegwitAddress(network)
     $node.segwitAddress.set(s)
 
   proc address*(node: HDNode, networkId: NetworkId): cstring {.exportc: "bip32_$1".} =
     var network = getNetwork(networkId)
-    var s = node.publicKey.toBytes.PublicKey.toAddress(network)
+    var s = node.publicKey.toAddress(network)
     node.address.set(s)
 
   proc segwitAddress*(node: HDNode, networkId: NetworkId): cstring {.exportc: "bip32_$1".} =
     var network = getNetwork(networkId)
-    var s = node.publicKey.toBytes.PublicKey.toSegwitAddress(network)
+    var s = node.publicKey.toSegwitAddress(network)
     node.segwitAddress.set(s)
 
   proc address*(node: HDNode, networkId: NetworkId, outAddress: ptr cstring): cint {.exportc: "bip32_$1_ex".} =
     var network = getNetwork(networkId)
-    var s = node.publicKey.toBytes.PublicKey.toAddress(network)
+    var s = node.publicKey.toAddress(network)
     node.address.set(s)
     outAddress[] = node.address
     result = s.len.cint
 
   proc segwitAddress*(node: HDNode, networkId: NetworkId, outAddress: ptr cstring): cint {.exportc: "bip32_$1_ex".} =
     var network = getNetwork(networkId)
-    var s = node.publicKey.toBytes.PublicKey.toSegwitAddress(network)
+    var s = node.publicKey.toSegwitAddress(network)
     node.segwitAddress.set(s)
     outAddress[] = node.segwitAddress
     result = s.len.cint
