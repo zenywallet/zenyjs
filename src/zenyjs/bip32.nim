@@ -172,10 +172,16 @@ else:
   import utils
   import address
 
-  const VersionTestnetPrivate* = 0x04358394'u32
-  const VersionTestnetPublic* = 0x043587CF'u32
-  const VersionMainnetPrivate* = 0x0488ADE4'u32
-  const VersionMainnetPublic* = 0x0488B21E'u32
+  type
+    VersionPrefix* = enum
+      tprv = 0x04358394'u32 #bip32
+      tpub = 0x043587CF'u32 #bip32
+      vprv = 0x045f18bc'u32 #bip84
+      vpub = 0x045f1cf6'u32 #bip84
+      xprv = 0x0488ADE4'u32 #bip32
+      xpub = 0x0488B21E'u32 #bip32
+      zprv = 0x04b2430c'u32 #bip84
+      zpub = 0x04b24746'u32 #bip84
 
   type
     ChainCode* = distinct Array[byte]
@@ -187,8 +193,8 @@ else:
       chainCode*: ChainCode
       privateKey*: PrivateKey
       publicKey*: PublicKey
-      versionPrv: uint32
-      versionPub: uint32
+      versionPrv: VersionPrefix
+      versionPub: VersionPrefix
       xprv: cstring
       xpub: cstring
       address: cstring
@@ -231,7 +237,7 @@ else:
     result.versionPrv = node.versionPrv
     result.versionPub = node.versionPub
 
-  proc master*(seed: Array[byte], versionPrv: uint32, versionPub: uint32): HDNode =
+  proc master*(seed: Array[byte], versionPrv: VersionPrefix, versionPub: VersionPrefix): HDNode =
     result = cast[HDNode](allocShared0(sizeof(HDNodeObj)))
     var I = sha512.hmac("Bitcoin seed", seed.toSeq).data
     result.depth = 0
@@ -245,9 +251,9 @@ else:
 
   proc master*(seed: Array[byte], testnet: bool = false): HDNode {.exportc: "bip32_$1".} =
     if testnet:
-      result = master(seed, VersionTestnetPrivate, VersionTestnetPublic)
+      result = master(seed, VersionPrefix.tprv, VersionPrefix.tpub)
     else:
-      result = master(seed, VersionMainnetPrivate, VersionMainnetPublic)
+      result = master(seed, VersionPrefix.xprv, VersionPrefix.xpub)
 
   proc master*(seedBuf: ptr UncheckedArray[byte], seedSize: int, testnet: bool = false): HDNode {.exportc: "bip32_$1_buf".} =
     var seed = seedBuf.toBytes(seedSize)
@@ -325,28 +331,28 @@ else:
     node.chainCode = d[13..44].toBytes
     var ver = d.toUint32BE
     if testnet:
-      if ver == VersionTestnetPublic:
+      if ver == VersionPrefix.tpub.uint32:
         node.publicKey = d[45..77].toBytes
-        node.versionPub = VersionTestnetPublic
-      elif ver == VersionTestnetPrivate:
+        node.versionPub = VersionPrefix.tpub
+      elif ver == VersionPrefix.tprv.uint32:
         node.privateKey = d[46..77].toBytes
         node.publicKey = node.privateKey.toBytes.PrivateKey.pub.toBytes
-        node.versionPrv = VersionTestnetPrivate
-        node.versionPub = VersionTestnetPublic
+        node.versionPrv = VersionPrefix.tprv
+        node.versionPub = VersionPrefix.tpub
       else:
         when HdErrorExceptionDisabled:
           return
         else:
           raise newException(HdError, "unknown version " & $ver.toBytesBE)
     else:
-      if ver == VersionMainnetPublic:
+      if ver == VersionPrefix.xpub.uint32:
         node.publicKey = d[45..77].toBytes
-        node.versionPub = VersionMainnetPublic
-      elif ver == VersionMainnetPrivate:
+        node.versionPub = VersionPrefix.xpub
+      elif ver == VersionPrefix.xprv.uint32:
         node.privateKey = d[46..77].toBytes
         node.publicKey = node.privateKey.toBytes.PrivateKey.pub.toBytes
-        node.versionPrv = VersionMainnetPrivate
-        node.versionPub = VersionMainnetPublic
+        node.versionPrv = VersionPrefix.xprv
+        node.versionPub = VersionPrefix.xpub
       else:
         when HdErrorExceptionDisabled:
           return
