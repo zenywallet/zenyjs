@@ -242,12 +242,12 @@ else:
   proc master*(seed: Array[byte], versionPrv: VersionPrefix = xprv,
               versionPub: VersionPrefix = xpub): HDNode {.exportc: "bip32_$1".} =
     result = cast[HDNode](allocShared0(sizeof(HDNodeObj)))
-    var I = sha512.hmac("Bitcoin seed", seed.toSeq).data
+    var I = sha512.hmac("Bitcoin seed", seed.toSeq).data.toBytes
     result.depth = 0
     result.fingerprint = 0
     result.childNumber = 0
-    result.chainCode = I[32..63].toBytes
-    result.privateKey = I[0..31].toBytes
+    result.chainCode = I[32..63]
+    result.privateKey = I[0..31]
     result.publicKey = result.privateKey.pub
     result.versionPrv = versionPrv
     result.versionPub = versionPub
@@ -326,40 +326,40 @@ else:
     else: # wasm SAFE_HEAP=1 alignfault
       node.fingerprint = d[5].toUint32BE
       node.childNumber = d[9].toUint32BE
-    node.chainCode = d[13..44].toBytes
+    node.chainCode = d[13..44]
     var ver = d.toUint32BE
     case ver
     of VersionPrefix.xprv.uint32:
-      node.privateKey = d[46..77].toBytes
+      node.privateKey = d[46..77]
       node.publicKey = node.privateKey.pub
       node.versionPrv = VersionPrefix.xprv
       node.versionPub = VersionPrefix.xpub
     of VersionPrefix.xpub.uint32:
-      node.publicKey = d[45..77].toBytes
+      node.publicKey = d[45..77]
       node.versionPub = VersionPrefix.xpub
     of VersionPrefix.zprv.uint32:
-      node.privateKey = d[46..77].toBytes
+      node.privateKey = d[46..77]
       node.publicKey = node.privateKey.pub
       node.versionPrv = VersionPrefix.zprv
       node.versionPub = VersionPrefix.zpub
     of VersionPrefix.zpub.uint32:
-      node.publicKey = d[45..77].toBytes
+      node.publicKey = d[45..77]
       node.versionPub = VersionPrefix.zpub
     of VersionPrefix.tprv.uint32:
-      node.privateKey = d[46..77].toBytes
+      node.privateKey = d[46..77]
       node.publicKey = node.privateKey.pub
       node.versionPrv = VersionPrefix.tprv
       node.versionPub = VersionPrefix.tpub
     of VersionPrefix.tpub.uint32:
-      node.publicKey = d[45..77].toBytes
+      node.publicKey = d[45..77]
       node.versionPub = VersionPrefix.tpub
     of VersionPrefix.vprv.uint32:
-      node.privateKey = d[46..77].toBytes
+      node.privateKey = d[46..77]
       node.publicKey = node.privateKey.pub
       node.versionPrv = VersionPrefix.vprv
       node.versionPub = VersionPrefix.vpub
     of VersionPrefix.vpub.uint32:
-      node.publicKey = d[45..77].toBytes
+      node.publicKey = d[45..77]
       node.versionPub = VersionPrefix.vpub
     else:
       when HdErrorExceptionDisabled:
@@ -376,14 +376,14 @@ else:
         raise newException(HdError, "derive privateKey len=" & $node.privateKey.len)
     var childNumber = (0x80000000'u32 or index)
     var data = (0x00'u8, node.privateKey, childNumber).toBytesBE
-    var I = sha512.hmac(node.chainCode.toBytes.toSeq, data.toSeq).data.toBytes
+    var I = sha512.hmac(node.chainCode.toSeq, data.toSeq).data.toBytes
     var privateKey: PrivateKey = I[0..31]
     var chainCode: ChainCode = I[32..63]
     var deriveNode = cast[HDNode](allocShared0(sizeof(HDNodeObj)))
     deriveNode.depth = node.depth + 1
     deriveNode.fingerprint = ripemd160hash(node.publicKey).toBytes.toUint32BE
     deriveNode.childNumber = childNumber
-    deriveNode.chainCode = chainCode.toBytes
+    deriveNode.chainCode = chainCode
     deriveNode.privateKey = privateKey.tweakAdd(node.privateKey)
     deriveNode.publicKey = deriveNode.privateKey.pub
     deriveNode.versionPrv = node.versionPrv
@@ -393,14 +393,14 @@ else:
   proc derive*(node: HDNode, index: uint32): HDNode {.exportc: "bip32_$1".} =
     var childNumber = index
     var data = (node.publicKey, childNumber).toBytesBE
-    var I = sha512.hmac(node.chainCode.toBytes.toSeq, data.toSeq).data.toBytes
+    var I = sha512.hmac(node.chainCode.toSeq, data.toSeq).data.toBytes
     var privateKey: PrivateKey = I[0..31]
     var chainCode: ChainCode = I[32..63]
     var deriveNode = cast[HDNode](allocShared0(sizeof(HDNodeObj)))
     deriveNode.depth = node.depth + 1
     deriveNode.fingerprint = ripemd160hash(node.publicKey).toBytes.toUint32BE
     deriveNode.childNumber = childNumber
-    deriveNode.chainCode = chainCode.toBytes
+    deriveNode.chainCode = chainCode
     if node.privateKey.len == 32:
       deriveNode.privateKey = privateKey.tweakAdd(node.privateKey)
       deriveNode.publicKey = deriveNode.privateKey.pub
