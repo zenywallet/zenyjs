@@ -1,5 +1,16 @@
 # Copyright (c) 2021 zenywallet
 
+type
+  VersionPrefix* = enum
+    tprv = 0x04358394'u32 #bip32
+    tpub = 0x043587CF'u32 #bip32
+    vprv = 0x045f18bc'u32 #bip84
+    vpub = 0x045f1cf6'u32 #bip84
+    xprv = 0x0488ADE4'u32 #bip32
+    xpub = 0x0488B21E'u32 #bip32
+    zprv = 0x04b2430c'u32 #bip84
+    zpub = 0x04b24746'u32 #bip84
+
 when defined(js):
   import std/jsffi
   import jslib except Array
@@ -19,8 +30,8 @@ when defined(js):
     Module = module
     Bip32Mod.free = Module.cwrap("bip32_free", jsNull, [NumVar])
     Bip32Mod.duplicate = Module.cwrap("bip32_duplicate", NumVar, [NumVar])
-    Bip32Mod.master = Module.cwrap("bip32_master", NumVar, [NumVar, NumVar])
-    Bip32Mod.masterBuf = Module.cwrap("bip32_master_buf", NumVar, [NumVar, NumVar, NumVar])
+    Bip32Mod.master = Module.cwrap("bip32_master", NumVar, [NumVar, NumVar, NumVar])
+    Bip32Mod.masterBuf = Module.cwrap("bip32_master_buf", NumVar, [NumVar, NumVar, NumVar, NumVar])
     Bip32Mod.xprv = Module.cwrap("bip32_xprv", NumVar, [NumVar])
     Bip32Mod.xpub = Module.cwrap("bip32_xpub", NumVar, [NumVar])
     Bip32Mod.node = Module.cwrap("bip32_node", NumVar, [NumVar, NumVar])
@@ -52,13 +63,15 @@ when defined(js):
     if not b.handle.isNil:
       a.handle = b.handle
 
-  proc master*(seed: Array[byte], testnet: bool = false): HDNode =
-    result.handle = Bip32Mod.master(seed.handle, false)
+  proc master*(seed: Array[byte], versionPrv: VersionPrefix = xprv,
+              versionPub: VersionPrefix = xpub): HDNode =
+    result.handle = Bip32Mod.master(seed.handle, versionPrv, versionPub)
 
-  proc master*(seed: Uint8Array, testnet: bool = false): HDNode =
+  proc master*(seed: Uint8Array, versionPrv: VersionPrefix = xprv,
+              versionPub: VersionPrefix = xpub): HDNode =
     var pdata = Module.malloc(seed.length.to(int))
     Module.HEAPU8.set(seed, pdata)
-    result.handle = Bip32Mod.masterBuf(pdata, seed.length.to(int), false)
+    result.handle = Bip32Mod.masterBuf(pdata, seed.length.to(int), versionPrv, versionPub)
     Module.free(pdata)
     return result
 
@@ -173,17 +186,6 @@ else:
   import address
 
   type
-    VersionPrefix* = enum
-      tprv = 0x04358394'u32 #bip32
-      tpub = 0x043587CF'u32 #bip32
-      vprv = 0x045f18bc'u32 #bip84
-      vpub = 0x045f1cf6'u32 #bip84
-      xprv = 0x0488ADE4'u32 #bip32
-      xpub = 0x0488B21E'u32 #bip32
-      zprv = 0x04b2430c'u32 #bip84
-      zpub = 0x04b24746'u32 #bip84
-
-  type
     ChainCode* = distinct Array[byte]
 
     HDNodeObj = object
@@ -237,7 +239,8 @@ else:
     result.versionPrv = node.versionPrv
     result.versionPub = node.versionPub
 
-  proc master*(seed: Array[byte], versionPrv: VersionPrefix, versionPub: VersionPrefix): HDNode =
+  proc master*(seed: Array[byte], versionPrv: VersionPrefix = xprv,
+              versionPub: VersionPrefix = xpub): HDNode {.exportc: "bip32_$1".} =
     result = cast[HDNode](allocShared0(sizeof(HDNodeObj)))
     var I = sha512.hmac("Bitcoin seed", seed.toSeq).data
     result.depth = 0
@@ -249,15 +252,10 @@ else:
     result.versionPrv = versionPrv
     result.versionPub = versionPub
 
-  proc master*(seed: Array[byte], testnet: bool = false): HDNode {.exportc: "bip32_$1".} =
-    if testnet:
-      result = master(seed, VersionPrefix.tprv, VersionPrefix.tpub)
-    else:
-      result = master(seed, VersionPrefix.xprv, VersionPrefix.xpub)
-
-  proc master*(seedBuf: ptr UncheckedArray[byte], seedSize: int, testnet: bool = false): HDNode {.exportc: "bip32_$1_buf".} =
+  proc master*(seedBuf: ptr UncheckedArray[byte], seedSize: int, versionPrv: VersionPrefix = xprv,
+              versionPub: VersionPrefix = xpub): HDNode {.exportc: "bip32_$1_buf".} =
     var seed = seedBuf.toBytes(seedSize)
-    result = master(seed, testnet)
+    result = master(seed, versionPrv, versionPub)
 
   proc addCheck*(data: Array[byte]): Array[byte] = concat(data.toSeq, sha256d(data)[0..3]).toBytes
 
