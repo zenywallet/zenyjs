@@ -32,15 +32,15 @@ when defined(js):
     Bip32Mod.duplicate = Module.cwrap("bip32_duplicate", NumVar, [NumVar])
     Bip32Mod.master = Module.cwrap("bip32_master", NumVar, [NumVar, NumVar, NumVar])
     Bip32Mod.masterBuf = Module.cwrap("bip32_master_buf", NumVar, [NumVar, NumVar, NumVar, NumVar])
-    Bip32Mod.xprv = Module.cwrap("bip32_xprv", NumVar, [NumVar])
-    Bip32Mod.xpub = Module.cwrap("bip32_xpub", NumVar, [NumVar])
+    Bip32Mod.xprv = Module.cwrap("bip32_xprv_c", NumVar, [NumVar])
+    Bip32Mod.xpub = Module.cwrap("bip32_xpub_c", NumVar, [NumVar])
     Bip32Mod.node = Module.cwrap("bip32_node", NumVar, [NumVar])
     Bip32Mod.hardened = Module.cwrap("bip32_hardened", NumVar, [NumVar, NumVar])
     Bip32Mod.derive = Module.cwrap("bip32_derive", NumVar, [NumVar, NumVar])
     Bip32Mod.address = Module.cwrap("bip32_address", NumVar, [NumVar, NumVar])
     Bip32Mod.segwitAddress = Module.cwrap("bip32_segwitAddress", NumVar, [NumVar, NumVar])
-    Bip32Mod.xprvEx = Module.cwrap("bip32_xprv_ex", NumVar, [NumVar, NumVar])
-    Bip32Mod.xpubEx = Module.cwrap("bip32_xpub_ex", NumVar, [NumVar, NumVar])
+    Bip32Mod.xprvEx = Module.cwrap("bip32_xprv_c_ex", NumVar, [NumVar, NumVar])
+    Bip32Mod.xpubEx = Module.cwrap("bip32_xpub_c_ex", NumVar, [NumVar, NumVar])
     Bip32Mod.addressEx = Module.cwrap("bip32_address_ex", NumVar, [NumVar, NumVar, NumVar])
     Bip32Mod.segwitAddressEx = Module.cwrap("bip32_segwitAddress_ex", NumVar, [NumVar, NumVar, NumVar])
 
@@ -171,9 +171,9 @@ when defined(js):
 else:
   when defined(emscripten):
     const EXPORTED_FUNCTIONS* = ["_bip32_free", "_bip32_master", "_bip32_master_buf",
-                                "_bip32_xprv", "_bip32_xpub", "_bip32_node",
+                                "_bip32_xprv_c", "_bip32_xpub_c", "_bip32_node",
                                 "_bip32_hardened", "_bip32_derive", "_bip32_address", "_bip32_segwitAddress",
-                                "_bip32_duplicate", "_bip32_xprv_ex", "_bip32_xpub_ex",
+                                "_bip32_duplicate", "_bip32_xprv_c_ex", "_bip32_xpub_c_ex",
                                 "_bip32_address_ex", "_bip32_segwitAddress_ex"]
 
   import std/sequtils
@@ -265,6 +265,21 @@ else:
       return true
     return false
 
+  proc xprv*(node: HDNode): string =
+    if node.privateKey.len != 32:
+      when HdErrorExceptionDisabled:
+        return
+      else:
+        raise newException(HdError, "xprv privateKey len=" & $node.privateKey.len)
+    var d = (node.versionPrv, node.depth, node.fingerprint, node.childNumber,
+            node.chainCode, 0x00'u8, node.privateKey).toBytesBE.addCheck
+    result = base58.enc(d)
+
+  proc xpub*(node: HDNode): string =
+    var d = (node.versionPub, node.depth, node.fingerprint, node.childNumber,
+            node.chainCode, node.publicKey).toBytesBE.addCheck
+    result = base58.enc(d)
+
   proc set(p: var cstring, s: string): cstring {.discardable.} =
     if not p.isNil:
       p.deallocShared()
@@ -273,7 +288,7 @@ else:
     copyMem(p, unsafeAddr s[0], len)
     result = p
 
-  proc xprv*(node: HDNode): cstring {.exportc: "bip32_$1".} =
+  proc xprv_c(node: HDNode): cstring {.exportc: "bip32_$1".} =
     if node.privateKey.len != 32:
       when HdErrorExceptionDisabled:
         return
@@ -284,13 +299,13 @@ else:
     var s = base58.enc(d)
     node.xprv.set(s)
 
-  proc xpub*(node: HDNode): cstring {.exportc: "bip32_$1".} =
+  proc xpub_c(node: HDNode): cstring {.exportc: "bip32_$1".} =
     var d = (node.versionPub, node.depth, node.fingerprint, node.childNumber,
             node.chainCode, node.publicKey).toBytesBE.addCheck
     var s = base58.enc(d)
     node.xpub.set(s)
 
-  proc xprv*(node: HDNode, xprv: ptr cstring): cint {.exportc: "bip32_$1_ex".} =
+  proc xprv_c(node: HDNode, xprv: ptr cstring): cint {.exportc: "bip32_$1_ex".} =
     if node.privateKey.len != 32:
       when HdErrorExceptionDisabled:
         return
@@ -303,7 +318,7 @@ else:
     xprv[] = node.xprv
     result = s.len.cint
 
-  proc xpub*(node: HDNode, xpub: ptr cstring): cint {.exportc: "bip32_$1_ex".} =
+  proc xpub_c(node: HDNode, xpub: ptr cstring): cint {.exportc: "bip32_$1_ex".} =
     var d = (node.versionPub, node.depth, node.fingerprint, node.childNumber,
             node.chainCode, node.publicKey).toBytesBE.addCheck
     var s = base58.enc(d)
