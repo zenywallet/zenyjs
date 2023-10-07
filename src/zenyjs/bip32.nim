@@ -15,6 +15,7 @@ when defined(js):
   import std/jsffi
   import jslib except Array
   import arraylib
+  import eckey
   import address
 
   type
@@ -34,6 +35,8 @@ when defined(js):
     Bip32Mod.masterBuf = Module.cwrap("bip32_master_buf", NumVar, [NumVar, NumVar, NumVar, NumVar])
     Bip32Mod.xprv = Module.cwrap("bip32_xprv_c", NumVar, [NumVar])
     Bip32Mod.xpub = Module.cwrap("bip32_xpub_c", NumVar, [NumVar])
+    Bip32Mod.prv = Module.cwrap("bip32_prv", jsNull, [NumVar, NumVar])
+    Bip32Mod.pub = Module.cwrap("bip32_pub", jsNull, [NumVar, NumVar])
     Bip32Mod.node = Module.cwrap("bip32_node", NumVar, [NumVar])
     Bip32Mod.hardened = Module.cwrap("bip32_hardened", NumVar, [NumVar, NumVar])
     Bip32Mod.derive = Module.cwrap("bip32_derive", NumVar, [NumVar, NumVar])
@@ -109,6 +112,14 @@ when defined(js):
     var s = a.uint8ArrayToStr()
     return s
 
+  proc prv*(node: HDNode): PrivateKey =
+    result = newArray[byte]().PrivateKey
+    Bip32Mod.prv(node.handle, result.handle)
+
+  proc pub*(node: HDNode): PublicKey =
+    result = newArray[byte]().PublicKey
+    Bip32Mod.pub(node.handle, result.handle)
+
   proc node*(x: cstring): HDNode =
     var a = strToUint8Array(x)
     var size = a.length.to(cint) + 1
@@ -171,7 +182,7 @@ when defined(js):
 else:
   when defined(emscripten):
     const EXPORTED_FUNCTIONS* = ["_bip32_free", "_bip32_master", "_bip32_master_buf",
-                                "_bip32_xprv_c", "_bip32_xpub_c", "_bip32_node",
+                                "_bip32_xprv_c", "_bip32_xpub_c", "_bip32_prv", "_bip32_pub", "_bip32_node",
                                 "_bip32_hardened", "_bip32_derive", "_bip32_address", "_bip32_segwitAddress",
                                 "_bip32_duplicate", "_bip32_xprv_c_ex", "_bip32_xpub_c_ex",
                                 "_bip32_address_ex", "_bip32_segwitAddress_ex"]
@@ -184,6 +195,7 @@ else:
   import eckey
   import utils
   import address
+  import custom
 
   type
     ChainCode* = distinct Array[byte]
@@ -325,6 +337,14 @@ else:
     node.xpub.set(s)
     xpub[] = node.xpub
     result = s.len.cint
+
+  proc prv*(node: HDNode): PrivateKey = node.privateKey
+
+  proc prv*(node: HDNode): PrivateKey {.returnToLastParam, exportc: "bip32_$1".}
+
+  proc pub*(node: HDNode): PublicKey = node.publicKey
+
+  proc pub*(node: HDNode): PublicKey {.returnToLastParam, exportc: "bip32_$1".}
 
   proc node*(x: cstring): HDNode {.exportc: "bip32_$1".} =
     var d = base58.dec(toString(cast[ptr UncheckedArray[byte]](x), x.len))
