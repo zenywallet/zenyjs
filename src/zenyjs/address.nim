@@ -64,6 +64,7 @@ else:
   import utils
   import base58
   import arraylib
+  import eckey
 
   template getNetwork*(networkId: NetworkId): Network = networkList[networkId.int]
 
@@ -320,7 +321,7 @@ else:
   proc checkAddress*(networkId: NetworkId, address: cstring): bool {.exportc: "address_$1".} =
     checkAddress(networkId, $address)
 
-  proc wif*(networkId: NetworkId, prv: Array[byte]): string =
+  proc wif*(networkId: NetworkId, prv: PrivateKey): string =
     let wifPrvCompress = (networkId.getNetwork.wif, prv, 0x01'u8).toBytes
     let checkSum = sha256d(wifPrvCompress)[0..3]
     let wifRaw = (wifPrvCompress, checkSum).toBytes
