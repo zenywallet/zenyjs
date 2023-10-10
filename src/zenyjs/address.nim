@@ -23,9 +23,9 @@ when defined(js):
   proc init*(module: JsObject) =
     Module = module
     AddressMod.checkAddress = Module.cwrap("address_checkAddress", NumVar, [NumVar])
-    AddressMod.getAddress = Module.cwrap("getAddress_c", NumVar, [NumVar, NumVar])
-    AddressMod.getSegwitAddress = Module.cwrap("getSegwitAddress_c", NumVar, [NumVar, NumVar])
-    AddressMod.wif = Module.cwrap("wif_c", NumVar, [NumVar, NumVar])
+    AddressMod.getAddress = Module.cwrap("getAddress_c", jsNull, [NumVar, NumVar, NumVar])
+    AddressMod.getSegwitAddress = Module.cwrap("getSegwitAddress_c", jsNull, [NumVar, NumVar, NumVar])
+    AddressMod.wif = Module.cwrap("wif_c", jsNull, [NumVar, NumVar, NumVar])
 
     config.init(module)
 
@@ -38,19 +38,19 @@ when defined(js):
       result = AddressMod.checkAddress(networkId, p).to(bool)
 
   proc getAddress*(networkId: NetworkId, pub: PublicKey): cstring =
-    var p = AddressMod.getAddress(networkId, pub.handle)
-    var a = newUint8Array(Module.HEAPU8.buffer, p.to(int), 256)
-    result = a.slice(0, a.indexOf(0)).uint8ArrayToStr()
+    var ret = newArray[byte]()
+    AddressMod.getAddress(networkId, pub.handle, ret.handle)
+    result = ret.toString()
 
   proc getSegwitAddress*(networkId: NetworkId, pub: PublicKey): cstring =
-    var p = AddressMod.getSegwitAddress(networkId, pub.handle)
-    var a = newUint8Array(Module.HEAPU8.buffer, p.to(int), 256)
-    result = a.slice(0, a.indexOf(0)).uint8ArrayToStr()
+    var ret = newArray[byte]()
+    AddressMod.getSegwitAddress(networkId, pub.handle, ret.handle)
+    result = ret.toString()
 
   proc wif*(networkId: NetworkId, prv: PrivateKey): cstring =
-    var p = AddressMod.wif(networkId, prv.handle)
-    var a = newUint8Array(Module.HEAPU8.buffer, p.to(int), 256)
-    result = a.slice(0, a.indexOf(0)).uint8ArrayToStr()
+    var ret = newArray[byte]()
+    var p = AddressMod.wif(networkId, prv.handle, ret.handle)
+    result = ret.toString()
 
 else:
   when defined(emscripten):
@@ -119,11 +119,11 @@ else:
   proc getSegwitAddress*(network: NetWork | NetworkId, pub: Array[byte]): string {.inline.} =
     network.p2wpkh_address(ripemd160hash(pub))
 
-  proc getAddress_c*(networkId: NetworkId, pub: Array[byte]): cstring {.exportc: "$1".} =
-    networkId.getNetwork.p2pkh_address(ripemd160hash(pub)).cstring
+  proc getAddress_c*(networkId: NetworkId, pub: Array[byte], retStringArray: var Array[byte]) {.exportc: "$1".} =
+    retStringArray = networkId.getNetwork.p2pkh_address(ripemd160hash(pub)).toBytes
 
-  proc getSegwitAddress_c*(networkId: NetworkId, pub: Array[byte]): cstring {.exportc: "$1".} =
-    networkId.getNetwork.p2wpkh_address(ripemd160hash(pub)).cstring
+  proc getSegwitAddress_c*(networkId: NetworkId, pub: Array[byte], retStringArray: var Array[byte]) {.exportc: "$1".} =
+    retStringArray = networkId.getNetwork.p2wpkh_address(ripemd160hash(pub)).toBytes
 
   proc getAddress*(network: NetWork | NetworkId, hash160: Hash160, addressType: AddressType): string =
     case addressType
@@ -327,8 +327,8 @@ else:
     let wifRaw = (wifPrvCompress, checkSum).toBytes
     result = base58.enc(wifRaw)
 
-  proc wif_c*(networkId: NetworkId, prv: Array[byte]): cstring {.exportc: "$1".} =
-    wif(networkId, prv).cstring
+  proc wif_c*(networkId: NetworkId, prv: Array[byte], retStringArray: var Array[byte]) {.exportc: "$1".} =
+    retStringArray = wif(networkId, prv).toBytes
 
 
   when isMainModule:
