@@ -49,7 +49,7 @@ when defined(js):
 
   proc wif*(networkId: NetworkId, prv: PrivateKey): cstring =
     var ret = newArray[byte]()
-    var p = AddressMod.wif(networkId, prv.handle, ret.handle)
+    AddressMod.wif(networkId, prv.handle, ret.handle)
     result = ret.toString()
 
 else:
