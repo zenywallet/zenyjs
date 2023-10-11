@@ -47,7 +47,7 @@ when defined(js):
     withStack:
       var p = Module.stackAlloc(64)
       EckeyMod.ecPubKeyCreate(privateKey.handle, p)
-      result = newUint8Array(Module.HEAPU8.buffer, p.to(cint), 64)
+      result = newUint8Array(Module.HEAPU8.buffer, p.to(cint), 64).slice().to(Uint8Array)
 
   proc ecPubKeySerializeCompressed*(pubkey: Uint8Array): Array[byte] =
     withStack:
