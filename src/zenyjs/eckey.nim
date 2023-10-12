@@ -101,9 +101,9 @@ when defined(js):
     result = newArray[byte]().PublicKeyObj
     EckeyMod.tweakAdd_pubobj(publicKeyObj.handle, tweak.handle, result.handle)
 
-  proc `$`*(data: PrivateKey | PublicKey): string = $cast[Array[byte]](data)
+  proc `$`*(data: PrivateKey | PublicKey | PublicKeyObj): string = $cast[Array[byte]](data)
 
-  converter toCstring*(data: PrivateKey | PublicKey): cstring = data.toHex
+  converter toCstring*(data: PrivateKey | PublicKey | PublicKeyObj): cstring = data.toHex
 
 else:
   when defined(emscripten):
