@@ -25,9 +25,9 @@ when defined(js):
     Bip47Mod.paymentCode(node.handle, ret.handle)
     ret.toString()
 
-  proc ecdh*(prv: PrivateKey, pub: PublicKeyObj): Array[byte] =
+  proc ecdh*(prv: PrivateKey, pubObj: PublicKeyObj): Array[byte] =
     result = newArray[byte]()
-    discard Bip47Mod.ecdh(prv.handle, pub.handle, result.handle)
+    discard Bip47Mod.ecdh(prv.handle, pubObj.handle, result.handle)
 
 else:
   when defined(emscripten):
@@ -49,18 +49,16 @@ else:
     copyMem(output, x32, 32)
     result = 1.cint
 
-  proc ecdh*(prv: PrivateKey, pub: PublicKeyObj): Array[byte] =
-    if prv.len != 32 or pub.len != 64:
+  proc ecdh*(prv: PrivateKey, pubObj: PublicKeyObj): Array[byte] =
+    if prv.len != 32 or pubObj.len != 64:
       raise newException(EcError, "ecdh parameters")
     result = newArray[byte](32)
-    let prvSeq = prv.toBytes
-    let pubSeq = pub.toBytes
     if secp256k1_ecdh(ctx(), cast[ptr uint8](addr result[0]),
-                      cast[ptr secp256k1_pubkey](unsafeAddr pubSeq[0]),
-                      cast[ptr uint8](unsafeAddr prvSeq[0]), ecdhFunc, nil) == 0:
+                      cast[ptr secp256k1_pubkey](addr pubObj[0]),
+                      cast[ptr uint8](addr prv[0]), ecdhFunc, nil) == 0:
       raise newException(EcError, "secp256k1_ecdh")
 
-  proc ecdh*(prv: PrivateKey, pub: PublicKeyObj): Array[byte] {.returnToLastParam, exportc: "bip47_$1".}
+  proc ecdh*(prv: PrivateKey, pubObj: PublicKeyObj): Array[byte] {.returnToLastParam, exportc: "bip47_$1".}
 
 
 when isMainModule:
