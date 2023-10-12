@@ -87,6 +87,8 @@ when defined(js):
         eckey.init(module)
       when declared(bip47):
         bip47.init(module)
+      when declared(utils):
+        utils.init(module)
       discard (proc() {.async.} = body)()
     )
 
@@ -100,6 +102,7 @@ elif defined(emscripten):
   import base58
   import eckey
   import bip47
+  import utils
 
   const ZENYJS_MODULE_NAME = "ZenyJS"
   {.passL: "-s EXPORT_NAME=" & ZENYJS_MODULE_NAME.}
@@ -139,6 +142,9 @@ elif defined(emscripten):
         bracket.add(newLit(functionName))
     when declared(bip47.EXPORTED_FUNCTIONS):
       for functionName in bip47.EXPORTED_FUNCTIONS:
+        bracket.add(newLit(functionName))
+    when declared(utils.EXPORTED_FUNCTIONS):
+      for functionName in utils.EXPORTED_FUNCTIONS:
         bracket.add(newLit(functionName))
     result.add(
       nnkConstSection.newTree(
