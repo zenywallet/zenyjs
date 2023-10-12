@@ -7,27 +7,61 @@ import sequtils
 import eckey
 import arraylib
 
-proc paymentCode*(node: HDNode): string =
-  var d = (0x47'u8, 0x01'u8, 0x00'u8, node.publicKey, node.chainCode, Pad(13)).toBytes.addCheck
-  base58.enc(d)
+when defined(js):
+  import std/jsffi
+  import jslib except Array
+  #import arraylib
 
-var ecdhFunc: secp256k1_ecdh_hash_function = proc (output: ptr uint8;
-                                                  x32: ptr uint8; y32: ptr uint8;
-                                                  data: pointer): cint {.cdecl.} =
-  copyMem(output, x32, 32)
-  result = 1.cint
+  var Bip47Mod = JsObject{}
+  var Module: JsObject
 
-proc ecdh*(prv: PrivateKey, pub: PublicKeyObj): Array[byte] =
-  if prv.len != 32 or pub.len != 64:
-    raise newException(EcError, "ecdh parameters")
-  var output = newArray[byte](32)
-  let prvSeq = prv.toBytes
-  let pubSeq = pub.toBytes
-  if secp256k1_ecdh(ctx(), cast[ptr uint8](addr output[0]),
-                    cast[ptr secp256k1_pubkey](unsafeAddr pubSeq[0]),
-                    cast[ptr uint8](unsafeAddr prvSeq[0]), ecdhFunc, nil) == 0:
-    raise newException(EcError, "secp256k1_ecdh")
-  result = output
+  proc init*(module: JsObject) =
+    Module = module
+    Bip47Mod.paymentCode = Module.cwrap("bip47_paymentCode", jsNull, [NumVar, NumVar])
+    Bip47Mod.ecdh = Module.cwrap("bip47_ecdh", jsNull, [NumVar, NumVar, NumVar])
+
+  proc paymentCode*(node: HDNode): cstring =
+    var ret = newArray[byte]()
+    Bip47Mod.paymentCode(node.handle, ret.handle)
+    ret.toString()
+
+  proc ecdh*(prv: PrivateKey, pub: PublicKeyObj): Array[byte] =
+    result = newArray[byte]()
+    discard Bip47Mod.ecdh(prv.handle, pub.handle, result.handle)
+
+else:
+  when defined(emscripten):
+    const EXPORTED_FUNCTIONS* = ["_bip47_paymentCode", "_bip47_ecdh"]
+
+  import eckey
+  import custom
+
+  proc paymentCode*(node: HDNode): string =
+    var d = (0x47'u8, 0x01'u8, 0x00'u8, node.publicKey, node.chainCode, Pad(13)).toBytes.addCheck
+    base58.enc(d)
+
+  proc paymentCode*(node: HDNode, retStringArray: var Array[byte]) {.exportc: "bip47_$1".} =
+    retStringArray = paymentCode(node).toBytes
+
+  var ecdhFunc: secp256k1_ecdh_hash_function = proc (output: ptr uint8;
+                                                    x32: ptr uint8; y32: ptr uint8;
+                                                    data: pointer): cint {.cdecl.} =
+    copyMem(output, x32, 32)
+    result = 1.cint
+
+  proc ecdh*(prv: PrivateKey, pub: PublicKeyObj): Array[byte] =
+    if prv.len != 32 or pub.len != 64:
+      raise newException(EcError, "ecdh parameters")
+    var output = newArray[byte](32)
+    let prvSeq = prv.toBytes
+    let pubSeq = pub.toBytes
+    if secp256k1_ecdh(ctx(), cast[ptr uint8](addr output[0]),
+                      cast[ptr secp256k1_pubkey](unsafeAddr pubSeq[0]),
+                      cast[ptr uint8](unsafeAddr prvSeq[0]), ecdhFunc, nil) == 0:
+      raise newException(EcError, "secp256k1_ecdh")
+    result = output
+
+  proc ecdh*(prv: PrivateKey, pub: PublicKeyObj): Array[byte] {.returnToLastParam, exportc: "bip47_$1".}
 
 
 when isMainModule:
