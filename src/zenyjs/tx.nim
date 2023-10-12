@@ -70,6 +70,7 @@ else:
   import custom
   import macros
   import config
+  export custom
 
   type
     Flags* = distinct uint8
