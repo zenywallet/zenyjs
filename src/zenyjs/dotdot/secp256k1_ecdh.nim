@@ -20,12 +20,12 @@ type
 ## * An implementation of SHA256 hash function that applies to compressed public key.
 ##  Populates the output parameter with 32 bytes.
 
-var secp256k1_ecdh_hash_function_sha256* {.importc, cdecl.}: secp256k1_ecdh_hash_function
+var secp256k1_ecdh_hash_function_sha256* {.importc.}: secp256k1_ecdh_hash_function
 
 ## * A default ECDH hash function (currently equal to secp256k1_ecdh_hash_function_sha256).
 ##  Populates the output parameter with 32 bytes.
 
-var secp256k1_ecdh_hash_function_default* {.importc, cdecl.}: secp256k1_ecdh_hash_function
+var secp256k1_ecdh_hash_function_default* {.importc.}: secp256k1_ecdh_hash_function
 
 ## * Compute an EC Diffie-Hellman secret in constant time
 ##
