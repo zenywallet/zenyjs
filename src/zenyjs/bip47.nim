@@ -43,9 +43,9 @@ else:
   proc paymentCode*(node: HDNode, retStringArray: var Array[byte]) {.exportc: "bip47_$1".} =
     retStringArray = paymentCode(node).toBytes
 
-  var ecdhFunc: secp256k1_ecdh_hash_function = proc (output: ptr uint8;
-                                                    x32: ptr uint8; y32: ptr uint8;
-                                                    data: pointer): cint {.cdecl.} =
+  proc ecdhFunc(output: ptr uint8;
+                x32: ptr uint8; y32: ptr uint8;
+                data: pointer): cint {.cdecl.} = # secp256k1_ecdh_hash_function
     copyMem(output, x32, 32)
     result = 1.cint
 
