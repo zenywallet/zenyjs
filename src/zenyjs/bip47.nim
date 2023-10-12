@@ -19,6 +19,7 @@ when defined(js):
     Module = module
     Bip47Mod.paymentCode = Module.cwrap("bip47_paymentCode", jsNull, [NumVar, NumVar])
     Bip47Mod.ecdh = Module.cwrap("bip47_ecdh", jsNull, [NumVar, NumVar, NumVar])
+    Bip47Mod.ecdhPub = Module.cwrap("bip47_ecdh_pub", jsNull, [NumVar, NumVar, NumVar])
 
   proc paymentCode*(node: HDNode): cstring =
     var ret = newArray[byte]()
@@ -29,9 +30,13 @@ when defined(js):
     result = newArray[byte]()
     discard Bip47Mod.ecdh(prv.handle, pubObj.handle, result.handle)
 
+  proc ecdh*(prv: PrivateKey, pub: PublicKey): Array[byte] =
+    result = newArray[byte]()
+    discard Bip47Mod.ecdhPub(prv.handle, pub.handle, result.handle)
+
 else:
   when defined(emscripten):
-    const EXPORTED_FUNCTIONS* = ["_bip47_paymentCode", "_bip47_ecdh"]
+    const EXPORTED_FUNCTIONS* = ["_bip47_paymentCode", "_bip47_ecdh", "_bip47_ecdh_pub"]
 
   import eckey
   import custom
@@ -59,6 +64,10 @@ else:
       raise newException(EcError, "secp256k1_ecdh")
 
   proc ecdh*(prv: PrivateKey, pubObj: PublicKeyObj): Array[byte] {.returnToLastParam, exportc: "bip47_$1".}
+
+  proc ecdh*(prv: PrivateKey, pub: PublicKey): Array[byte] = ecdh(prv, pub.pubObj)
+
+  proc ecdh*(prv: PrivateKey, pub: PublicKey): Array[byte] {.returnToLastParam, exportc: "bip47_$1_pub".}
 
 
 when isMainModule:
