@@ -52,14 +52,13 @@ else:
   proc ecdh*(prv: PrivateKey, pub: PublicKeyObj): Array[byte] =
     if prv.len != 32 or pub.len != 64:
       raise newException(EcError, "ecdh parameters")
-    var output = newArray[byte](32)
+    result = newArray[byte](32)
     let prvSeq = prv.toBytes
     let pubSeq = pub.toBytes
-    if secp256k1_ecdh(ctx(), cast[ptr uint8](addr output[0]),
+    if secp256k1_ecdh(ctx(), cast[ptr uint8](addr result[0]),
                       cast[ptr secp256k1_pubkey](unsafeAddr pubSeq[0]),
                       cast[ptr uint8](unsafeAddr prvSeq[0]), ecdhFunc, nil) == 0:
       raise newException(EcError, "secp256k1_ecdh")
-    result = output
 
   proc ecdh*(prv: PrivateKey, pub: PublicKeyObj): Array[byte] {.returnToLastParam, exportc: "bip47_$1".}
 
