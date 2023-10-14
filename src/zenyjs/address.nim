@@ -17,6 +17,9 @@ when defined(js):
   import arraylib
   import eckey
 
+  type
+    Wif* = cstring
+
   var AddressMod = JsObject{}
   var Module: JsObject
 
@@ -65,6 +68,9 @@ else:
   import base58
   import arraylib
   import eckey
+
+  type
+    Wif* = string
 
   template getNetwork*(networkId: NetworkId): Network = networkList[networkId.int]
 
