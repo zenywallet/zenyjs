@@ -56,6 +56,9 @@ when defined(js):
     result = ret.toString()
 
 else:
+  type
+    Wif* = string
+
   when defined(emscripten):
     const EXPORTED_FUNCTIONS* = ["_address_checkAddress", "_getAddress_c", "_getSegwitAddress_c", "_wif_c"]
 
@@ -68,9 +71,6 @@ else:
   import base58
   import arraylib
   import eckey
-
-  type
-    Wif* = string
 
   template getNetwork*(networkId: NetworkId): Network = networkList[networkId.int]
 
