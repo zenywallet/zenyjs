@@ -29,6 +29,7 @@ when defined(js):
     AddressMod.getAddress = Module.cwrap("getAddress_c", jsNull, [NumVar, NumVar, NumVar])
     AddressMod.getSegwitAddress = Module.cwrap("getSegwitAddress_c", jsNull, [NumVar, NumVar, NumVar])
     AddressMod.wif = Module.cwrap("wif_c", jsNull, [NumVar, NumVar, NumVar])
+    AddressMod.prv = Module.cwrap("prv_c", jsNull, [NumVar, NumVar, NumVar])
 
     config.init(module)
 
@@ -55,12 +56,21 @@ when defined(js):
     AddressMod.wif(networkId, prv.handle, ret.handle)
     result = ret.toString()
 
+  proc prv*(networkId: NetworkId, wif: Wif): PrivateKey =
+    withStack:
+      var wifUint8Array = strToUint8Array(wif)
+      var p = Module.stackAlloc(wifUint8Array.length.to(int) + 1)
+      Module.HEAPU8.set(wifUint8Array, p)
+      Module.HEAPU8[p.to(int) + wifUint8Array.length.to(int)] = 0
+      result = newArray[byte]().PrivateKey
+      AddressMod.prv(networkId, p, result.handle)
+
 else:
   type
     Wif* = string
 
   when defined(emscripten):
-    const EXPORTED_FUNCTIONS* = ["_address_checkAddress", "_getAddress_c", "_getSegwitAddress_c", "_wif_c"]
+    const EXPORTED_FUNCTIONS* = ["_address_checkAddress", "_getAddress_c", "_getSegwitAddress_c", "_wif_c", "_prv_c"]
 
   import strutils, nimcrypto
   import script
@@ -335,6 +345,11 @@ else:
 
   proc wif_c*(networkId: NetworkId, prv: Array[byte], retStringArray: var Array[byte]) {.exportc: "$1".} =
     retStringArray = wif(networkId, prv).toBytes
+
+  proc prv*(networkId: NetworkId, wif: Wif): PrivateKey = base58.dec(wif)[1..^6]
+
+  proc prv_c*(networkId: NetworkId, wif: cstring, prv: var PrivateKey) {.exportc: "$1".} =
+    prv = prv(networkId, $wif)
 
 
   when isMainModule:
