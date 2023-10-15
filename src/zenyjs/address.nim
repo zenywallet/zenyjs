@@ -346,7 +346,12 @@ else:
   proc wif_c*(networkId: NetworkId, prv: Array[byte], retStringArray: var Array[byte]) {.exportc: "$1".} =
     retStringArray = wif(networkId, prv).toBytes
 
-  proc prv*(networkId: NetworkId, wif: Wif): PrivateKey = base58.dec(wif)[1..^6]
+  proc prv*(networkId: NetworkId, wif: Wif): PrivateKey =
+    var d = base58.dec(wif)
+    let network = networkId.getNetwork
+    if d[0] != network.wif:
+      raise newException(NetworkError, "invalid wif " & $d[0] & " expect " & $network.wif)
+    d[1..^6]
 
   proc prv_c*(networkId: NetworkId, wif: cstring, prv: var PrivateKey) {.exportc: "$1".} =
     prv = prv(networkId, $wif)

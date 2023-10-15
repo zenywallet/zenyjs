@@ -15,6 +15,8 @@ type
 
   NetworkId* = distinct int
 
+  NetworkError* = object of CatchableError
+
 when defined(js):
   var networkList*: seq[Network]
 else:
