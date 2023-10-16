@@ -13,13 +13,6 @@ when defined(js):
   import jsffi
   import jslib except Array
 
-  template borrowArrayProc(typ: typedesc) =
-    proc len*(x: typ): int {.borrow.}
-    proc cap*(x: typ): int {.borrow.}
-    proc data*(x: typ): int {.borrow.}
-    proc toUint8Array*(x: typ): Uint8Array {.borrow.}
-    proc toHex*(x: typ): cstring {.borrow.}
-
   borrowArrayProc(PrivateKey)
   borrowArrayProc(PublicKey)
   borrowArrayProc(PublicKeyObj)

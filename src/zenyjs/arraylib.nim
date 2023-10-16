@@ -103,6 +103,13 @@ when defined(js):
         return false
     result = true
 
+  template borrowArrayProc*(typ: typedesc) =
+    proc len*(x: typ): int {.borrow.}
+    proc cap*(x: typ): int {.borrow.}
+    proc data*(x: typ): int {.borrow.}
+    proc toUint8Array*(x: typ): Uint8Array {.borrow.}
+    proc toHex*(x: typ): cstring {.borrow.}
+
 else:
   when defined(emscripten):
     const EXPORTED_FUNCTIONS* = ["_array_new", "_array_destroy"]
