@@ -7,7 +7,7 @@ when defined(js):
 
   export asyncjs
   export jsffi
-  export jslib
+  export jslib except Array
 
 import arraylib
 import bytes
