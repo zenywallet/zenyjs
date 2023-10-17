@@ -11,6 +11,8 @@ when defined(js):
 
     Hash* {.borrow: `.`.} = distinct Array[byte]
 
+  borrowArrayProc(Hash)
+
   proc toHex*(x: Hash): cstring =
     var uint8Array = cast[Array[byte]](x).toUint8Array()
     result = uint8ArrayToHex(uint8Array.reverse())
