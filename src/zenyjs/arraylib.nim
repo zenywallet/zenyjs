@@ -6,13 +6,49 @@ when defined(js):
 
   type
     Array*[T] = object
-      handle*: JsObject
+      handle: JsObject
+      cache: cint
 
     ArrayByte* = Array[byte]
 
     Hex* = distinct string
 
     ArrayError* = object of CatchableError
+
+    ArrayDirty {.pure.} = enum
+      None
+      Handle
+      Data
+
+    ArrayCache[T] = object
+      data: seq[T]
+      dirty: ArrayDirty
+
+  var arrayCache = JsObject{}
+  var arrayCacheIdx = 1.cint
+
+  proc getNewArrayCacheIdx(): cint =
+    var flag = false
+    while arrayCache[arrayCacheIdx] != jsNull:
+      if arrayCacheIdx >= cint.high:
+        if flag: raise
+        flag = true
+        arrayCacheIdx = 1.cint
+      else:
+        inc(arrayCacheIdx)
+    result = arrayCacheIdx.cint
+
+  proc handle*[T](a: Array[T]): JsObject =
+    when T is byte:
+      if a.cache != 0 and arrayCache[a.cache] != jsNull:
+        var cache = arrayCache[a.cache].to(ArrayCache[byte])
+        if cache.dirty == ArrayDirty.Data:
+          echo "purge cache"
+          cache.data = @[]
+          cache.dirty = ArrayDirty.None
+    else:
+      discard
+    result = a.handle
 
   var ArrayMod = JsObject{}
   var Module: JsObject
@@ -109,6 +145,7 @@ when defined(js):
     proc data*(x: typ): int {.borrow.}
     proc toUint8Array*(x: typ): Uint8Array {.borrow.}
     proc toHex*(x: typ): cstring {.borrow.}
+    proc handle*(x: typ): JsObject {.borrow.}
 
 else:
   when defined(emscripten):
