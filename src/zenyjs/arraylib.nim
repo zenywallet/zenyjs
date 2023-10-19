@@ -36,7 +36,7 @@ when defined(js):
         arrayCacheIdx = 1.cint
       else:
         inc(arrayCacheIdx)
-    result = arrayCacheIdx.cint
+    result = arrayCacheIdx
 
   proc handle*[T](a: Array[T]): JsObject =
     when T is byte:
