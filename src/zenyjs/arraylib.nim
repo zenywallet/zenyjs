@@ -58,7 +58,7 @@ when defined(js):
     ArrayMod.newArrayByte = Module.cwrap("array_new", jsNull, [NumVar, NumVar])
     ArrayMod.destroy = Module.cwrap("array_destroy", jsNull, [NumVar])
 
-  proc newArray*(len: int or cint or JsObject): Array[byte] =
+  proc newArray*(len: Natural or JsObject): Array[byte] =
     result.handle = Module.malloc(12)
     discard ArrayMod.newArrayByte(len, result.handle)
 
@@ -147,7 +147,7 @@ when defined(js):
         y[i] = a[i]
       var cacheIdx = getNewArrayCacheIdx()
       arrayCache[cacheIdx] = ArrayCache[byte](data: y, dirty: ArrayDirty.Data)
-      result = newArray(a.len.int)
+      result = newArray(a.len)
       result.cache = cacheIdx
       echo y
     else:
