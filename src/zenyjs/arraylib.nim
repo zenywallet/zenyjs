@@ -75,6 +75,7 @@ when defined(js):
     `=destroy`(a)
     wasMoved(a)
     a.handle = b.handle
+    a.cache = b.cache
 
   proc init*[T](x: var Array[T]) =
     `=destroy`(x)
@@ -138,6 +139,19 @@ when defined(js):
       if xa[f] != ya[f]:
         return false
     result = true
+
+  proc `@^`*[IDX, T](a: sink array[IDX, T]): Array[T] =
+    when T is byte:
+      var y = newSeq[byte](a.len)
+      for i in 0..a.len-1:
+        y[i] = a[i]
+      var cacheIdx = getNewArrayCacheIdx()
+      arrayCache[cacheIdx] = ArrayCache[byte](data: y, dirty: ArrayDirty.Data)
+      result = newArray(a.len.int)
+      result.cache = cacheIdx
+      echo y
+    else:
+      discard
 
   template borrowArrayProc*(typ: typedesc) =
     proc len*(x: typ): int {.borrow.}
