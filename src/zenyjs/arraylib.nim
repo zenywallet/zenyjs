@@ -24,6 +24,9 @@ when defined(js):
       data: seq[T]
       dirty: ArrayDirty
 
+  var ArrayMod = JsObject{}
+  var Module: JsObject
+
   var arrayCache = JsObject{}
   var arrayCacheIdx = 1.cint
 
@@ -43,15 +46,14 @@ when defined(js):
       if a.cache != 0 and arrayCache[a.cache] != jsNull:
         var cache = arrayCache[a.cache].to(ArrayCache[byte])
         if cache.dirty == ArrayDirty.Data:
-          echo "purge cache"
+          var pData = newUint32Array(newUint8Array(Module.HEAPU8.buffer, a.handle.to(cint) + 8, 4).slice().buffer, 0, 1)[0].to(int)
+          for i, d in cache.data:
+            Module.HEAPU8[pData + i] = d
           cache.data = @[]
           cache.dirty = ArrayDirty.None
     else:
       discard
     result = a.handle
-
-  var ArrayMod = JsObject{}
-  var Module: JsObject
 
   proc init*(module: JsObject) =
     Module = module
