@@ -46,7 +46,7 @@ when defined(js):
       if a.cache != 0 and arrayCache[a.cache] != jsNull:
         var cache = arrayCache[a.cache].to(ArrayCache[byte])
         if cache.dirty == ArrayDirty.Data:
-          var pData = newUint32Array(newUint8Array(Module.HEAPU8.buffer, a.handle.to(cint) + 8, 4).slice().buffer, 0, 1)[0].to(int)
+          var pData = Module.HEAPU32[(a.handle.to(cint) + 8) div 4].to(int)
           for i, d in cache.data:
             Module.HEAPU8[pData + i] = d
           cache.data = @[]
