@@ -94,15 +94,15 @@ when defined(js):
   proc data*[T](x: Array[T]): int = Module.HEAPU32[(x.handle.to(cint) + 8) div 4].to(int)
 
   proc toUint8Array*[T](x: Array[T]): Uint8Array =
-    var arrayObj = newUint32Array(newUint8Array(Module.HEAPU8.buffer, x.handle.to(cint), 12).slice().buffer, 0, 3)
+    var p32 = x.handle.to(cint) div 4
     when T is byte:
-      newUint8Array(Module.HEAPU8.buffer, arrayObj[2].to(int), arrayObj[0].to(int)).slice().to(Uint8Array)
+      newUint8Array(Module.HEAPU8.buffer, Module.HEAPU32[p32 + 2].to(int), Module.HEAPU32[p32].to(int)).slice().to(Uint8Array)
     else:
       discard
 
   proc toString*(x: Array[byte]): cstring =
-    var arrayObj = newUint32Array(newUint8Array(Module.HEAPU8.buffer, x.handle.to(cint), 12).slice().buffer, 0, 3)
-    var uint8Array = newUint8Array(Module.HEAPU8.buffer, arrayObj[2].to(int), arrayObj[0].to(int)).slice()
+    var p32 = x.handle.to(cint) div 4
+    var uint8Array = newUint8Array(Module.HEAPU8.buffer, Module.HEAPU32[p32 + 2].to(int), Module.HEAPU32[p32].to(int)).slice()
     let textdec = newTextDecoder()
     result = textdec.decode(uint8Array).to(cstring)
 
