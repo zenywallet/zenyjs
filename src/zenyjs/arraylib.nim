@@ -87,17 +87,11 @@ when defined(js):
 
   proc newArray*[T](): Array[T] = result.init()
 
-  proc len*[T](x: Array[T]): int =
-    var arrayObj = newUint32Array(newUint8Array(Module.HEAPU8.buffer, x.handle.to(cint), 4).slice().buffer, 0, 1)
-    arrayObj[0].to(int)
+  proc len*[T](x: Array[T]): int = Module.HEAPU32[x.handle.to(cint) div 4].to(int)
 
-  proc cap*[T](x: Array[T]): int =
-    var arrayObj = newUint32Array(newUint8Array(Module.HEAPU8.buffer, x.handle.to(cint) + 4, 4).slice().buffer, 0, 1)
-    arrayObj[0].to(int)
+  proc cap*[T](x: Array[T]): int = Module.HEAPU32[(x.handle.to(cint) + 4) div 4].to(int)
 
-  proc data*[T](x: Array[T]): int =
-    var arrayObj = newUint32Array(newUint8Array(Module.HEAPU8.buffer, x.handle.to(cint) + 8, 4).slice().buffer, 0, 1)
-    arrayObj[0].to(int)
+  proc data*[T](x: Array[T]): int = Module.HEAPU32[(x.handle.to(cint) + 8) div 4].to(int)
 
   proc toUint8Array*[T](x: Array[T]): Uint8Array =
     var arrayObj = newUint32Array(newUint8Array(Module.HEAPU8.buffer, x.handle.to(cint), 12).slice().buffer, 0, 3)
