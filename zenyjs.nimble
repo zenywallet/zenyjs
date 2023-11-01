@@ -33,6 +33,8 @@ task secp256k1, "make secp256k1":
     exec "./autogen.sh"
     exec "./configure --enable-module-ecdh --disable-shared --enable-static --disable-tests --disable-benchmark --disable-openssl-tests --disable-exhaustive-tests"
     exec "make -j$(nproc)"
+    exec "mkdir -p ../../src/zenyjs/deps/secp256k1/libs"
+    exec "cp .libs/libsecp256k1.a ../../src/zenyjs/deps/secp256k1/libs/"
 
 task wasmSecp256k1, "make wasm-secp256k1":
   withDir "deps/wasm-secp256k1":
