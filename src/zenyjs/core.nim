@@ -1,5 +1,7 @@
 # Copyright (c) 2023 zenywallet
 
+{.used.}
+
 when defined(js):
   import std/asyncjs
   import std/jsffi except `.=`
