@@ -84,5 +84,5 @@ proc bech32_decode*(hrp: cstring; data: ptr uint8_t; data_len: ptr csize_t;
 
 
 import os
-const bech32Path = splitPath(currentSourcePath()).head / "../../../deps/bech32/ref/c"
+const bech32Path = splitPath(currentSourcePath()).head / "../deps/bech32/ref/c"
 {.compile: bech32Path / "segwit_addr.c".}

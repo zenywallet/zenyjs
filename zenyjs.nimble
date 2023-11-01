@@ -59,6 +59,12 @@ task jsCuint, "copy js-cuint":
     exec "mkdir -p deps/js-cuint/lib"
     exec "cp ../../deps/js-cuint/lib/uint64.js deps/js-cuint/lib/"
 
+task bech32, "copy segwit_addr.c":
+  withDir "deps/bech32":
+    exec "mkdir -p ../../src/zenyjs/deps/bech32/ref/c"
+    exec "cp ref/c/segwit_addr.c ../../src/zenyjs/deps/bech32/ref/c/"
+    exec "cp ref/c/segwit_addr.h ../../src/zenyjs/deps/bech32/ref/c/"
+
 task depsAll, "Build deps":
   exec "git submodule update --init"
   exec "git submodule update --remote deps/emsdk"
@@ -68,6 +74,7 @@ task depsAll, "Build deps":
   zbarTask()
   jsLevenshteinTask()
   jsCuintTask()
+  bech32Task()
 
 task zenyjs, "Build zenyjs":
   withDir "src/zenyjs":
