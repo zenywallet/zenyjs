@@ -69,6 +69,9 @@ when defined(js):
       ArrayMod.destroy(x.handle)
       Module.free(x.handle)
       x.handle = jsNull
+      if x.cache != 0.cint:
+        discard jsDelete(arrayCache[x.cache])
+        x.cache = 0.cint
 
   proc `=copy`*[T](a: var Array[T]; b: Array[T]) =
     raise newException(ArrayError, "unsupported =copy")
