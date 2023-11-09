@@ -60,7 +60,8 @@ when defined(js):
     ArrayMod.newArrayByte = Module.cwrap("array_new", jsNull, [NumVar, NumVar])
     ArrayMod.destroy = Module.cwrap("array_destroy", jsNull, [NumVar])
 
-  proc newArray*(len: Natural or JsObject): Array[byte] =
+  proc newArray*[T](len: Natural or JsObject): Array[T] =
+    when not T is byte: raise
     result.handle = Module.malloc(12)
     discard ArrayMod.newArrayByte(len, result.handle)
 
@@ -113,7 +114,7 @@ when defined(js):
 
   proc toBytes*(uint8Array: Uint8Array): Array[byte] =
     var arrayLen = uint8Array.length
-    result = newArray(arrayLen)
+    result = newArray[byte](arrayLen)
     discard Module.HEAPU8.set(uint8Array, result.data.cint)
 
   proc toBytes*(s: cstring): Array[byte] =
@@ -146,7 +147,7 @@ when defined(js):
         y[i] = a[i]
       var cacheIdx = getNewArrayCacheIdx()
       arrayCache[cacheIdx] = ArrayCache[byte](data: y, dirty: ArrayDirty.Data)
-      result = newArray(a.len)
+      result = newArray[T](a.len)
       result.cache = cacheIdx
       echo y
     else:
