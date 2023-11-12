@@ -132,6 +132,11 @@ when defined(js):
   proc toBytes*(x: Hex): Array[byte] = x.cstring.hexToUint8Array.toBytes
 
   proc toHex*(x: Array[byte]): cstring =
+    var cacheJsObj = arrayCache[x.cache]
+    if cacheJsObj != jsNull:
+      var cache = cacheJsObj.to(ArrayCache[byte])
+      if cache.dirty == ArrayDirty.Data:
+        return uint8ArrayToHex(cache.data.toUint8Array)
     var arrayObj = newUint32Array(newUint8Array(Module.HEAPU8.buffer, x.handle.to(cint), 12).slice().buffer, 0, 3)
     var uint8Array = newUint8Array(Module.HEAPU8.buffer, arrayObj[2].to(int), arrayObj[0].to(int)).slice()
     result = uint8ArrayToHex(uint8Array)
