@@ -104,6 +104,14 @@ when defined(js):
     else:
       discard
 
+  proc toUint8Array*[T](x: seq[T]): Uint8Array =
+    when T is byte:
+      result = newUint8Array(x.len)
+      for i, d in x:
+        result[i] = d
+    else:
+      discard
+
   proc toString*(x: Array[byte]): cstring =
     var p32 = x.handle.to(cint) div 4
     var uint8Array = newUint8Array(Module.HEAPU8.buffer, Module.HEAPU32[p32 + 2].to(int), Module.HEAPU32[p32].to(int)).slice()
