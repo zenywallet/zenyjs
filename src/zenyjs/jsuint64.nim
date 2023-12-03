@@ -25,8 +25,12 @@ type
 
 proc newUint64(jsMod: JsObject, val: uint): Uint64 {.importcpp: "new #(#)".}
 
-proc newUint64*(uint64obj: var Uint64, val: uint = 0) =
-  uint64obj = ModuleUINT64.newUint64(val)
+proc newUint64*(uint64obj: var Uint64, val: SomeUnsignedInt = 0) =
+  when sizeof(val) > 4:
+    uint64obj = ModuleUINT64.newUint64(0.uint)
+    uint64obj.fromString(cstring($val))
+  else:
+    uint64obj = ModuleUINT64.newUint64(val.uint)
 
 proc newUint64*(val: uint = 0): Uint64 = ModuleUINT64.newUint64(val)
 
