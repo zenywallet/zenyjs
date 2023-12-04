@@ -32,16 +32,16 @@ proc newUint64*(uint64obj: var Uint64, val: SomeUnsignedInt = 0) =
   else:
     uint64obj = ModuleUINT64.newUint64(val.uint)
 
-proc newUint64*(val: uint = 0): Uint64 = ModuleUINT64.newUint64(val)
-
 proc newUint64*(sval: cstring): Uint64 =
   result = ModuleUINT64.newUint64(0.uint)
   result.fromString(sval)
 
+proc newUint64*(val: SomeUnsignedInt): Uint64 = newUint64(cstring($val))
+
 proc newUint64*(jval: JsObject): Uint64 =
   let typ = jsTypeOf(jval)
   if typ == "number":
-    result = newUint64(jval.to(uint))
+    result = newUint64(cstring($(jval.to(uint64))))
   elif typ == "string":
     result = newUint64(jval.to(cstring))
   else:
