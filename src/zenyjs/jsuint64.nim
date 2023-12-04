@@ -35,7 +35,7 @@ proc newUint64*(uint64obj: var Uint64, val: SomeUnsignedInt = 0) =
 proc newUint64*(val: uint = 0): Uint64 = ModuleUINT64.newUint64(val)
 
 proc newUint64*(sval: cstring): Uint64 =
-  result = newUint64(0)
+  result = ModuleUINT64.newUint64(0.uint)
   result.fromString(sval)
 
 proc newUint64*(jval: JsObject): Uint64 =
