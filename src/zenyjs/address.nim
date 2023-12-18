@@ -12,7 +12,7 @@ type
     P2WPKH
 
 when defined(js):
-  import jsffi
+  import std/jsffi
   import std/json
   import jslib except Array
   import arraylib
@@ -97,7 +97,8 @@ else:
       "_getSegwitAddress_c", "_getSegwitAddress2_c", "_wif_c", "_prv_c"]
 
   import std/json
-  import strutils, nimcrypto
+  import std/strutils
+  import nimcrypto
   import script
   import dotdot/segwit
   import dotdot/opcodes
