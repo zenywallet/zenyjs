@@ -13,6 +13,7 @@ type
 
 when defined(js):
   import jsffi
+  import std/json
   import jslib except Array
   import arraylib
   import eckey
@@ -27,7 +28,9 @@ when defined(js):
     Module = module
     AddressMod.checkAddress = Module.cwrap("address_checkAddress", NumVar, [NumVar])
     AddressMod.getAddress = Module.cwrap("getAddress_c", jsNull, [NumVar, NumVar, NumVar])
+    AddressMod.getAddress2 = Module.cwrap("getAddress2_c", jsNull, [NumVar, NumVar, NumVar])
     AddressMod.getSegwitAddress = Module.cwrap("getSegwitAddress_c", jsNull, [NumVar, NumVar, NumVar])
+    AddressMod.getSegwitAddress2 = Module.cwrap("getSegwitAddress2_c", jsNull, [NumVar, NumVar, NumVar])
     AddressMod.wif = Module.cwrap("wif_c", jsNull, [NumVar, NumVar, NumVar])
     AddressMod.prv = Module.cwrap("prv_c", jsNull, [NumVar, NumVar, NumVar])
 
@@ -41,14 +44,34 @@ when defined(js):
       Module.HEAPU8[p.to(int) + addressUint8Array.length.to(int)] = 0
       result = AddressMod.checkAddress(networkId, p).to(bool)
 
+  proc getAddress*(network: Network, pub: PublicKey): cstring =
+    withStack:
+      var nw = strToUint8Array(cstring($(%network)))
+      var pnw = Module.stackAlloc(nw.length.to(int) + 1)
+      Module.HEAPU8.set(nw, pnw)
+      Module.HEAPU8[pnw.to(int) + nw.length.to(int)] = 0
+      var ret = newArray[byte]()
+      AddressMod.getAddress(pnw, pub.handle, ret.handle)
+      result = ret.toString()
+
   proc getAddress*(networkId: NetworkId, pub: PublicKey): cstring =
     var ret = newArray[byte]()
-    AddressMod.getAddress(networkId, pub.handle, ret.handle)
+    AddressMod.getAddress2(networkId, pub.handle, ret.handle)
     result = ret.toString()
+
+  proc getSegwitAddress*(network: Network, pub: PublicKey): cstring =
+    withStack:
+      var nw = strToUint8Array(cstring($(%network)))
+      var pnw = Module.stackAlloc(nw.length.to(int) + 1)
+      Module.HEAPU8.set(nw, pnw)
+      Module.HEAPU8[pnw.to(int) + nw.length.to(int)] = 0
+      var ret = newArray[byte]()
+      AddressMod.getSegwitAddress(pnw, pub.handle, ret.handle)
+      result = ret.toString()
 
   proc getSegwitAddress*(networkId: NetworkId, pub: PublicKey): cstring =
     var ret = newArray[byte]()
-    AddressMod.getSegwitAddress(networkId, pub.handle, ret.handle)
+    AddressMod.getSegwitAddress2(networkId, pub.handle, ret.handle)
     result = ret.toString()
 
   proc wif*(networkId: NetworkId, prv: PrivateKey): cstring =
@@ -70,8 +93,10 @@ else:
     Wif* = string
 
   when defined(emscripten):
-    const EXPORTED_FUNCTIONS* = ["_address_checkAddress", "_getAddress_c", "_getSegwitAddress_c", "_wif_c", "_prv_c"]
+    const EXPORTED_FUNCTIONS* = ["_address_checkAddress", "_getAddress_c", "_getAddress2_c",
+      "_getSegwitAddress_c", "_getSegwitAddress2_c", "_wif_c", "_prv_c"]
 
+  import std/json
   import strutils, nimcrypto
   import script
   import dotdot/segwit
@@ -135,10 +160,20 @@ else:
   proc getSegwitAddress*(network: NetWork | NetworkId, pub: Array[byte]): string {.inline.} =
     network.p2wpkh_address(ripemd160hash(pub))
 
-  proc getAddress_c*(networkId: NetworkId, pub: Array[byte], retStringArray: var Array[byte]) {.exportc: "$1".} =
+  proc getAddress_c*(networkString: cstring, pub: Array[byte], retStringArray: var Array[byte]) {.exportc: "$1".} =
+    var networkJson = parseJson($networkString)
+    var network: Network = networkJson.to(Network)
+    retStringArray = network.p2pkh_address(ripemd160hash(pub)).toBytes
+
+  proc getAddress2_c*(networkId: NetworkId, pub: Array[byte], retStringArray: var Array[byte]) {.exportc: "$1".} =
     retStringArray = networkId.getNetwork.p2pkh_address(ripemd160hash(pub)).toBytes
 
-  proc getSegwitAddress_c*(networkId: NetworkId, pub: Array[byte], retStringArray: var Array[byte]) {.exportc: "$1".} =
+  proc getSegwitAddress_c*(networkString: cstring, pub: Array[byte], retStringArray: var Array[byte]) {.exportc: "$1".} =
+    var networkJson = parseJson($networkString)
+    var network: Network = networkJson.to(Network)
+    retStringArray = network.p2wpkh_address(ripemd160hash(pub)).toBytes
+
+  proc getSegwitAddress2_c*(networkId: NetworkId, pub: Array[byte], retStringArray: var Array[byte]) {.exportc: "$1".} =
     retStringArray = networkId.getNetwork.p2wpkh_address(ripemd160hash(pub)).toBytes
 
   proc getAddress*(network: NetWork | NetworkId, hash160: Hash160, addressType: AddressType): string =
