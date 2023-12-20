@@ -88,7 +88,7 @@ else:
     result = align($val, totp.digit, '0')
 
   proc generateCounter*(totpString: cstring, counter: array[8, byte], retStringArray: var Array[byte]) {.exportc: "$1".} =
-    var counter: uint64 = cast[ptr uint64](addr counter)[]
+    var counter: uint64 = cast[ptr uint64](unsafeAddr counter)[]
     try:
       var totpJson = parseJson($totpString)
       var totp: Totp = totpJson.to(Totp)
