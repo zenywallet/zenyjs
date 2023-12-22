@@ -297,7 +297,7 @@ else:
 
   proc `%`*(tx: Tx): JsonNode = %tx.handle[]
 
-  proc toJson*(tx: Tx, network: Network): JsonNode =
+  proc toJson*(tx: Tx, network: Network | NetworkId): JsonNode =
     var json = %tx
     for i, o in tx.outs:
       var script = o.script
