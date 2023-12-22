@@ -6,14 +6,12 @@ when (compiles do: import zenyjs):
   import zenyjs/random
   import zenyjs/eckey
   import zenyjs/address
-  import zenyjs/config
 else:
   import ../src/zenyjs
   import ../src/zenyjs/core
   import ../src/zenyjs/random
   import ../src/zenyjs/eckey
   import ../src/zenyjs/address
-  import ../src/zenyjs/config
 
 networksDefault()
 
