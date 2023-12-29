@@ -4,6 +4,7 @@ import std/os
 import std/macros
 import std/strformat
 import std/strutils
+import std/compilesettings
 
 const srcFile = currentSourcePath()
 const (srcFileDir, srcFileName, srcFileExt) = splitFile(srcFile)
@@ -88,7 +89,14 @@ proc compileJsCode*(srcFileDir: string, code: string, rstr: string): string {.co
   let tmpJsFile = tmpNameFile & ".js"
   echo code
   writeFile(tmpSrcFile, code)
-  echo staticExec("nim js -d:release --mm:orc -o:" & tmpJsFile & " " & tmpSrcFile)
+  var verbosity = ""
+  let cl = querySetting(SingleValueSetting.commandLine)
+  var params = cl.split(" ")
+  for param in params:
+    if param.startsWith("--verbosity:"):
+      verbosity = " " & param
+      break
+  echo staticExec("nim js -d:release --mm:orc" & verbosity & " -o:" & tmpJsFile & " " & tmpSrcFile)
   if not fileExists(tmpJsFile):
     rmFile(tmpSrcFile)
     macros.error "nim js failed"
