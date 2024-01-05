@@ -39,7 +39,7 @@ else:
   import dotdot/seed_native
   import arraylib
 
-  proc cryptSeed*(buf: ptr UncheckedArray[byte], size: int): int {.importc: "crypt_seed".}
+  proc cryptSeed*(buf: ptr UncheckedArray[byte], size: int): int {.importc: "crypt_seed", cdecl.}
 
   proc cryptSeed*(buf: openArray[byte]): int {.inline.} =
     cryptSeed(cast[ptr UncheckedArray[byte]](buf), buf.len)
