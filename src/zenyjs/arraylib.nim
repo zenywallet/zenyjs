@@ -169,6 +169,24 @@ when defined(js):
     else:
       discard
 
+  proc add*[T](x: var Array[T]; y: sink seq[T]) =
+    when T is byte:
+      if arrayCache[x.cache] != jsNull:
+        var cache = arrayCache[x.cache].to(ArrayCache[byte])
+        cache.data.add(y)
+      else:
+        var p32 = x.handle.to(cint) div 4
+        var ua = newUint8Array(Module.HEAPU8.buffer, Module.HEAPU32[p32 + 2].to(int), Module.HEAPU32[p32].to(int)).slice().to(Uint8Array)
+        var s = newSeq[byte](ua.length.to(int))
+        for i in 0..<ua.length.to(int):
+          s[i] = ua[i].to(byte)
+        s.add(y)
+        var cacheIdx = getNewArrayCacheIdx()
+        arrayCache[cacheIdx] = ArrayCache[byte](data: s, dirty: ArrayDirty.Data)
+        x.cache = cacheIdx
+    else:
+      discard
+
   template borrowArrayProc*(typ: typedesc) =
     proc len*(x: typ): int {.borrow.}
     proc cap*(x: typ): int {.borrow.}
