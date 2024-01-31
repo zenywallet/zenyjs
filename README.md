@@ -171,5 +171,33 @@ $ ./koch boot -d:release
 ```
 See [Bootstrapping the compiler](https://nim-lang.github.io/Nim/intern.html#bootstrapping-the-compiler) for detail.
 
-### License
+## Custom Coin Networks
+Set the coin parameters in the `networks:` block.
+
+```nim
+import zenyjs
+import zenyjs/core
+import zenyjs/random
+import zenyjs/address
+
+networks:
+  bitcoin:
+    pubKeyPrefix: 0'u8
+    scriptPrefix: 5'u8
+    wif: 128'u8
+    bech32: "bc"
+
+  bitzeny:
+    pubKeyPrefix: 81'u8
+    scriptPrefix: 5'u8
+    wif: 128'u8
+    bech32: "sz"
+
+zenyjs.ready:
+  var pair = randomKey()
+  echo "Bitcoin address: ", bitcoin.getAddress(pair.pub)
+  echo "BitZeny address: ", bitzeny.getAddress(pair.pub)
+```
+
+## License
 MIT
