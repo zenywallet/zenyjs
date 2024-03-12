@@ -76,7 +76,7 @@ when isMainModule:
   import script
   import nimcrypto
   import tx
-  import dotdot/opcodes
+  import opcodes
   import custom
 
   echo "###Alice's wallet:"

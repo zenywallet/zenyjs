@@ -101,7 +101,7 @@ else:
   import nimcrypto
   import script
   import dotdot/segwit
-  import dotdot/opcodes
+  import opcodes
   import bytes
   import utils
   import base58

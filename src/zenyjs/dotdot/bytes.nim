@@ -1,7 +1,7 @@
 # Copyright (c) 2020 zenywallet
 
 import sequtils, strutils, endians, algorithm
-import opcodes
+import ../opcodes
 
 type
   VarInt* = distinct int

@@ -1,6 +1,6 @@
 # Copyright (c) 2020 zenywallet
 
-import dotdot/opcodes
+import opcodes
 import arraylib
 
 type

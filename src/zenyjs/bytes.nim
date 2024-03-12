@@ -80,7 +80,7 @@ when defined(js):
 
 else:
   import sequtils, strutils, endians, algorithm
-  import dotdot/opcodes
+  import opcodes
   import arraylib
 
   type
