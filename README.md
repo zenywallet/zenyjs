@@ -2,9 +2,9 @@
 A web wallet library for BitZeny
 
 ## Features
-- Libraries for wallets and block explorers. For example, block, address, transaction, sign, secp256k1, ecdh, bip32, bip44, bip49, bip84, bip47, base58, seed, uint64(for coin amounts), levenshtein, lock
+- Libraries for wallets and block explorers of the coins forked from Bitcoin. For example, block, address, transaction, sign, secp256k1, ecdh, bip32, bip44, bip49, bip84, bip47, base58, seed, uint64(for coin amounts), levenshtein, lock
 - Wasm is used as the backend for JavaScript processing in the web browsers, so it is very fast
-- ZenyJS is used by the [Nim](https://nim-lang.org/) language instead of JavaScript or its common transpiles like TypeScript. By using Nim, strict types, true function overloading, and more are available. No need to write free functions to release resources after calling Wasm-based library functions, which are automatically freed by Nim's memory management
+- ZenyJS is used by the [Nim](https://nim-lang.org/) language instead of JavaScript or its common transpiles like TypeScript. By using Nim, strict types, true function overloading, and more are available. See details [Nim for TypeScript Programmers](https://github.com/nim-lang/Nim/wiki/Nim-for-TypeScript-Programmers#comparison). In addition, no need to write free functions to release resources after calling Wasm-based library functions, which are automatically freed by Nim's memory management
 - ZenyJS allows the same Nim code to be used in both web browsers and native executables
 - Web miner and native miner, both are multi-threaded processing. [yespower](https://www.openwall.com/yespower/) only
 - Multi-threaded signing process for transactions in the web browsers and native executables
