@@ -4,8 +4,27 @@ when defined(js):
   import jsffi
   import jslib except Array
   import arraylib
+  import script
 
   type
+    Flags* = distinct uint8
+
+    Witness* = distinct Array[byte]
+
+    Sig* = distinct Array[byte]
+
+    TxIn* = tuple[tx: Hash, n: uint32, sig: Sig, sequence: uint32]
+
+    TxOut* = tuple[value: uint64, script: Script]
+
+    TxObj* = object
+      ver*: int32
+      flags*: Flags
+      ins*: Array[TxIn]
+      outs*: Array[TxOut]
+      witnesses*: Array[Array[Witness]]
+      locktime*: uint32
+
     Tx* = object
       handle*: JsObject
 
