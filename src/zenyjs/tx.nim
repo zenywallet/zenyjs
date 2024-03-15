@@ -1,7 +1,7 @@
 # Copyright (c) 2020 zenywallet
 
 when defined(js):
-  import jsffi
+  import std/jsffi
   import jslib except Array
   import arraylib
   import script
