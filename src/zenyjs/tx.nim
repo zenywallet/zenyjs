@@ -1,6 +1,7 @@
 # Copyright (c) 2020 zenywallet
 
 when defined(js):
+  import std/json
   import std/jsffi
   import jslib except Array
   import arraylib
@@ -31,6 +32,16 @@ when defined(js):
     Hash* {.borrow: `.`.} = distinct Array[byte]
 
   borrowArrayProc(Hash)
+
+  proc `%`*(f: Flags): JsonNode = %cast[uint8](f)
+
+  proc `%`*(h: Hash): JsonNode = %cast[Array[byte]](h)
+
+  proc `%`*(s: Sig): JsonNode = %cast[Array[byte]](s)
+
+  proc `%`*[T: tuple](o: T): JsonNode =
+    result = newJObject()
+    for k, v in o.fieldPairs: result[k] = %v
 
   proc toHex*(x: Hash): cstring =
     var uint8Array = cast[Array[byte]](x).toUint8Array()
