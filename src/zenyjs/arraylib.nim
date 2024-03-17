@@ -187,6 +187,20 @@ when defined(js):
     else:
       discard
 
+  proc `[]`*[T](x: Array[T]; i: Natural): T =
+    when T is byte:
+      var cacheJsObj = arrayCache[x.cache]
+      if cacheJsObj != jsNull:
+        var cache = cacheJsObj.to(ArrayCache[byte])
+        if cache.dirty == ArrayDirty.Data:
+          var uint8Array = cache.data.toUint8Array
+          return uint8Array[i].to(byte)
+      var arrayObj = newUint32Array(newUint8Array(Module.HEAPU8.buffer, x.handle.to(cint), 12).slice().buffer, 0, 3)
+      var uint8Array = newUint8Array(Module.HEAPU8.buffer, arrayObj[2].to(int), arrayObj[0].to(int)).slice()
+      result = uint8Array[i].to(byte)
+    else:
+      raise
+
   template borrowArrayProc*(typ: typedesc) =
     proc len*(x: typ): int {.borrow.}
     proc cap*(x: typ): int {.borrow.}
