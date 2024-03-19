@@ -230,6 +230,29 @@ when defined(js):
     else:
       raise
 
+  proc `[]`*[T](a: Array[T]; i: BackwardsIndex): T {.inline.} =
+    a[a.len - int(i) + low(a)]
+
+  proc `[]`*[T](a: var Array[T]; i: BackwardsIndex): var T {.inline.} =
+    a[a.len - int(i) + low(a)]
+
+  proc `[]`*[T; U, V: Ordinal](a: Array[T]; x: HSlice[U, V]): Array[T] =
+    var xa, xb: int
+    when x.a is BackwardsIndex:
+      xa = a.len - x.a.int
+    else:
+      xa = x.a.int
+    when x.b is BackwardsIndex:
+      xb = a.len - x.b.int
+    else:
+      xb = x.b.int
+    let len = xb - xa + 1
+    result.newArray(len)
+    var idx = 0
+    for i in xa..xb:
+      result[idx] = a[i]
+      inc(idx)
+
   template borrowArrayProc*(typ: typedesc) =
     proc len*(x: typ): int {.borrow.}
     proc cap*(x: typ): int {.borrow.}
