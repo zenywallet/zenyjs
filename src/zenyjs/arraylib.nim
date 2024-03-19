@@ -201,6 +201,35 @@ when defined(js):
     else:
       raise
 
+  proc `[]=`*[T](x: var Array[T]; i: Natural; y: sink T) =
+    when T is byte:
+      var cacheJsObj = arrayCache[x.cache]
+
+      if cacheJsObj != jsNull:
+        var cache = cacheJsObj.to(ArrayCache[byte])
+        if cache.dirty == ArrayDirty.Data:
+          cache.data[i] = y
+        else:
+          var p32 = x.handle.to(cint) div 4
+          var ua = newUint8Array(Module.HEAPU8.buffer, Module.HEAPU32[p32 + 2].to(int), Module.HEAPU32[p32].to(int)).slice().to(Uint8Array)
+          var s = newSeq[byte](ua.length.to(int))
+          for j in 0..<ua.length.to(int):
+            s[j] = ua[j].to(byte)
+          s[i] = y
+          arrayCache[x.cache] = ArrayCache[byte](data: s, dirty: ArrayDirty.Data)
+      else:
+        var p32 = x.handle.to(cint) div 4
+        var ua = newUint8Array(Module.HEAPU8.buffer, Module.HEAPU32[p32 + 2].to(int), Module.HEAPU32[p32].to(int)).slice().to(Uint8Array)
+        var s = newSeq[byte](ua.length.to(int))
+        for j in 0..<ua.length.to(int):
+          s[j] = ua[j].to(byte)
+        s[i] = y
+        var cacheIdx = getNewArrayCacheIdx()
+        arrayCache[cacheIdx] = ArrayCache[byte](data: s, dirty: ArrayDirty.Data)
+        x.cache = cacheIdx
+    else:
+      raise
+
   template borrowArrayProc*(typ: typedesc) =
     proc len*(x: typ): int {.borrow.}
     proc cap*(x: typ): int {.borrow.}
