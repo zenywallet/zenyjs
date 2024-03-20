@@ -43,6 +43,10 @@ when defined(js):
     result = newJObject()
     for k, v in o.fieldPairs: result[k] = %v
 
+  proc `%`*(s: Script): JsonNode = %cast[Array[byte]](s)
+
+  proc `%`*(s: Witness): JsonNode = %cast[Array[byte]](s)
+
   proc toHex*(x: Hash): cstring =
     var uint8Array = cast[Array[byte]](x).toUint8Array()
     result = uint8ArrayToHex(uint8Array.reverse())
