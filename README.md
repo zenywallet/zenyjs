@@ -121,7 +121,7 @@ ZenyJS needs to be reinstalled.
 
 > *Error: cannot open file: caprese*
 
-    sudo apt install build-essential autoconf libtool cmake pkg-config golang openjdk-19-jre maven
+    sudo apt install build-essential automake autoconf libtool cmake pkg-config golang openjdk-19-jre maven
     nimble install https://github.com/zenywallet/caprese
 
 > *Error: internal error: ("genAddr: 2", skTemp)*  
