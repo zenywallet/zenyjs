@@ -77,8 +77,8 @@ when defined(js):
         bip32.init(module)
       when declared(deoxy):
         deoxy.init(module)
-      when declared(tx):
-        tx.init(module)
+      when declared(tx_init):
+        tx_init(module)
       when declared(address.AddressType):
         address.init(module)
       when declared(base58):

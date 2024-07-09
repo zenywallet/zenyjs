@@ -54,7 +54,7 @@ when defined(js):
   var TxMod = JsObject{}
   var Module: JsObject
 
-  proc init*(module: JsObject) =
+  proc tx_init*(module: JsObject) =
     Module = module
     TxMod.newTx = Module.cwrap("tx_newTx", NumVar, [].toJs)
     TxMod.toTx = Module.cwrap("tx_toTx", NumVar, [NumVar])
@@ -63,6 +63,8 @@ when defined(js):
     TxMod.hash = Module.cwrap("tx_hash", jsNull, [NumVar, NumVar])
     TxMod.free = Module.cwrap("tx_free", jsNull, [NumVar])
     TxMod.duplicate = Module.cwrap("tx_duplicate", NumVar, [NumVar])
+
+  template init*(module: JsObject) = tx_init(module)
 
   proc `=destroy`*(tx: var Tx) =
     if not tx.handle.isNil:
