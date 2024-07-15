@@ -83,10 +83,10 @@ const SampleHtml = staticHtmlDocument:
 
 server(ssl = true, ip = "127.0.0.1", port = 8009):
   routes(host = "localhost"):
-    get "/": return SampleHtml.content("html").response
-    get "/js/app.js": return App.js.content("js").response
-    get "/js/zenyjs.wasm": return App.wasm.content("wasm").response
-    return "Not found".addHeader(Status404).send
+    get "/": SampleHtml.content("html").response
+    get "/js/app.js": App.js.content("js").response
+    get "/js/zenyjs.wasm": App.wasm.content("wasm").response
+    "Not found".addHeader(Status404).send
 
 serverStart()
 ```
