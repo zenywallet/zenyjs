@@ -24,7 +24,7 @@ when defined(js):
   var AddressMod = JsObject{}
   var Module: JsObject
 
-  proc init*(module: JsObject) =
+  proc address_init*(module: JsObject) =
     Module = module
     AddressMod.checkAddress = Module.cwrap("address_checkAddress", NumVar, [NumVar])
     AddressMod.getAddress = Module.cwrap("getAddress_c", jsNull, [NumVar, NumVar, NumVar])
@@ -35,6 +35,8 @@ when defined(js):
     AddressMod.prv = Module.cwrap("prv_c", jsNull, [NumVar, NumVar, NumVar])
 
     config.init(module)
+
+  template init*(module: JsObject) = address_init(module)
 
   proc checkAddress*(networkId: NetworkId, address: cstring): bool =
     withStack:
