@@ -4,6 +4,8 @@ when defined(js):
   import std/jsffi
   import arraylib
   import script
+  import hash
+  export hash
 
   type
     Flags* = distinct uint8
@@ -26,8 +28,6 @@ when defined(js):
 
     Tx* = object
       handle*: JsObject
-
-    Hash* {.borrow: `.`.} = distinct Array[byte]
 
   var TxMod* = JsObject{}
 
