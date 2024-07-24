@@ -82,6 +82,8 @@ else:
   import sequtils, strutils, endians, algorithm
   import opcodes
   import arraylib
+  import hash
+  export hash
 
   type
     VarInt* = distinct int
@@ -93,8 +95,6 @@ else:
     FixedStr* = ref object
       data*: string
       size*: int
-
-    Hash* = distinct Array[byte]
 
     Hash160* = distinct Array[byte]
 
