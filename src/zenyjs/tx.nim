@@ -6,30 +6,7 @@ when defined(js):
   import jslib except Array
   import arraylib
   import script
-
-  type
-    Flags* = distinct uint8
-
-    Witness* = distinct Array[byte]
-
-    Sig* = distinct Array[byte]
-
-    TxIn* = tuple[tx: Hash, n: uint32, sig: Sig, sequence: uint32]
-
-    TxOut* = tuple[value: uint64, script: Script]
-
-    TxObj* = object
-      ver*: int32
-      flags*: Flags
-      ins*: Array[TxIn]
-      outs*: Array[TxOut]
-      witnesses*: Array[Array[Witness]]
-      locktime*: uint32
-
-    Tx* = object
-      handle*: JsObject
-
-    Hash* {.borrow: `.`.} = distinct Array[byte]
+  import tx_types
 
   borrowArrayProc(Hash)
 
@@ -51,7 +28,6 @@ when defined(js):
     var uint8Array = cast[Array[byte]](x).toUint8Array()
     result = uint8ArrayToHex(uint8Array.reverse())
 
-  var TxMod = JsObject{}
   var Module: JsObject
 
   proc tx_init*(module: JsObject) =
@@ -65,21 +41,6 @@ when defined(js):
     TxMod.duplicate = Module.cwrap("tx_duplicate", NumVar, [NumVar])
 
   template init*(module: JsObject) = tx_init(module)
-
-  proc `=destroy`*(tx: var Tx) =
-    if not tx.handle.isNil:
-      TxMod.free(tx)
-      tx.handle = jsNull
-
-  proc `=copy`*(a: var Tx; b: Tx) =
-    `=destroy`(a)
-    if not b.handle.isNil:
-      a.handle = TxMod.duplicate(b.handle)
-
-  proc `=sink`*(a: var Tx; b: Tx) =
-    `=destroy`(a)
-    if not b.handle.isNil:
-      a.handle = b.handle
 
   proc newTx*(): Tx =
     result.handle = TxMod.newTx()
