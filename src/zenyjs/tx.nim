@@ -68,7 +68,6 @@ else:
   import arraylib
   import custom
   import macros
-  import config
   import tx_types
   export custom
 
@@ -256,6 +255,8 @@ else:
 
 
 when isMainModule:
+  import config
+
   networksDefault()
 
   # bitcoin-cli getblockhash 100000
