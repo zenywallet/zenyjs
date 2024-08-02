@@ -196,12 +196,12 @@ else:
     reader.toTx()
 
   proc stripWitness(tx: Tx): Tx =
-    var tx = cast[TxHandle](allocShared0(sizeof(TxObj)))
-    tx.ver = tx.ver
-    tx.ins = tx.ins
-    tx.outs = tx.outs
-    tx.locktime = tx.locktime
-    result.handle = tx
+    var txh = cast[TxHandle](allocShared0(sizeof(TxObj)))
+    txh.ver = tx.ver
+    txh.ins = tx.ins
+    txh.outs = tx.outs
+    txh.locktime = tx.locktime
+    result.handle = txh
 
   proc stripWitness(tx: Tx): Tx {.returnToHandle, exportc: "tx_stripWitness".}
 
