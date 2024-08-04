@@ -53,7 +53,7 @@ when defined(js):
 
   proc txid*(tx: Tx): Hash =
     result = newArray[byte]().Hash
-    TxMod.txid(tx, result.handle)
+    TxMod.txid(tx.handle, result.handle)
 
   proc hash*(tx: Tx): Hash =
     result = newArray[byte]().Hash
@@ -209,7 +209,11 @@ else:
 
   proc txid*(tx: Tx): Hash {.inline.} = tx.stripWitness.toBytes.hash
 
-  proc txid*(tx: Tx): Hash {.returnToLastParam, exportc: "tx_$1".}
+  #proc txid*(tx: Tx): Hash {.returnToLastParam, exportc: "tx_$1".}
+
+  proc txid*(txh: TxHandle, result: var Hash) {.exportc: "tx_txid".} =
+    var tx = Tx(handle: txh)
+    result = tx.stripWitness.toBytes.hash
 
   proc hash*(tx: Tx): Hash {.inline.} = tx.toBytes.hash
 
