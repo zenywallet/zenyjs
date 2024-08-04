@@ -199,7 +199,8 @@ else:
     var txh = cast[TxHandle](allocShared0(sizeof(TxObj)))
     txh.ver = tx.ver
     txh.ins = tx.ins
-    txh.outs = tx.outs
+    for t in tx.outs:
+      txh.outs.add(t)
     txh.locktime = tx.locktime
     result.handle = txh
 
