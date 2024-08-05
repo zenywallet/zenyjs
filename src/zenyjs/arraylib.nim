@@ -275,7 +275,7 @@ else:
   type
     Array*[T] = object
       len*, cap*: int
-      data*: ptr UncheckedArray[T]
+      data* {.align(8).}: ptr UncheckedArray[T]
 
     ArrayByte* = Array[byte]
 
