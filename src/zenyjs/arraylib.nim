@@ -134,6 +134,8 @@ when defined(js):
 
   proc toBytes*(x: Hex): Array[byte] = x.cstring.hexToUint8Array.toBytes
 
+  proc toBytesFromHex*(s: string): Array[byte] = s.cstring.hexToUint8Array.toBytes
+
   proc toHex*(x: Array[byte]): cstring =
     var cacheJsObj = arrayCache[x.cache]
     if cacheJsObj != jsNull:
