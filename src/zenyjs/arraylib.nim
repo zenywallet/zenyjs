@@ -1,7 +1,7 @@
 # Copyright (c) 2022 zenywallet
 
 when defined(js):
-  import jsffi
+  import std/jsffi
   import jslib
 
   type
@@ -272,7 +272,7 @@ else:
   when defined(emscripten):
     const EXPORTED_FUNCTIONS* = ["_array_new", "_array_destroy"]
 
-  import json
+  import std/json
 
   type
     Array*[T] = object
