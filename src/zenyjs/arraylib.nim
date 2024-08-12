@@ -298,7 +298,11 @@ else:
     a.cap = b.cap
     if b.data != nil:
       a.data = cast[typeof(a.data)](allocShared0(sizeof(T) * a.cap))
-      copyMem(a.data, b.data, sizeof(T) * a.len)
+      when T is Ordinal:
+        copyMem(a.data, b.data, sizeof(T) * a.len)
+      else:
+        for i in 0..<a.len:
+          a[i] = b[i]
 
   proc `=sink`*[T](a: var Array[T]; b: Array[T]) =
     `=destroy`(a)
