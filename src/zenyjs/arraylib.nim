@@ -406,7 +406,7 @@ else:
     let size = sizeof(T) * len
     result.data = cast[typeof(result.data)](allocShared0(size))
     copyMem(result.data, buf, size)
-    result.len = size
+    result.len = len
     result.cap = size
 
   proc toArray*[T](x: openArray[T]): Array[T] =
