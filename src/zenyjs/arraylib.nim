@@ -292,9 +292,6 @@ else:
         for i in 0..<x.len:
           `=destroy`(x.data[i])
       x.data.deallocShared()
-      x.data = nil
-      x.len = 0
-      x.cap = 0
 
   proc `=copy`*[T](a: var Array[T]; b: Array[T]) =
     if a.data == b.data: return
@@ -528,6 +525,9 @@ else:
 
   proc empty*[T](x: var Array[T]) =
     `=destroy`(x)
+    x.data = nil
+    x.len = 0
+    x.cap = 0
 
   proc clear*[T](x: var Array[T]) {.inline.} =
     x.len = 0
