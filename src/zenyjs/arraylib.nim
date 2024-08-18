@@ -2,6 +2,7 @@
 
 when defined(js):
   import std/jsffi
+  import std/json
   import jslib
 
   type
@@ -259,6 +260,8 @@ when defined(js):
     result.newSeq(x.len)
     for i in 0..<x.len:
       result[i] = x[i]
+
+  proc `%`*[T](a: Array[T]): JsonNode = %a.toSeq
 
   template borrowArrayProc*(typ: typedesc) =
     proc len*(x: typ): int {.borrow.}
