@@ -302,7 +302,7 @@ else:
         copyMem(a.data, b.data, sizeof(T) * a.len)
       else:
         for i in 0..<a.len:
-          a[i] = b[i]
+          a.data[i] = b.data[i]
 
   proc `=sink`*[T](a: var Array[T]; b: Array[T]) =
     `=destroy`(a)
