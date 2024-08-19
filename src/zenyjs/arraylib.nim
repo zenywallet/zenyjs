@@ -288,6 +288,9 @@ else:
 
   proc `=destroy`*[T](x: var Array[T]) =
     if x.data != nil:
+      when T is not Ordinal:
+        for i in 0..<x.len:
+          `=destroy`(x.data[i])
       x.data.deallocShared()
       x.data = nil
       x.len = 0
