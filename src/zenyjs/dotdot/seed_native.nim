@@ -1,5 +1,6 @@
 {.used.}
 when defined(emscripten):
+  {.push stackTrace:off.}
   proc crypt_seed*(seed: pointer, size: int): int {.exportc.} =
     {.emit:"""
 #include <emscripten.h>
@@ -26,6 +27,7 @@ try {
 , `seed`, `size`);
 return ret;
 """.}
+  {.pop.}
 else:
   {.emit: """
 #ifdef _WIN32
