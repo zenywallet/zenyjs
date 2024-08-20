@@ -286,12 +286,20 @@ else:
 
     Hex* = distinct string
 
-  proc `=destroy`*[T](x: var Array[T]) =
-    if x.data != nil:
-      when T is not Ordinal:
-        for i in 0..<x.len:
-          `=destroy`(x.data[i])
-      x.data.deallocShared()
+  when defined(emscripten):
+    proc `=destroy`*[T](x: var Array[T]) =
+      if x.data != nil:
+        when T is not Ordinal:
+          for i in 0..<x.len:
+            `=destroy`(x.data[i])
+        x.data.deallocShared()
+  else:
+    proc `=destroy`*[T](x: var Array[T]) =
+      if x.data != nil:
+        when T is not Ordinal:
+          for i in 0..<x.len:
+            `=destroy`(x.data[i])
+        x.data.deallocShared()
 
   proc `=copy`*[T](a: var Array[T]; b: Array[T]) =
     if a.data == b.data: return
