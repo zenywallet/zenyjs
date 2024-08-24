@@ -296,7 +296,7 @@ else:
   else:
     proc `=destroy`*[T](x: Array[T]) =
       if x.data != nil:
-        when T is not Ordinal:
+        when T is not Ordinal and T is not Array[byte]:
           for i in 0..<x.len:
             `=destroy`(x.data[i])
         x.data.deallocShared()
