@@ -79,7 +79,10 @@ when defined(js):
       result = ""
 
 else:
-  import sequtils, strutils, endians, algorithm
+  import std/sequtils
+  import std/strutils
+  import std/endians
+  import std/algorithm
   import opcodes
   import arraylib
   import hash
