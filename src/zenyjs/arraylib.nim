@@ -322,6 +322,8 @@ else:
     a.cap = b.cap
     a.data = b.data
 
+  template toOpenArray*[T](x: Array[T]): openArray[T] = toOpenArray(x.data, 0, x.len - 1)
+
   template nextCap(cap: int): int =
     if cap <= 16:
       32
