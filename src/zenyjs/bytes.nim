@@ -1,5 +1,8 @@
 # Copyright (c) 2020 zenywallet
 
+import hex
+export hex
+
 when defined(js):
   when not defined(CSTRING_SAFE):
     proc toString*(s: seq[byte]): string = cast[string](s)
@@ -14,7 +17,7 @@ when defined(js):
 
   proc `$`*(data: seq[byte]): string =
     if data.len > 0:
-      result = bytes.toHex(data)
+      result = hex.toHex(data)
     else:
       result = ""
 
@@ -287,22 +290,16 @@ else:
     for i in 0..<size:
       result.add(cast[char](buf[i]))
 
-    when not defined(ARRAY_USE_SEQ):
-      proc toHex*(a: Array[byte]): string =
-        result = newStringOfCap(a.len * 2)
-        for i in 0..a.high:
-          result.add(hexStr[a[i]])
-
   proc `$`*(data: seq[byte]): string =
     if data.len > 0:
-      result = bytes.toHex(data)
+      result = hex.toHex(data)
     else:
       result = ""
 
   when not defined(ARRAY_USE_SEQ):
     proc `$`*(data: Array[byte]): string =
       if data.len > 0:
-        result = bytes.toHex(data)
+        result = hex.toHex(toOpenArray(data.data, 0, data.len - 1))
       else:
         result = ""
 
@@ -317,7 +314,7 @@ else:
   proc `$`*(data: Hash): string =
     var b = cast[Array[byte]](data).toSeq
     algorithm.reverse(b)
-    bytes.toHex(b)
+    hex.toHex(b)
 
   proc `$`*(data: Hash160): string = data.toBytes.toHex
 
