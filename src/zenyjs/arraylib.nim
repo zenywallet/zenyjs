@@ -444,6 +444,8 @@ else:
       result.len = x.len
       result.cap = x.len
 
+  proc toArray*(x: string): Array[byte] = cast[seq[byte]](x).toArray()
+
   proc toSeq*[T](x: Array[T]): seq[T] =
     result.newSeq(x.len)
     for i in 0..<x.len:
