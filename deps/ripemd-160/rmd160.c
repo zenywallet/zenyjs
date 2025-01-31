@@ -12,23 +12,23 @@
  *
  *      Copyright (c) 1996 Katholieke Universiteit Leuven
  *
- *      Permission is hereby granted, free of charge, to any person 
- *      obtaining a copy of this software and associated documentation 
- *      files (the "Software"), to deal in the Software without restriction, 
- *      including without limitation the rights to use, copy, modify, merge, 
- *      publish, distribute, sublicense, and/or sell copies of the Software, 
- *      and to permit persons to whom the Software is furnished to do so, 
+ *      Permission is hereby granted, free of charge, to any person
+ *      obtaining a copy of this software and associated documentation
+ *      files (the "Software"), to deal in the Software without restriction,
+ *      including without limitation the rights to use, copy, modify, merge,
+ *      publish, distribute, sublicense, and/or sell copies of the Software,
+ *      and to permit persons to whom the Software is furnished to do so,
  *      subject to the following conditions:
  *
- *      The above copyright notice and this permission notice shall be 
+ *      The above copyright notice and this permission notice shall be
  *      included in all copies or substantial portions of the Software.
  *
- *      THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
- *      EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
- *      MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
- *      IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY 
- *      CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
- *      TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
+ *      THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ *      EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ *      MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ *      IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+ *      CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ *      TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  *      SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
 \********************************************************************/
@@ -37,7 +37,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "rmd160.h"      
+#include "rmd160.h"
 
 /********************************************************************/
 
@@ -78,7 +78,7 @@ void compress(dword *MDbuf, dword *X)
    FF(cc, dd, ee, aa, bb, X[13],  7);
    FF(bb, cc, dd, ee, aa, X[14],  9);
    FF(aa, bb, cc, dd, ee, X[15],  8);
-                             
+
    /* round 2 */
    GG(ee, aa, bb, cc, dd, X[ 7],  7);
    GG(dd, ee, aa, bb, cc, X[ 4],  6);
@@ -170,7 +170,7 @@ void compress(dword *MDbuf, dword *X)
    JJJ(aaa, bbb, ccc, ddd, eee, X[12],  6);
 
    /* parallel round 2 */
-   III(eee, aaa, bbb, ccc, ddd, X[ 6],  9); 
+   III(eee, aaa, bbb, ccc, ddd, X[ 6],  9);
    III(ddd, eee, aaa, bbb, ccc, X[11], 13);
    III(ccc, ddd, eee, aaa, bbb, X[ 3], 15);
    III(bbb, ccc, ddd, eee, aaa, X[ 7],  7);
@@ -205,7 +205,7 @@ void compress(dword *MDbuf, dword *X)
    HHH(eee, aaa, bbb, ccc, ddd, X[ 4],  7);
    HHH(ddd, eee, aaa, bbb, ccc, X[13],  5);
 
-   /* parallel round 4 */   
+   /* parallel round 4 */
    GGG(ccc, ddd, eee, aaa, bbb, X[ 8], 15);
    GGG(bbb, ccc, ddd, eee, aaa, X[ 6],  5);
    GGG(aaa, bbb, ccc, ddd, eee, X[ 4],  8);
