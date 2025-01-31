@@ -37,17 +37,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "rmd160.h"
+#include "rmd160_64.h"
 
 /********************************************************************/
 
 void MDinit(dword *MDbuf)
 {
-   MDbuf[0] = 0x67452301UL;
-   MDbuf[1] = 0xefcdab89UL;
-   MDbuf[2] = 0x98badcfeUL;
-   MDbuf[3] = 0x10325476UL;
-   MDbuf[4] = 0xc3d2e1f0UL;
+   MDbuf[0] = 0x67452301U;
+   MDbuf[1] = 0xefcdab89U;
+   MDbuf[2] = 0x98badcfeU;
+   MDbuf[3] = 0x10325476U;
+   MDbuf[4] = 0xc3d2e1f0U;
 
    return;
 }
