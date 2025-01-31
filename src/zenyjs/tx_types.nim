@@ -8,9 +8,9 @@ export hash
 type
   Flags* = distinct uint8
 
-  Witness* = distinct Array[byte]
+  Witness* {.borrow: `.`.} = distinct Array[byte]
 
-  Sig* = distinct Array[byte]
+  Sig* {.borrow: `.`.} = distinct Array[byte]
 
   TxIn* = tuple[tx: Hash, n: uint32, sig: Sig, sequence: uint32]
 

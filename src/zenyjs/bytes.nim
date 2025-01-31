@@ -42,9 +42,9 @@ else:
       data*: string
       size*: int
 
-    Hash160* = distinct Array[byte]
+    Hash160* {.borrow: `.`.} = distinct Array[byte]
 
-    PushData* = distinct Array[byte]
+    PushData* {.borrow: `.`.} = distinct Array[byte]
 
 
   proc toBytes*(x: SomeOrdinal | SomeFloat): Array[byte] =
