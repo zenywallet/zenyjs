@@ -316,7 +316,7 @@ else:
     algorithm.reverse(b)
     hex.toHex(b)
 
-  proc `$`*(data: Hash160): string = data.toBytes.toHex
+  proc `$`*(data: Hash160): string = $data.toBytes
 
   proc `$`*(p: PushData): string =
     var op: string
