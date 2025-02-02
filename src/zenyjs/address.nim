@@ -100,7 +100,7 @@ else:
 
   import std/json
   import std/strutils
-  import nimcrypto
+  import ripemd160
   import script
   import dotdot/segwit
   import opcodes
@@ -112,8 +112,7 @@ else:
 
   template getNetwork*(networkId: NetworkId): Network = networkList[networkId.int]
 
-  proc ripemd160hash*(pub: Array[byte]): Hash160 =
-    Hash160(ripemd160.digest(sha256s(pub)).data.toArray)
+  template ripemd160hash*(pub: Array[byte]): Hash160 = ripemd160(sha256s(pub))
 
   proc checkSum(hash160Prefix: Array[byte]): Array[byte] =
     let hashd = sha256d(hash160Prefix)
