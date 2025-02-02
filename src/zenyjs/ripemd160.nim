@@ -30,7 +30,7 @@ else:
     var dataBytes = data.toBytes
     ripemd160(cast[ptr UncheckedArray[byte]](addr dataBytes[0]), dataBytes.len.uint32)
 
-  template ripemd160*(data: openArray[byte]): Hash160 =
+  proc ripemd160*(data: openArray[byte]): Hash160 =
     ripemd160(cast[ptr UncheckedArray[byte]](addr data[0]), data.len.uint32)
 
   template ripemd160*(data: static openArray[byte]): Hash160 =
