@@ -31,3 +31,6 @@
 [submodule "deps/bech32"]
 	path = deps/bech32
 	url = https://github.com/sipa/bech32
+[submodule "deps/bearssl"]
+	path = deps/bearssl
+	url = https://www.bearssl.org/git/BearSSL
