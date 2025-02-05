@@ -284,7 +284,7 @@ proc stopMiningDataUpdater() =
 
 proc onRate(value: int) =
   cpuCount = value
-  miningAddressValid = checkAddress(activeNid, miningAddress.cstring)
+  miningAddressValid = checkAddress(activeNid.NetworkId, miningAddress.cstring)
   if miningActive and miningAddressValid:
     changeMiningWorker(cpuCount)
   appInst.redraw()
@@ -292,7 +292,7 @@ proc onRate(value: int) =
 proc onOptimizeChange() =
   optimizedId = jq("input:radio[name='optimize']:checked").val().to(cstring).parseInt
   changeMiningWorker(0)
-  miningAddressValid = checkAddress(activeNid, miningAddress.cstring)
+  miningAddressValid = checkAddress(activeNid.NetworkId, miningAddress.cstring)
   if miningActive and miningAddressValid:
     changeMiningWorker(cpuCount)
 
@@ -321,7 +321,7 @@ proc appMain(data: RouterData): VNode =
                   activeNid = newActiveNid
                   if miningAddressValid:
                     cmdSend fmtj"""{"cmd":"addr-off","data":{"nid":<oldActiveNid>,"addr":"<miningAddress>"}}"""
-                  miningAddressValid = checkAddress(activeNid, miningAddress.cstring)
+                  miningAddressValid = checkAddress(activeNid.NetworkId, miningAddress.cstring)
                   if miningAddressValid:
                     cmdSend fmtj"""{"cmd":"addr-on","data":{"nid":<activeNid>,"addr":"<miningAddress>"}}"""
             text n
@@ -358,7 +358,7 @@ proc appMain(data: RouterData): VNode =
             if oldMiningAddress != miningAddress:
               if miningAddressValid:
                 cmdSend fmtj"""{"cmd":"addr-off","data":{"nid":<activeNid>,"addr":"<oldMiningAddress>"}}"""
-              miningAddressValid = checkAddress(activeNid, miningAddress.cstring)
+              miningAddressValid = checkAddress(activeNid.NetworkId, miningAddress.cstring)
               if miningAddressValid:
                 cmdSend fmtj"""{"cmd":"addr-on","data":{"nid":<activeNid>,"addr":"<miningAddress>"}}"""
         a(class="ui inverted tag label"):
@@ -374,7 +374,7 @@ proc appMain(data: RouterData): VNode =
             else:
               miningActive = true
               jq(".ui.mining.checkbox").checkbox("set checked")
-              miningAddressValid = checkAddress(activeNid, miningAddress.cstring)
+              miningAddressValid = checkAddress(activeNid.NetworkId, miningAddress.cstring)
               if miningAddressValid:
                 clearNotify()
                 miningHashRateWaiting = true
