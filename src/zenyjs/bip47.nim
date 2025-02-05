@@ -76,6 +76,7 @@ when isMainModule:
   import script
   import nimcrypto
   import tx
+  import tx_types
   import opcodes
   import custom
 
