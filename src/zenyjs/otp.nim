@@ -60,7 +60,7 @@ else:
   when defined(emscripten):
     const EXPORTED_FUNCTIONS* = ["_generateCounter"]
 
-  import nimcrypto
+  import br_hash
   import endians
   import sequtils
   import strutils
@@ -77,11 +77,14 @@ else:
     var hash: seq[byte]
     case totp.algo
     of SHA1:
-      hash = sha1.hmac(totp.key, c).data.toSeq
+      hash = sha1Hmac(cast[ptr UncheckedArray[byte]](addr totp.key[0]), totp.key.len.uint32,
+                      cast[ptr UncheckedArray[byte]](addr c[0]), c.len.uint32).toSeq
     of SHA256:
-      hash = sha256.hmac(totp.key, c).data.toSeq
+      hash = sha256Hmac(cast[ptr UncheckedArray[byte]](addr totp.key[0]), totp.key.len.uint32,
+                        cast[ptr UncheckedArray[byte]](addr c[0]), c.len.uint32).toSeq
     of SHA512:
-      hash = sha512.hmac(totp.key, c).data.toSeq
+      hash = sha512Hmac(cast[ptr UncheckedArray[byte]](addr totp.key[0]), totp.key.len.uint32,
+                        cast[ptr UncheckedArray[byte]](addr c[0]), c.len.uint32).toSeq
     let pos = hash[^1] and 0x0f'u8
     let code = hash[pos].toUint32BE and 0x7fffffff'u32
     let val = code mod DigitNum[totp.digit]
