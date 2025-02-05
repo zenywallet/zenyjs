@@ -39,7 +39,7 @@ task secp256k1, "make secp256k1":
   withDir "deps/secp256k1":
     exec "./autogen.sh"
     exec "./configure --enable-module-ecdh --disable-shared --enable-static --disable-tests --disable-benchmark --disable-openssl-tests --disable-exhaustive-tests"
-    exec "make -j$(nproc)"
+    exec "make -j$(nproc --all || sysctl -n hw.ncpu || getconf _NPROCESSORS_ONLN || echo 1)"
     exec "mkdir -p ../../src/zenyjs/deps/secp256k1/libs"
     exec "cp .libs/libsecp256k1.a ../../src/zenyjs/deps/secp256k1/libs/"
 
@@ -47,14 +47,14 @@ task wasmSecp256k1, "make wasm-secp256k1":
   withDir "deps/wasm-secp256k1":
     exec "./autogen.sh"
     exec emsdkEnv("emconfigure ./configure --enable-module-ecdh --disable-shared --enable-static --disable-tests --disable-benchmark --disable-openssl-tests --disable-exhaustive-tests")
-    exec emsdkEnv("emmake make -j$(nproc)")
+    exec emsdkEnv("emmake make -j$(nproc --all || sysctl -n hw.ncpu || getconf _NPROCESSORS_ONLN || echo 1)")
 
 task zbar, "make zbar":
   withDir "deps/zbar":
     exec "sed -i \"s/ -Werror//\" $(pwd)/configure.ac"
     exec "autoreconf -vfi"
     exec emsdkEnv("emconfigure ./configure CPPFLAGS=-DNDEBUG=1 --without-x --without-jpeg --without-imagemagick --without-npapi --without-gtk --without-python --without-qt --without-xshm --disable-video --disable-pthread --enable-codes=all")
-    exec emsdkEnv("emmake make -j$(nproc)")
+    exec emsdkEnv("emmake make -j$(nproc --all || sysctl -n hw.ncpu || getconf _NPROCESSORS_ONLN || echo 1)")
 
 task jsLevenshtein, "copy js-levenshtein":
   withDir "src/zenyjs":
