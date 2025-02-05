@@ -11,7 +11,6 @@ srcDir        = "src"
 
 requires "nim >= 1.6.4"
 requires "nimcrypto"
-requires "templates"
 
 
 import std/os
