@@ -188,7 +188,7 @@ else:
                                 "_bip32_address_ex", "_bip32_segwitAddress_ex"]
 
   import std/sequtils
-  import nimcrypto
+  import br_hash
   import arraylib
   import bytes
   import base58
@@ -254,12 +254,14 @@ else:
   proc master*(seed: Array[byte], versionPrv: VersionPrefix = xprv,
               versionPub: VersionPrefix = xpub): HDNode {.exportc: "bip32_$1".} =
     result = cast[HDNode](allocShared0(sizeof(HDNodeObj)))
-    var I = sha512.hmac("Bitcoin seed", seed.toSeq).data.toBytes
+    var k = "Bitcoin seed"
+    var I = sha512Hmac(cast[ptr UncheckedArray[byte]](addr k[0]), k.len.uint32,
+                      cast[ptr UncheckedArray[byte]](addr seed[0]), seed.len.uint32)
     result.depth = 0
     result.fingerprint = 0
     result.childNumber = 0
-    result.chainCode = I[32..63]
-    result.privateKey = I[0..31]
+    result.chainCode = I[32..63].toBytes
+    result.privateKey = I[0..31].toBytes
     result.publicKey = result.privateKey.pub
     result.versionPrv = versionPrv
     result.versionPub = versionPub
@@ -413,9 +415,10 @@ else:
         raise newException(HdError, "derive privateKey len=" & $node.privateKey.len)
     var childNumber = (0x80000000'u32 or index)
     var data = (0x00'u8, node.privateKey, childNumber).toBytesBE
-    var I = sha512.hmac(node.chainCode.toSeq, data.toSeq).data.toBytes
-    var privateKey: PrivateKey = I[0..31]
-    var chainCode: ChainCode = I[32..63]
+    var I = sha512Hmac(cast[ptr UncheckedArray[byte]](addr node.chainCode[0]), node.chainCode.len.uint32,
+                      cast[ptr UncheckedArray[byte]](addr data[0]), data.len.uint32)
+    var privateKey: PrivateKey = I[0..31].toBytes
+    var chainCode: ChainCode = I[32..63].toBytes
     var deriveNode = cast[HDNode](allocShared0(sizeof(HDNodeObj)))
     deriveNode.depth = node.depth + 1
     deriveNode.fingerprint = ripemd160hash(node.publicKey).toBytes.toUint32BE
@@ -430,9 +433,10 @@ else:
   proc derive*(node: HDNode, index: uint32): HDNode {.exportc: "bip32_$1".} =
     var childNumber = index
     var data = (node.publicKey, childNumber).toBytesBE
-    var I = sha512.hmac(node.chainCode.toSeq, data.toSeq).data.toBytes
-    var privateKey: PrivateKey = I[0..31]
-    var chainCode: ChainCode = I[32..63]
+    var I = sha512Hmac(cast[ptr UncheckedArray[byte]](addr node.chainCode[0]), node.chainCode.len.uint32,
+                      cast[ptr UncheckedArray[byte]](addr data[0]), data.len.uint32)
+    var privateKey: PrivateKey = I[0..31].toBytes
+    var chainCode: ChainCode = I[32..63].toBytes
     var deriveNode = cast[HDNode](allocShared0(sizeof(HDNodeObj)))
     deriveNode.depth = node.depth + 1
     deriveNode.fingerprint = ripemd160hash(node.publicKey).toBytes.toUint32BE
