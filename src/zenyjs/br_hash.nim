@@ -13,6 +13,7 @@ const bearsslPath = currentSourcePath().parentDir() / "../../deps/bearssl"
 {.compile: bearsslPath / "src/codec/dec64be.c".}
 {.compile: bearsslPath / "src/codec/enc64be.c".}
 {.compile: bearsslPath / "src/mac/hmac.c".}
+{.compile: bearsslPath / "src/hash/sha1.c".}
 
 type
   uint32_t = uint32
@@ -145,5 +146,18 @@ proc sha512Hmac*(key: ptr UncheckedArray[byte], keySize: uint32, data: ptr Unche
   var hmacCtx: br_hmac_context
   br_hmac_key_init(addr hmacKeyCtx, addr br_sha512_vtable, cast[pointer](key), keySize.csize_t)
   br_hmac_init(addr hmacCtx, addr hmacKeyCtx, br_sha512_SIZE.csize_t)
+  br_hmac_update(addr hmacCtx, cast[pointer](data), dataSize.csize_t)
+  discard br_hmac_out(addr hmacCtx, addr result)
+
+const
+  br_sha1_SIZE = 20
+
+var br_sha1_vtable {.importc.}: br_hash_class
+
+proc sha1Hmac*(key: ptr UncheckedArray[byte], keySize: uint32, data: ptr UncheckedArray[byte], dataSize: uint32): array[br_sha1_SIZE, byte] =
+  var hmacKeyCtx: br_hmac_key_context
+  var hmacCtx: br_hmac_context
+  br_hmac_key_init(addr hmacKeyCtx, addr br_sha1_vtable, cast[pointer](key), keySize.csize_t)
+  br_hmac_init(addr hmacCtx, addr hmacKeyCtx, br_sha1_SIZE.csize_t)
   br_hmac_update(addr hmacCtx, cast[pointer](data), dataSize.csize_t)
   discard br_hmac_out(addr hmacCtx, addr result)
