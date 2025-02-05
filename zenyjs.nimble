@@ -22,8 +22,8 @@ template emsdkEnv(cmd: string): string =
 task emsdk, "Emscripten SDK install":
   withDir "deps/emsdk":
     exec "git pull origin main"
-    exec "./emsdk install latest"
-    exec "./emsdk activate latest"
+    exec "./emsdk install 3.1.74"
+    exec "./emsdk activate 3.1.74"
     exec ". ./emsdk_env.sh" # For testing, does not effect the current terminal
 
 task emsdkLatest, "Emscripten SDK install":
