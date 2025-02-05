@@ -74,7 +74,7 @@ when isMainModule:
   import utils
   import address
   import script
-  import nimcrypto
+  import br_hash
   import tx
   import tx_types
   import opcodes
@@ -156,7 +156,8 @@ when isMainModule:
   var s = alicePrv.ecdh(m_bob_47h_0h_0h_0.publicKey.pubObj)
   echo "Shared secret: ", s
 
-  var I = sha512.hmac(outputAlice.toSeq, s.toSeq).data # opposite? s = HMAC-SHA512(x, o)
+  var I = sha512Hmac(cast[ptr UncheckedArray[byte]](addr outputAlice[0]), outputAlice.len.uint32,
+                    cast[ptr UncheckedArray[byte]](addr s[0]), s.len.uint32) # opposite? s = HMAC-SHA512(x, o)
   var mask = I.toSeq
   echo "Blinding mask:"
   echo mask
