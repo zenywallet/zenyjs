@@ -36,7 +36,7 @@ else:
   when defined(emscripten):
     const EXPORTED_FUNCTIONS* = ["_sha256d", "_sha256s", "_sha512Hmac"]
 
-  import json, strutils, nimcrypto
+  import json, strutils, br_hash
   import arraylib
 
   proc toJson*(val: uint64): JsonNode =
@@ -55,25 +55,30 @@ else:
       raiseAssert("toUint64 unexpected " & $val.kind)
 
   proc sha256d*(data: openarray[byte]): array[32, byte] {.inline.} =
-    sha256.digest(sha256.digest(data).data).data
+    var h = sha256(cast[ptr UncheckedArray[byte]](addr data[0]), data.len.uint32)
+    sha256(cast[ptr UncheckedArray[byte]](addr h[0]), h.len.uint32)
 
   proc sha256s*(data: openarray[byte]): array[32, byte] {.inline.} =
-    sha256.digest(data).data
+    sha256(cast[ptr UncheckedArray[byte]](addr data[0]), data.len.uint32)
 
   proc sha256d*(data: Array[byte]): array[32, byte] {.inline.} =
-    sha256.digest(sha256.digest(cast[ptr byte](data.data), data.len.uint).data).data
+    var h = sha256(cast[ptr UncheckedArray[byte]](data.data), data.len.uint32)
+    sha256(cast[ptr UncheckedArray[byte]](addr h[0]), h.len.uint32)
 
   proc sha256s*(data: Array[byte]): array[32, byte] {.inline.} =
-    sha256.digest(cast[ptr byte](data.data), data.len.uint).data
+    sha256(cast[ptr UncheckedArray[byte]](data.data), data.len.uint32)
 
   proc sha256d*(data: Array[byte], ret: var array[32, byte]) {.exportc: "$1".} =
-    ret = sha256.digest(sha256.digest(cast[ptr byte](data.data), data.len.uint).data).data
+    var h = sha256(cast[ptr UncheckedArray[byte]](data.data), data.len.uint32)
+    ret = sha256(cast[ptr UncheckedArray[byte]](addr h[0]), h.len.uint32)
 
   proc sha256s*(data: Array[byte], ret: var array[32, byte]) {.exportc: "$1".} =
-    ret = sha256.digest(cast[ptr byte](data.data), data.len.uint).data
+    ret = sha256(cast[ptr UncheckedArray[byte]](addr data[0]), data.len.uint32)
 
   proc sha512Hmac*(key, data: Array[byte]): array[64, byte] {.inline.} =
-    sha512.hmac(key.toSeq, data.toSeq).data
+    sha512Hmac(cast[ptr UncheckedArray[byte]](addr key[0]), key.len.uint32,
+              cast[ptr UncheckedArray[byte]](addr data[0]), data.len.uint32)
 
   proc sha512Hmac*(key, data: Array[byte], ret: var array[64, byte]) {.exportc: "$1".} =
-    ret = sha512.hmac(key.toSeq, data.toSeq).data
+    ret = sha512Hmac(cast[ptr UncheckedArray[byte]](addr key[0]), key.len.uint32,
+                    cast[ptr UncheckedArray[byte]](addr data[0]), data.len.uint32)
