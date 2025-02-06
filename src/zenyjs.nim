@@ -19,9 +19,12 @@ else:
 
   const ZenyWasm = staticRead(currentSourcePath().parentDir() / "zenyjs/zenyjs.wasm")
 
-  proc staticZenyJs*(src: static string): tuple[js: string, wasm: string] {.compileTime.} =
-    let minJs = contents.scriptMinifier(src, extern = ZenyJsExterns)
-    (js: minJs, wasm: ZenyWasm)
+  proc staticZenyJs*(src: static string, minify: bool = true): tuple[js: string, wasm: string] {.compileTime.} =
+    if minify:
+      let minJs = contents.scriptMinifier(src, extern = ZenyJsExterns)
+      (js: minJs, wasm: ZenyWasm)
+    else:
+      (js: src, wasm: ZenyWasm)
 
   proc staticZenyJs*(src, extern: static string): tuple[js: string, wasm: string] {.compileTime.} =
     let minJs = contents.scriptMinifier(src, extern = extern & "\n" & ZenyJsExterns)
