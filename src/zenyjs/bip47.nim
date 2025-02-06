@@ -156,9 +156,8 @@ when isMainModule:
   var s = alicePrv.ecdh(m_bob_47h_0h_0h_0.publicKey.pubObj)
   echo "Shared secret: ", s
 
-  var I = sha512Hmac(cast[ptr UncheckedArray[byte]](addr outputAlice[0]), outputAlice.len.uint32,
-                    cast[ptr UncheckedArray[byte]](addr s[0]), s.len.uint32) # opposite? s = HMAC-SHA512(x, o)
-  var mask = I.toSeq
+  var I = sha512Hmac(outputAlice, s) # opposite? s = HMAC-SHA512(x, o)
+  var mask = I.toBytes
   echo "Blinding mask:"
   echo mask
 
