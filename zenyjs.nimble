@@ -70,6 +70,11 @@ task bech32, "copy segwit_addr.c":
     exec "cp ref/c/segwit_addr.c ../../src/zenyjs/deps/bech32/ref/c/"
     exec "cp ref/c/segwit_addr.h ../../src/zenyjs/deps/bech32/ref/c/"
 
+task bearssl, "copy bearssl":
+  withDir "deps/bearssl":
+    exec "mkdir -p ../../src/bearssl"
+    exec "cp -r inc src ../../src/bearssl/"
+
 task depsAll, "Build deps":
   exec "git submodule update --init"
   exec "git submodule update --remote deps/emsdk"
@@ -80,6 +85,7 @@ task depsAll, "Build deps":
   jsLevenshteinTask()
   jsCuintTask()
   bech32Task()
+  bearsslTask()
 
 task zenyjs, "Build zenyjs":
   withDir "src/zenyjs":
