@@ -75,6 +75,11 @@ task bearssl, "copy bearssl":
     exec "mkdir -p ../../src/bearssl"
     exec "cp -r inc src ../../src/bearssl/"
 
+task ripemd160, "copy ripemd-160":
+  withDir "deps/ripemd-160":
+    exec "mkdir -p ../../src/ripemd-160"
+    exec "cp -r . ../../src/ripemd-160/"
+
 task depsAll, "Build deps":
   exec "git submodule update --init"
   exec "git submodule update --remote deps/emsdk"
@@ -86,6 +91,7 @@ task depsAll, "Build deps":
   jsCuintTask()
   bech32Task()
   bearsslTask()
+  ripemd160Task()
 
 task zenyjs, "Build zenyjs":
   withDir "src/zenyjs":

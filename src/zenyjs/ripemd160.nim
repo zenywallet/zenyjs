@@ -4,10 +4,14 @@ when defined(js):
   {.error: "not implemented".}
 
 else:
+  import os
+
+  const ripemd160Path = currentSourcePath().parentDir() / "../ripemd-160"
+
   when defined(emscripten):
-    {.compile: "../../deps/ripemd-160/rmd160.c".}
+    {.compile: ripemd160Path / "rmd160.c".}
   else:
-    {.compile: "../../deps/ripemd-160/rmd160_64.c".}
+    {.compile: ripemd160Path / "rmd160_64.c".}
 
   import bytes
   import arraylib
