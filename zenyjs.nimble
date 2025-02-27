@@ -104,5 +104,6 @@ task zenyjsdebug, "Build zenyjs debug":
     exec "nim c -r zenyjs_patch.nim && rm zenyjs_patch"
 
 before install:
-  depsAllTask()
-  zenyjsTask()
+  if not fileExists("src/zenyjs/zenyjs.wasm"):
+    depsAllTask()
+    zenyjsTask()
