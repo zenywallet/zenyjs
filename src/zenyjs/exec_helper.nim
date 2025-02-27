@@ -2,9 +2,9 @@
 
 import std/os
 import std/random
-import std/nre
 import std/tables
 import std/strutils
+import regex
 
 const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
@@ -28,23 +28,23 @@ elif paramCount() == 2:
     let targetJs = paramStr(2)
     let d = readFile(targetJs)
 
-    for s in d.findIter(re""": "[a-zA-Z_][\w]*""""):
-      var t = s.match.strip(chars = {' ', ':', '"'})
+    for m in d.findAll(re2""": "[a-zA-Z_][\w]*""""):
+      var t = d[m.boundaries].strip(chars = {' ', ':', '"'})
       list[t] = t
 
-    for s in d.findIter(re"[a-zA-Z_][\w]*: "):
-      var t = s.match.strip(chars = {' ', ':'})
+    for m in d.findAll(re2"[a-zA-Z_][\w]*: "):
+      var t = d[m.boundaries].strip(chars = {' ', ':'})
       list[t] = t
       #if list.hasKey(t):
       #  resList[t] = t
 
-    for s in d.findIter(re"\.[a-zA-Z_][\w]*"):
-      var t = s.match.strip(chars = {'.'})
+    for m in d.findAll(re2"\.[a-zA-Z_][\w]*"):
+      var t = d[m.boundaries].strip(chars = {'.'})
       if list.hasKey(t):
         resList[t] = t
 
-    for s in d.findIter(re"\[""[a-zA-Z_][\w]*""\]"):
-      var t = s.match.strip(chars = {'[', ']', '"'})
+    for m in d.findAll(re2"\[""[a-zA-Z_][\w]*""\]"):
+      var t = d[m.boundaries].strip(chars = {'[', ']', '"'})
       if list.hasKey(t):
         resList[t] = t
 
@@ -65,9 +65,9 @@ elif paramCount() == 2:
     echo res
 
 
-    var wasmImportsMatch = d.find(re"var wasmImports = \{\n((.+)\n)+\};")
-    if wasmImportsMatch.isSome:
-      var wasmImportsStr = $wasmImportsMatch.get
+    var m = RegexMatch2()
+    if d.find(re2"var wasmImports = \{\n((.+)\n)+\};", m):
+      var wasmImportsStr = d[m.boundaries]
 
       var wasmImportsExtern: string
       for s in wasmImportsStr.splitLines:
