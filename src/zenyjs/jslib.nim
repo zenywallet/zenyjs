@@ -15,12 +15,14 @@ type
   Uint8ArrayObj* = JsObject
   Uint32ArrayObj* = JsObject
   NumberObj* = JsObject
+  StringObj* = JsObject
   ArrayObj* = JsObject
 
   WebSocket* = ref object of WebSocketObj
   Uint8Array* = ref object of Uint8ArrayObj
   Uint32Array* = ref object of Uint32ArrayObj
   Number* = ref object of NumberObj
+  String* = ref object of StringObj
   Array* = ref object of ArrayObj
 
   JslibError* = object of CatchableError
@@ -66,6 +68,7 @@ proc newUint32Array*(buffer: JsObject, byteOffset: int, length: int): Uint32Arra
 proc newTextEncoder*(): JsObject {.importcpp: "new TextEncoder()".}
 proc newTextDecoder*(): JsObject {.importcpp: "new TextDecoder()".}
 proc newNumber*(val: JsObject): Number {.importcpp: "new Number(#)".}
+proc newString*(val: JsObject): String {.importcpp: "new String(#)".}
 proc newWorker*(url: cstring): JsObject {.importcpp: "new Worker(#)".}
 proc newWorker*(url: cstring, options: JsObject): JsObject {.importcpp: "new Worker(#, #)".}
 
