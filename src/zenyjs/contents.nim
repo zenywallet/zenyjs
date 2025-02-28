@@ -52,14 +52,52 @@ template scriptMinifier*(code: string, extern: seq[string]): string =
       )
     scriptMinifierMacro()
 
-proc sanitizeHtml*(s: string): string =
-  for c in s:
-    case c
-    of '&': result.add("&amp;")
-    of '\'': result.add("&#39;")
-    of '`': result.add("&#96;")
-    of '"': result.add("&quot;")
-    of '<': result.add("&lt;")
-    of '>': result.add("&gt;")
-    of '/': result.add("&#47;")
-    else: result.add(c)
+when defined(SANITIZEHTML_COMPACT):
+  proc sanitizeHtml*(s: string): string =
+    for c in s:
+      case c
+      of '&': result.add("&amp;")
+      of '\'': result.add("&#39;")
+      of '`': result.add("&#96;")
+      of '"': result.add("&quot;")
+      of '<': result.add("&lt;")
+      of '>': result.add("&gt;")
+      of '/': result.add("&#47;")
+      else: result.add(c)
+else:
+  const saniMap = [
+    "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+    "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+    "", "", "&quot;", "", "", "", "&amp;", "&#39;", "", "", "", "", "", "", "", "&#47;",
+    "", "", "", "", "", "", "", "", "", "", "", "", "&lt;", "", "&gt;", "",
+    "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+    "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+    "&#96;", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+    "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+    "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+    "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+    "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+    "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+    "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+    "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+    "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+    "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]
+
+  {.push checks: off.}
+  proc sanitizeHtml*(s: string): string =
+    result = newString(s.len * 6)
+    var cur = 0
+    var startPos = 0
+    for i, c in s:
+      if saniMap[c.byte].len != 0:
+        let d = i - startPos
+        copyMem(addr result[cur], unsafeAddr s[startPos], d)
+        inc(cur, d)
+        let sLen = saniMap[c.byte].len
+        copyMem(addr result[cur], unsafeAddr saniMap[c.byte][0], sLen)
+        inc(cur, sLen)
+        startPos = i + 1
+    let d = s.len - startPos
+    copyMem(addr result[cur], unsafeAddr s[startPos], d)
+    result.setLen(cur + d)
+  {.pop.}
