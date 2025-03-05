@@ -54,6 +54,13 @@ else:
     else:
       raiseAssert("toUint64 unexpected " & $val.kind)
 
+  proc sha256d*(data: ptr UncheckedArray[byte], size: uint32): array[32, byte] {.inline.} =
+    var h = sha256(data, size)
+    sha256(cast[ptr UncheckedArray[byte]](addr h), h.len.uint32)
+
+  proc sha256s*(data: ptr UncheckedArray[byte], size: uint32): array[32, byte] {.inline.} =
+    sha256(data, size)
+
   proc sha256d*(data: openarray[byte]): array[32, byte] {.inline.} =
     var h = if data.len > 0:
       sha256(cast[ptr UncheckedArray[byte]](addr data[0]), data.len.uint32)
