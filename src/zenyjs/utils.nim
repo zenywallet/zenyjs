@@ -82,9 +82,9 @@ else:
     ret = sha256(cast[ptr UncheckedArray[byte]](addr data[0]), data.len.uint32)
 
   proc sha512Hmac*(key, data: Array[byte]): array[64, byte] {.inline.} =
-    sha512Hmac(cast[ptr UncheckedArray[byte]](addr key[0]), key.len.uint32,
-              cast[ptr UncheckedArray[byte]](addr data[0]), data.len.uint32)
+    sha512Hmac(cast[ptr UncheckedArray[byte]](key.data), key.len.uint32,
+              cast[ptr UncheckedArray[byte]](data.data), data.len.uint32)
 
   proc sha512Hmac*(key, data: Array[byte], ret: var array[64, byte]) {.exportc: "$1".} =
-    ret = sha512Hmac(cast[ptr UncheckedArray[byte]](addr key[0]), key.len.uint32,
-                    cast[ptr UncheckedArray[byte]](addr data[0]), data.len.uint32)
+    ret = sha512Hmac(cast[ptr UncheckedArray[byte]](key.data), key.len.uint32,
+                    cast[ptr UncheckedArray[byte]](data.data), data.len.uint32)
