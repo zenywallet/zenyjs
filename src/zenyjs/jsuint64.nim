@@ -63,6 +63,10 @@ proc `/`*(a, b: Uint64): Uint64 =
   result = a.clone().to(Uint64)
   result.div(b)
 
+proc `==`*(a, b: Uint64): bool = a.eq(b).to(bool)
+proc `>`*(a, b: Uint64): bool = a.gt(b).to(bool)
+proc `<`*(a, b: Uint64): bool = a.lt(b).to(bool)
+
 proc remainder*(a: Uint64): Uint64 = a.toJs.remainder.to(Uint64)
 
 proc a00*(a: Uint64): uint16 {.importcpp: "#._a00".}
@@ -89,6 +93,10 @@ when isMainModule:
   console.log((a - b).toString)
   console.log((a * b).toString)
   console.log((a / b).toString)
+
+  console.log(a.eq(b), a == b)
+  console.log(a.gt(b), a > b)
+  console.log(a.lt(b), a < b)
 
   var val = newUint64("18446744073709551615")
   console.log(val.toString, val.toUint8Array)
