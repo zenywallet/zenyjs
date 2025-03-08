@@ -84,6 +84,7 @@ proc toUint8Array*(a: Uint64): Uint8Array =
 proc toNumber*(a: Uint64): int = a.toJs.toNumber().to(int)  # last 32 bits are dropped
 
 proc toString*(a: Uint64): cstring = a.toString(10).to(cstring)
+proc `$`*(a: Uint64): string = $a.toString()
 
 
 when isMainModule:
