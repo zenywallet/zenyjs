@@ -22,9 +22,9 @@ when defined(js):
         else:
           raise newException(SeedError, "crypto.getRandomValues is not available")
       else:
-        if global.crypto.isNil:
-          global.crypto = require("crypto")
-        var seedData = Uint8Array.from(global.crypto.randomBytes(size)).to(Uint8Array)
+        if global.cryptoMod.isNil:
+          global.cryptoMod = require("crypto")
+        var seedData = Uint8Array.from(global.cryptoMod.randomBytes(size)).to(Uint8Array)
         result = seedData
     except:
       raise newException(SeedError, getCurrentExceptionMsg())
