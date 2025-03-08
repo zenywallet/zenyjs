@@ -36,7 +36,9 @@ proc newUint64*(sval: cstring): Uint64 =
   result = ModuleUINT64.newUint64(0.uint)
   result.fromString(sval)
 
-proc newUint64*(val: SomeUnsignedInt): Uint64 = newUint64(cstring($val))
+proc newUint64*(val: SomeInteger): Uint64 =
+  if val < 0: raise
+  newUint64(cstring($val))
 
 proc newUint64*(jval: JsObject): Uint64 =
   let typ = jsTypeOf(jval)
