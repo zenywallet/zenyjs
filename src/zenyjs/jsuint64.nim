@@ -68,6 +68,8 @@ proc `/`*(a, b: Uint64): Uint64 =
 proc `==`*(a, b: Uint64): bool = a.eq(b).to(bool)
 proc `>`*(a, b: Uint64): bool = a.gt(b).to(bool)
 proc `<`*(a, b: Uint64): bool = a.lt(b).to(bool)
+proc `>=`*(a, b: Uint64): bool = a.gt(b).to(bool) or a.eq(b).to(bool)
+proc `<=`*(a, b: Uint64): bool = a.lt(b).to(bool) or a.eq(b).to(bool)
 
 proc remainder*(a: Uint64): Uint64 = a.toJs.remainder.to(Uint64)
 
