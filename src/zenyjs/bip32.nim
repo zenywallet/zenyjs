@@ -274,6 +274,8 @@ else:
   proc addCheck*(data: Array[byte]): Array[byte] = concat(data.toSeq, sha256d(data)[0..3]).toBytes
 
   proc check(data: Array[byte]): bool =
+    if data.len < 5:
+      return false
     var chk = data[^4..^1]
     if chk == sha256d(data[0..^5])[0..3].toArray:
       return true
