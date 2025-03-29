@@ -2,17 +2,15 @@
 
 import std/os
 import std/strutils
+import regex
 
 const curPath = currentSourcePath().parentDir()
 
 var jsOrg = readFile(curPath / "zenyjs.js")
 
-var jsPatch = jsOrg.replace("""class ExitStatus {
-  name="ExitStatus";
+var jsPatch = jsOrg.replace(re2"""class ExitStatus\s+\{\s+name="ExitStatus";\s+constructor\(status\)\s+\{""",
+  """class ExitStatus {
   constructor(status) {
-""", """class ExitStatus {
-  constructor(status) {
-    this.name = "ExitStatus";
-""")
+    this.name = "ExitStatus";""")
 
 writeFile(curPath / "zenyjs.js", jsPatch)
