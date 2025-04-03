@@ -294,7 +294,9 @@ else:
             `=destroy`(x.data[i])
         x.data.deallocShared()
   else:
-    when NimMajor >= 2:
+    when NimMajor >= 2 and (compileOption("mm", "orc") or
+                            compileOption("mm", "arc") or
+                            compileOption("mm", "atomicArc")):
       proc `=destroy`*[T](x: Array[T]) =
         if x.data != nil:
           when T is not Ordinal and T is not Array[byte]:
