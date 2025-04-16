@@ -23,7 +23,7 @@ A web wallet library for BitZeny
 ## Requirements
 Nim must be installed.
 
-    sudo apt install build-essential automake libtool autopoint openjdk-19-jre maven
+    sudo apt install build-essential automake libtool autopoint openjdk-21-jre-headless maven
 
 ## Install
     nimble install https://github.com/zenywallet/zenyjs
