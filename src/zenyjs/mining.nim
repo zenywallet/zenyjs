@@ -247,7 +247,7 @@ proc postMiningData() =
     miningData.nonce = nonce
     worker.postMessage(miningData)
     worker.started = true
-    nonce += step
+    nonce = (nonce + step) % number0x100000000
 
 proc startMiningDataUpdater() =
   var allReady = true
