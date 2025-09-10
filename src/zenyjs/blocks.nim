@@ -1,12 +1,13 @@
 # Copyright (c) 2020 zenywallet
 
-import sequtils, json
+import json
 import tx_types, tx, bytes, reader, address, script, utils
+import arraylib
 
 type
-  BlockHash* = distinct seq[byte]
+  BlockHash* = distinct Array[byte]
 
-  MerkleHash* = distinct seq[byte]
+  MerkleHash* = distinct Array[byte]
 
   BlockHeader* = ref object
     ver*: int32
@@ -19,7 +20,7 @@ type
   Block* = ref object
     header*: BlockHeader
     txn*: VarInt
-    txs*: seq[Tx]
+    txs*: Array[Tx]
 
   BlockRaw* = ref object
     magic: uint32
@@ -38,20 +39,20 @@ type
     bits*: uint32
     nonce*: uint32
 
-proc toBytes*(o: BlockHash | MerkleHash): seq[byte] {.inline.} = cast[seq[byte]](o)
-proc toBytesBE*(o: BlockHash | MerkleHash): seq[byte] {.inline.} = cast[seq[byte]](o)
-proc toBytes*(o: BlockHashObj | MerkleHashObj): seq[byte] {.inline.} = cast[array[32, byte]](o).toBytes
-proc toBytesBE*(o: BlockHashObj | MerkleHashObj): seq[byte] {.inline.} = cast[array[32, byte]](o).toBytes
+proc toBytes*(o: BlockHash | MerkleHash): Array[byte] {.inline.} = cast[Array[byte]](o)
+proc toBytesBE*(o: BlockHash | MerkleHash): Array[byte] {.inline.} = cast[Array[byte]](o)
+proc toBytes*(o: BlockHashObj | MerkleHashObj): Array[byte] {.inline.} = cast[array[32, byte]](o).toBytes
+proc toBytesBE*(o: BlockHashObj | MerkleHashObj): Array[byte] {.inline.} = cast[array[32, byte]](o).toBytes
 
-proc toBytes*(o: seq[Tx]): seq[byte] {.inline.} =
-  var s: seq[seq[byte]]
+proc toBytes*(o: Array[Tx]): Array[byte] {.inline.} =
+  var s: Array[Array[byte]]
   for i in o:
     s.add(i.toBytes)
   result = concat(s)
 
 proc toBlockHash*(x: Hex): BlockHash {.inline.} = x.toBytes.toReverse.BlockHash
 
-proc `$`*(o: BlockHash | MerkleHash): string = $toReverse(cast[seq[byte]](o))
+proc `$`*(o: BlockHash | MerkleHash): string = $toReverse(cast[Array[byte]](o))
 
 proc `$`*(o: BlockHashObj | MerkleHashObj): string = $toReverse(o.toBytes)
 
@@ -65,7 +66,7 @@ proc toHeader*(reader: Reader): BlockHeader =
   header.nonce = reader.getUint32
   result = header
 
-proc toHeader*(data: seq[byte]): BlockHeader {.inline.} =
+proc toHeader*(data: Array[byte]): BlockHeader {.inline.} =
   var reader = newReader(data)
   reader.toHeader()
 
@@ -83,7 +84,7 @@ proc toBlock*(reader: Reader): Block =
     b.txs.add(reader.toTx)
   result = b
 
-proc toBlock*(data: seq[byte]): Block {.inline.} =
+proc toBlock*(data: Array[byte]): Block {.inline.} =
   var reader = newReader(data)
   reader.toBlock()
 
@@ -91,7 +92,7 @@ proc toBlock*(data: ptr UncheckedArray[byte], size: int): Block {.inline.} =
   var reader = newReader(data, size)
   reader.toBlock()
 
-proc `%`*(o: BlockHash | MerkleHash): JsonNode = newJString($toReverse(cast[seq[byte]](o)))
+proc `%`*(o: BlockHash | MerkleHash): JsonNode = newJString($toReverse(cast[Array[byte]](o)))
 
 proc `%`*(o: BlockHashObj | MerkleHashObj): JsonNode = newJString($toReverse(o.toBytes))
 
@@ -108,16 +109,19 @@ proc toJson*(blk: Block, network: Network): JsonNode =
       p["addrs"] = %network.getAddresses(chunks)
   json
 
-proc merkle*(txids: seq[seq[byte]]): MerkleHash =
-  var list = txids
+proc merkle*(txids: Array[Array[byte]]): MerkleHash =
+  var list: Array[Array[byte]]
+  for txid in txids:
+    list.add(txid)
   while list.len > 1:
-    var tmplist: seq[seq[byte]]
+    var tmplist: Array[Array[byte]]
     for i in countup(0, list.len - 2, 2):
-      tmplist.add(sha256d(concat(list[i], list[i + 1])).toSeq)
+      tmplist.add(sha256d(concat(list[i], list[i + 1])).toArray)
     if list.len mod 2 == 1:
-      tmplist.add(sha256d(concat(list[^1], list[^1])).toSeq)
+      tmplist.add(sha256d(concat(list[^1], list[^1])).toArray)
     list = tmplist
   result = MerkleHash(list[0])
+
 
 proc `==`*(x, y: BlockHash | MerkleHash): bool = x.toBytes == y.toBytes
 
@@ -139,9 +143,10 @@ when isMainModule:
 
   var h = new BlockHeader
   h.ver = 536870912'i32
+
   h.prev = BlockHash("00002bfedd7e553f464e67a2e9499dffb2f46d4a6c34024642e41017dfbc93de".Hex.toBytes.toReverse)
   #h.merkle = MerkleHash("00345cdecc3ea8d8b5976f57efdaa52273383f217681277340c5f335a5c459a4".Hex.toBytes.toReverse)
-  h.merkle = merkle(@[tx1.Hex.toBytes.toTx.txidBin, tx2.Hex.toBytes.toTx.txidBin])
+  h.merkle = merkle(@^[tx1.Hex.toBytes.toTx.txidBin, tx2.Hex.toBytes.toTx.txidBin])
   h.time = 1527130511'u32
   h.bits = 0x1e3fffff'u32
   h.nonce = 738525248'u32
