@@ -1,5 +1,8 @@
 # Copyright (c) 2020 zenywallet
 
+type
+  Hex* = distinct string
+
 when defined(js):
   const TOHEX_COMPACT = true
 else:
