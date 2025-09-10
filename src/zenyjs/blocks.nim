@@ -1,7 +1,7 @@
 # Copyright (c) 2020 zenywallet
 
 import sequtils, json
-import tx, bytes, reader, address, script, utils
+import tx_types, tx, bytes, reader, address, script, utils
 
 type
   BlockHash* = distinct seq[byte]
