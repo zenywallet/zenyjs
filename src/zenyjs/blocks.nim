@@ -161,4 +161,4 @@ when isMainModule:
   b.txs.add(tx1.Hex.toBytes.toTx)
   b.txs.add(tx2.Hex.toBytes.toTx)
 
-  assert b.toBytes.toHex == blockRawString
+  assert $b.toBytes == blockRawString
