@@ -1,5 +1,7 @@
 # Copyright (c) 2022 zenywallet
 
+import hex
+
 when defined(js):
   import std/jsffi
   import std/json
@@ -11,8 +13,6 @@ when defined(js):
       cache: cint
 
     ArrayByte* = Array[byte]
-
-    Hex* = distinct string
 
     ArrayError* = object of CatchableError
 
@@ -283,8 +283,6 @@ else:
       data* {.align(8).}: ptr UncheckedArray[T]
 
     ArrayByte* = Array[byte]
-
-    Hex* = distinct string
 
   when defined(emscripten):
     proc `=destroy`*[T](x: var Array[T]) =
