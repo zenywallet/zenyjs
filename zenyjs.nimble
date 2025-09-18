@@ -47,6 +47,8 @@ task wasmSecp256k1, "make wasm-secp256k1":
     exec "./autogen.sh"
     exec emsdkEnv("emconfigure ./configure --enable-module-ecdh --disable-shared --enable-static --disable-tests --disable-benchmark --disable-openssl-tests --disable-exhaustive-tests")
     exec emsdkEnv("emmake make -j$(nproc --all || sysctl -n hw.ncpu || getconf _NPROCESSORS_ONLN || echo 1)")
+    exec "mkdir -p ../../src/zenyjs/deps/wasm-secp256k1/libs"
+    exec "cp .libs/libsecp256k1.a ../../src/zenyjs/deps/wasm-secp256k1/libs/"
 
 task zbar, "make zbar":
   withDir "deps/zbar":
