@@ -2,7 +2,7 @@
 
 import ed25519
 import serpent
-import yespower
+import ../yespower
 import ../br_hash
 import algorithm
 
