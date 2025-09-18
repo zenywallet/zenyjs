@@ -144,7 +144,7 @@ elif defined(emscripten):
   import dotdot/bytes
   import dotdot/deoxy
   import dotdot/ed25519
-  import dotdot/lz4
+  import lz4
 
   const EXPORTED_FUNCTIONS* = ["_cipher_create", "_cipher_free", "_cipher_process", "_cipher_encrypt"]
 
