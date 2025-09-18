@@ -81,6 +81,11 @@ task ripemd160, "copy ripemd-160":
     exec "mkdir -p ../../src/ripemd-160"
     exec "cp -r . ../../src/ripemd-160/"
 
+task yespower, "copy yespower":
+  withDir "deps/yespower":
+    exec "mkdir -p ../../src/yespower"
+    exec "cp -r . ../../src/yespower/"
+
 task depsAll, "Build deps":
   exec "git submodule update --init"
   exec "git submodule update --remote deps/emsdk"
@@ -93,6 +98,7 @@ task depsAll, "Build deps":
   bech32Task()
   bearsslTask()
   ripemd160Task()
+  yespowerTask()
 
 task zenyjs, "Build zenyjs":
   withDir "src/zenyjs":
