@@ -710,6 +710,6 @@ proc secp256k1_ec_pubkey_combine*(ctx: ptr secp256k1_context;
 import os
 
 when defined(emscripten):
-  {.passL: currentSourcePath().parentDir() / "../deps/wasm-secp256k1/libs/libsecp256k1.a".}
+  {.passL: currentSourcePath().parentDir() / "deps/wasm-secp256k1/libs/libsecp256k1.a".}
 else:
-  {.passL: currentSourcePath().parentDir() / "../deps/secp256k1/libs/libsecp256k1.a".}
+  {.passL: currentSourcePath().parentDir() / "deps/secp256k1/libs/libsecp256k1.a".}

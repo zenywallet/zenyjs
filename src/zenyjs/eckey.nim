@@ -106,7 +106,7 @@ else:
       , "_eckey_sign", "_eckey_verify_obj", "_eckey_verify",
       "_eckey_tweakAdd_prv", "_eckey_tweakAdd_pubobj"]
 
-  import dotdot/secp256k1
+  import secp256k1
   import custom
 
   converter toBytes*(o: PrivateKey | PublicKey | PublicKeyObj): Array[byte] {.inline.} =
