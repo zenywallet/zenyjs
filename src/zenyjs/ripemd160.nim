@@ -6,7 +6,7 @@ when defined(js):
 else:
   import os
 
-  const ripemd160Path = currentSourcePath().parentDir() / "../ripemd-160"
+  const ripemd160Path = currentSourcePath().parentDir() / "deps/ripemd-160"
 
   when defined(emscripten):
     {.compile: ripemd160Path / "rmd160.c".}

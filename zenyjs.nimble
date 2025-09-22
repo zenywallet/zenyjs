@@ -80,8 +80,8 @@ task bearssl, "copy bearssl":
 
 task ripemd160, "copy ripemd-160":
   withDir "deps/ripemd-160":
-    exec "mkdir -p ../../src/ripemd-160"
-    exec "cp -r . ../../src/ripemd-160/"
+    exec "mkdir -p ../../src/zenyjs/deps/ripemd-160"
+    exec "cp -r . ../../src/zenyjs/deps/ripemd-160/"
 
 task yespower, "copy yespower":
   withDir "deps/yespower":
