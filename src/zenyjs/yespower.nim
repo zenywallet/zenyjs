@@ -136,7 +136,7 @@ proc yespower_tls*(src: ptr uint8_t; srclen: csize_t; params: ptr yespower_param
 
 import os
 
-const yespowerPath = currentSourcePath().parentDir() / "../../../deps/yespower"
+const yespowerPath = currentSourcePath().parentDir() / "deps/yespower"
 
 {.passC: "-I\"" & yespowerPath & "\" -DNDEBUG".}
 {.compile: yespowerPath / "sha256.c".}

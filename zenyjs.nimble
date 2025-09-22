@@ -85,8 +85,8 @@ task ripemd160, "copy ripemd-160":
 
 task yespower, "copy yespower":
   withDir "deps/yespower":
-    exec "mkdir -p ../../src/yespower"
-    exec "cp -r . ../../src/yespower/"
+    exec "mkdir -p ../../src/zenyjs/deps/yespower"
+    exec "cp -r . ../../src/zenyjs/deps/yespower/"
 
 task lz4, "copy lz4":
   withDir "deps/lz4":
