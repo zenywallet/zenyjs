@@ -75,8 +75,8 @@ task bech32, "copy segwit_addr.c":
 
 task bearssl, "copy bearssl":
   withDir "deps/bearssl":
-    exec "mkdir -p ../../src/bearssl"
-    exec "cp -r inc src ../../src/bearssl/"
+    exec "mkdir -p ../../src/zenyjs/deps/bearssl"
+    exec "cp -r inc src ../../src/zenyjs/deps/bearssl/"
 
 task ripemd160, "copy ripemd-160":
   withDir "deps/ripemd-160":
