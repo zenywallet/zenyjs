@@ -90,8 +90,8 @@ task yespower, "copy yespower":
 
 task lz4, "copy lz4":
   withDir "deps/lz4":
-    exec "mkdir -p ../../src/lz4"
-    exec "cp -r lib ../../src/lz4/"
+    exec "mkdir -p ../../src/zenyjs/deps/lz4"
+    exec "cp -r lib ../../src/zenyjs/deps/lz4/"
 
 task depsAll, "Build deps":
   exec "git submodule update --init"
