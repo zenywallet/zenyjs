@@ -1,6 +1,6 @@
 # Copyright (c) 2019 zenywallet
 
-import ed25519
+import ../ed25519
 import ../serpent
 import ../yespower
 import ../br_hash
