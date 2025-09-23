@@ -102,7 +102,7 @@ else:
   import std/strutils
   import ripemd160
   import script
-  import dotdot/segwit
+  import segwit
   import opcodes
   import bytes
   import utils
