@@ -93,6 +93,11 @@ task lz4, "copy lz4":
     exec "mkdir -p ../../src/zenyjs/deps/lz4"
     exec "cp -r lib ../../src/zenyjs/deps/lz4/"
 
+task serpent, "copy serpent":
+  withDir "deps/serpent":
+    exec "mkdir -p ../../src/zenyjs/deps/serpent"
+    exec "cp serpent_threadsafe.c std_defs_threadsafe.h ../../src/zenyjs/deps/serpent/"
+
 task depsAll, "Build deps":
   exec "git submodule update --init"
   exec "git submodule update --remote deps/emsdk"
@@ -107,6 +112,7 @@ task depsAll, "Build deps":
   ripemd160Task()
   yespowerTask()
   lz4Task()
+  serpentTask()
 
 task zenyjs, "Build zenyjs":
   withDir "src/zenyjs":

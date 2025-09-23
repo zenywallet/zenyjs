@@ -1,7 +1,7 @@
 # Copyright (c) 2019 zenywallet
 
 import ed25519
-import serpent
+import ../serpent
 import ../yespower
 import ../br_hash
 import algorithm
