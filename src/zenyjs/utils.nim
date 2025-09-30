@@ -61,14 +61,14 @@ else:
   proc sha256s*(data: ptr UncheckedArray[byte], size: uint32): array[32, byte] {.inline.} =
     sha256(data, size)
 
-  proc sha256d*(data: openarray[byte]): array[32, byte] {.inline.} =
+  proc sha256d*(data: openArray[byte]): array[32, byte] {.inline.} =
     var h = if data.len > 0:
       sha256(cast[ptr UncheckedArray[byte]](addr data[0]), data.len.uint32)
     else:
       sha256(nil, 0.uint32)
     sha256(cast[ptr UncheckedArray[byte]](addr h), h.len.uint32)
 
-  proc sha256s*(data: openarray[byte]): array[32, byte] {.inline.} =
+  proc sha256s*(data: openArray[byte]): array[32, byte] {.inline.} =
     if data.len > 0:
       sha256(cast[ptr UncheckedArray[byte]](addr data[0]), data.len.uint32)
     else:
