@@ -12,6 +12,8 @@ when defined(js):
     Module = module
     Utils.sha256d = Module.cwrap("sha256d", jsNull, [NumVar, NumVar])
     Utils.sha256s = Module.cwrap("sha256s", jsNull, [NumVar, NumVar])
+    Utils.sha1Hmac = Module.cwrap("sha1Hmac", jsNull, [NumVar, NumVar, NumVar])
+    Utils.sha256Hmac = Module.cwrap("sha256Hmac", jsNull, [NumVar, NumVar, NumVar])
     Utils.sha512Hmac = Module.cwrap("sha512Hmac", jsNull, [NumVar, NumVar, NumVar])
 
   proc sha256d*(data: Array[byte]): Uint8Array =
@@ -26,6 +28,18 @@ when defined(js):
       Utils.sha256s(data.handle, p)
       result = newUint8Array(Module.HEAPU8.buffer, p.to(cint), 32).slice().to(Uint8Array)
 
+  proc sha1Hmac*(key, data: Array[byte]): Uint8Array =
+    withStack:
+      var p = Module.stackAlloc(20)
+      Utils.sha1Hmac(key.handle, data.handle, p)
+      result = newUint8Array(Module.HEAPU8.buffer, p.to(cint), 20).slice().to(Uint8Array)
+
+  proc sha256Hmac*(key, data: Array[byte]): Uint8Array =
+    withStack:
+      var p = Module.stackAlloc(32)
+      Utils.sha256Hmac(key.handle, data.handle, p)
+      result = newUint8Array(Module.HEAPU8.buffer, p.to(cint), 32).slice().to(Uint8Array)
+
   proc sha512Hmac*(key, data: Array[byte]): Uint8Array =
     withStack:
       var p = Module.stackAlloc(64)
@@ -34,7 +48,7 @@ when defined(js):
 
 else:
   when defined(emscripten):
-    const EXPORTED_FUNCTIONS* = ["_sha256d", "_sha256s", "_sha512Hmac"]
+    const EXPORTED_FUNCTIONS* = ["_sha256d", "_sha256s", "_sha1Hmac", "_sha256Hmac", "_sha512Hmac"]
 
   import json, strutils, br_hash
   import arraylib
@@ -88,6 +102,22 @@ else:
   proc sha256s*(data: Array[byte], ret: var array[32, byte]) {.exportc: "$1".} =
     ret = sha256(cast[ptr UncheckedArray[byte]](data.data), data.len.uint32)
 
+  proc sha1Hmac*(key, data: Array[byte]): array[20, byte] {.inline.} =
+    sha1Hmac(cast[ptr UncheckedArray[byte]](key.data), key.len.uint32,
+            cast[ptr UncheckedArray[byte]](data.data), data.len.uint32)
+
+  proc sha1Hmac*(key, data: Array[byte], ret: var array[20, byte]) {.exportc: "$1".} =
+    ret = sha1Hmac(cast[ptr UncheckedArray[byte]](key.data), key.len.uint32,
+                  cast[ptr UncheckedArray[byte]](data.data), data.len.uint32)
+
+  proc sha256Hmac*(key, data: Array[byte]): array[32, byte] {.inline.} =
+    sha256Hmac(cast[ptr UncheckedArray[byte]](key.data), key.len.uint32,
+              cast[ptr UncheckedArray[byte]](data.data), data.len.uint32)
+
+  proc sha256Hmac*(key, data: Array[byte], ret: var array[32, byte]) {.exportc: "$1".} =
+    ret = sha256Hmac(cast[ptr UncheckedArray[byte]](key.data), key.len.uint32,
+                    cast[ptr UncheckedArray[byte]](data.data), data.len.uint32)
+
   proc sha512Hmac*(key, data: Array[byte]): array[64, byte] {.inline.} =
     sha512Hmac(cast[ptr UncheckedArray[byte]](key.data), key.len.uint32,
               cast[ptr UncheckedArray[byte]](data.data), data.len.uint32)
@@ -95,3 +125,27 @@ else:
   proc sha512Hmac*(key, data: Array[byte], ret: var array[64, byte]) {.exportc: "$1".} =
     ret = sha512Hmac(cast[ptr UncheckedArray[byte]](key.data), key.len.uint32,
                     cast[ptr UncheckedArray[byte]](data.data), data.len.uint32)
+
+  proc sha1Hmac*(key, data: openArray[byte]): array[20, byte] {.inline.} =
+    sha1Hmac(cast[ptr UncheckedArray[byte]](addr key[0]), key.len.uint32,
+            cast[ptr UncheckedArray[byte]](addr data[0]), data.len.uint32)
+
+  proc sha256Hmac*(key, data: openArray[byte]): array[32, byte] {.inline.} =
+    sha256Hmac(cast[ptr UncheckedArray[byte]](addr key[0]), key.len.uint32,
+              cast[ptr UncheckedArray[byte]](addr data[0]), data.len.uint32)
+
+  proc sha512Hmac*(key, data: openArray[byte]): array[64, byte] {.inline.} =
+    sha512Hmac(cast[ptr UncheckedArray[byte]](addr key[0]), key.len.uint32,
+              cast[ptr UncheckedArray[byte]](addr data[0]), data.len.uint32)
+
+  proc sha1Hmac*(key: string, data: openArray[byte]): array[20, byte] {.inline.} =
+    sha1Hmac(cast[ptr UncheckedArray[byte]](addr key[0]), key.len.uint32,
+            cast[ptr UncheckedArray[byte]](addr data[0]), data.len.uint32)
+
+  proc sha256Hmac*(key: string, data: openArray[byte]): array[32, byte] {.inline.} =
+    sha256Hmac(cast[ptr UncheckedArray[byte]](addr key[0]), key.len.uint32,
+              cast[ptr UncheckedArray[byte]](addr data[0]), data.len.uint32)
+
+  proc sha512Hmac*(key: string, data: openArray[byte]): array[64, byte] {.inline.} =
+    sha512Hmac(cast[ptr UncheckedArray[byte]](addr key[0]), key.len.uint32,
+              cast[ptr UncheckedArray[byte]](addr data[0]), data.len.uint32)
