@@ -476,9 +476,10 @@ else:
 
   proc toHex*[T](a: Array[T]): string =
     when T is byte:
-      a.toSeq.toHex
+      a.data.toHex(a.len)
     else:
-      a.toBytes.toSeq.toHex
+      var b = a.toBytes
+      b.data.toHex(b.len)
 
   iterator items*[T](a: Array[T]): lent T =
     for i in 0..<a.len:

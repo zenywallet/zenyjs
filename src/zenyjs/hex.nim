@@ -86,3 +86,8 @@ else:
       result = newStringOfCap(a.len * 2)
       for i in 0..a.high:
         result.add(hexStr[a[i]])
+
+    proc toHex*(a: ptr UncheckedArray[byte], len: int): string =
+      result = newStringOfCap(len * 2)
+      for i in 0..<len:
+        result.add(hexStr[a[i]])
