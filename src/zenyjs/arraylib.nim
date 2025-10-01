@@ -474,7 +474,11 @@ else:
     else:
       result = "@^[]"
 
-  proc toHex*[T](a: Array[T]): string = a.toBytes.toHex
+  proc toHex*[T](a: Array[T]): string =
+    when T is byte:
+      a.toSeq.toHex
+    else:
+      a.toBytes.toSeq.toHex
 
   iterator items*[T](a: Array[T]): lent T =
     for i in 0..<a.len:
