@@ -282,8 +282,6 @@ else:
       len*, cap*: int
       data* {.align(8).}: ptr UncheckedArray[T]
 
-    ArrayByte* = Array[byte]
-
   when defined(emscripten):
     proc `=destroy`*[T](x: var Array[T]) =
       if x.data != nil:
@@ -337,6 +335,9 @@ else:
     a.len = b.len
     a.cap = b.cap
     a.data = b.data
+
+  type
+    ArrayByte* = Array[byte]
 
   template toOpenArray*[T](x: Array[T]): openArray[T] = toOpenArray(x.data, 0, x.len - 1)
 
