@@ -292,15 +292,23 @@ else:
             `=destroy`(x.data[i])
         x.data.deallocShared()
   else:
-    when NimMajor >= 2 and (compileOption("mm", "orc") or
-                            compileOption("mm", "arc") or
-                            compileOption("mm", "atomicArc")):
-      proc `=destroy`*[T](x: Array[T]) =
-        if x.data != nil:
-          when T is not Ordinal and T is not Array[byte]:
-            for i in 0..<x.len:
-              `=destroy`(x.data[i])
-          x.data.deallocShared()
+    when NimMajor >= 2:
+      when compileOption("mm", "orc") or
+          compileOption("mm", "arc") or
+          compileOption("mm", "atomicArc"):
+        proc `=destroy`*[T](x: Array[T]) =
+          if x.data != nil:
+            when T is not Ordinal and T is not Array[byte]:
+              for i in 0..<x.len:
+                `=destroy`(x.data[i])
+            x.data.deallocShared()
+      else:
+        proc `=destroy`*[T](x: var Array[T]) =
+          if x.data != nil:
+            when T is not Ordinal:
+              for i in 0..<x.len:
+                `=destroy`(x.data[i])
+            x.data.deallocShared()
     else:
       proc `=destroy`*[T](x: var Array[T]) =
         if x.data != nil:
