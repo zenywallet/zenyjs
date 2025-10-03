@@ -296,7 +296,7 @@ else:
           compileOption("mm", "atomicArc"):
         proc `=destroy`*[T](x: Array[T]) =
           if x.data != nil:
-            when T is not Ordinal and T is not Array[byte]:
+            when T is not Ordinal:
               for i in 0..<x.len:
                 `=destroy`(x.data[i])
             x.data.deallocShared()
