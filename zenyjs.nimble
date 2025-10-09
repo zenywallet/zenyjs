@@ -14,11 +14,7 @@ requires "regex"
 
 
 import std/os
-
-template emsdkEnv(cmd: string): string =
-  let emsdkDir = currentSourcePath().parentDir() / "deps/emsdk"
-  let curDir = getCurrentDir()
-  "cd " & emsdkDir & " && . ./emsdk_env.sh && cd " & curDir & " && " & cmd
+import emsdkenv
 
 task emsdk, "Emscripten SDK install":
   withDir "deps/emsdk":
@@ -45,8 +41,8 @@ task secp256k1, "make secp256k1":
 task wasmSecp256k1, "make wasm-secp256k1":
   withDir "deps/wasm-secp256k1":
     exec "./autogen.sh"
-    exec emsdkEnv("emconfigure ./configure --enable-module-ecdh --disable-shared --enable-static --disable-tests --disable-benchmark --disable-openssl-tests --disable-exhaustive-tests")
-    exec emsdkEnv("emmake make -j$(nproc --all || sysctl -n hw.ncpu || getconf _NPROCESSORS_ONLN || echo 1)")
+    emsdkEnv "emconfigure ./configure --enable-module-ecdh --disable-shared --enable-static --disable-tests --disable-benchmark --disable-openssl-tests --disable-exhaustive-tests"
+    emsdkEnv "emmake make -j$(nproc --all || sysctl -n hw.ncpu || getconf _NPROCESSORS_ONLN || echo 1)"
     exec "mkdir -p ../../src/zenyjs/deps/wasm-secp256k1/libs"
     exec "cp .libs/libsecp256k1.a ../../src/zenyjs/deps/wasm-secp256k1/libs/"
 
@@ -54,8 +50,8 @@ task zbar, "make zbar":
   withDir "deps/zbar":
     exec "sed -i \"s/ -Werror//\" $(pwd)/configure.ac"
     exec "autoreconf -vfi"
-    exec emsdkEnv("emconfigure ./configure CPPFLAGS=-DNDEBUG=1 --without-x --without-jpeg --without-imagemagick --without-npapi --without-gtk --without-python --without-qt --without-xshm --disable-video --disable-pthread --enable-codes=all")
-    exec emsdkEnv("emmake make -j$(nproc --all || sysctl -n hw.ncpu || getconf _NPROCESSORS_ONLN || echo 1)")
+    emsdkEnv "emconfigure ./configure CPPFLAGS=-DNDEBUG=1 --without-x --without-jpeg --without-imagemagick --without-npapi --without-gtk --without-python --without-qt --without-xshm --disable-video --disable-pthread --enable-codes=all", "3.1.65"
+    emsdkEnv "emmake make -j$(nproc --all || sysctl -n hw.ncpu || getconf _NPROCESSORS_ONLN || echo 1)", "3.1.65"
 
 task jsLevenshtein, "copy js-levenshtein":
   withDir "src/zenyjs":
@@ -122,12 +118,12 @@ task depsAll, "Build deps":
 
 task zenyjs, "Build zenyjs":
   withDir "src/zenyjs":
-    exec emsdkEnv("nim c -d:release --threads:off -d:emscripten --noMain:on --gc:orc --forceBuild:on -o:zenyjs.js zenyjs.nim")
+    emsdkEnv "nim c -d:release --threads:off -d:emscripten --noMain:on --gc:orc --forceBuild:on -o:zenyjs.js zenyjs.nim"
     exec "nim c -r zenyjs_patch.nim && rm zenyjs_patch"
 
 task zenyjsdebug, "Build zenyjs debug":
   withDir "src/zenyjs":
-    exec emsdkEnv("nim c --threads:off -d:emscripten --noMain:on --gc:orc --forceBuild:on -o:zenyjs.js zenyjs.nim")
+    emsdkEnv "nim c --threads:off -d:emscripten --noMain:on --gc:orc --forceBuild:on -o:zenyjs.js zenyjs.nim"
     exec "nim c -r zenyjs_patch.nim && rm zenyjs_patch"
 
 before install:
