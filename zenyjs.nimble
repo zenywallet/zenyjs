@@ -16,20 +16,6 @@ requires "regex"
 import std/os
 import emsdkenv
 
-task emsdk, "Emscripten SDK install":
-  withDir "deps/emsdk":
-    exec "git pull origin main"
-    exec "./emsdk install 3.1.74"
-    exec "./emsdk activate 3.1.74"
-    exec ". ./emsdk_env.sh" # For testing, does not effect the current terminal
-
-task emsdkLatest, "Emscripten SDK install":
-  withDir "deps/emsdk":
-    exec "git pull origin main"
-    exec "./emsdk install latest"
-    exec "./emsdk activate latest"
-    exec ". ./emsdk_env.sh" # For testing, does not effect the current terminal
-
 task secp256k1, "make secp256k1":
   withDir "deps/secp256k1":
     exec "./autogen.sh"
@@ -101,8 +87,6 @@ task ed25519, "copy ed25519":
 
 task depsAll, "Build deps":
   exec "git submodule update --init"
-  exec "git submodule update --remote deps/emsdk"
-  emsdkTask()
   secp256k1Task()
   wasmSecp256k1Task()
   zbarTask()
