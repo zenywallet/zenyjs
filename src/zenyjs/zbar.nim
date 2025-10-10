@@ -7,12 +7,12 @@
 # nim c -d:release -d:emscripten -o:zbar.js zbar.nim
 import os
 
-const zbarPath = splitPath(currentSourcePath()).head & "/../deps/zbar"
-{.passL: zbarPath & "/zbar/.libs/libzbar.a".}
+const zbarPath = currentSourcePath.parentDir() / "deps/zbar"
+{.passL: zbarPath / "libs/libzbar.a".}
 
 {.emit: """
 #include <stdint.h>
-#include "../deps/zbar/include/zbar.h"
+#include "deps/zbar/include/zbar.h"
 #include <emscripten.h>
 
 zbar_image_scanner_t *scanner;

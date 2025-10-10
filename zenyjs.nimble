@@ -51,6 +51,10 @@ emconfigure ./configure CPPFLAGS=-DNDEBUG=1 --without-x \
 --disable-video --disable-pthread --enable-codes=all
 """, "3.1.65"
     emsdkEnv "emmake make -j$(nproc --all || sysctl -n hw.ncpu || getconf _NPROCESSORS_ONLN || echo 1)", "3.1.65"
+    exec "mkdir -p ../../src/zenyjs/deps/zbar/include"
+    exec "cp include/zbar.h ../../src/zenyjs/deps/zbar/include/"
+    exec "mkdir -p ../../src/zenyjs/deps/zbar/libs"
+    exec "cp zbar/.libs/libzbar.a  ../../src/zenyjs/deps/zbar/libs/"
 
 task jsLevenshtein, "copy js-levenshtein":
   withDir "src/zenyjs":
