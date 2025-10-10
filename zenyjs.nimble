@@ -19,7 +19,11 @@ import emsdkenv
 task secp256k1, "make secp256k1":
   withDir "deps/secp256k1":
     exec "./autogen.sh"
-    exec "./configure --enable-module-ecdh --disable-shared --enable-static --disable-tests --disable-benchmark --disable-openssl-tests --disable-exhaustive-tests"
+    exec """
+./configure --enable-module-ecdh --disable-shared \
+--enable-static --disable-tests --disable-benchmark \
+--disable-openssl-tests --disable-exhaustive-tests
+"""
     exec "make -j$(nproc --all || sysctl -n hw.ncpu || getconf _NPROCESSORS_ONLN || echo 1)"
     exec "mkdir -p ../../src/zenyjs/deps/secp256k1/libs"
     exec "cp .libs/libsecp256k1.a ../../src/zenyjs/deps/secp256k1/libs/"
@@ -27,16 +31,24 @@ task secp256k1, "make secp256k1":
 task wasmSecp256k1, "make wasm-secp256k1":
   withDir "deps/wasm-secp256k1":
     exec "./autogen.sh"
-    emsdkEnv "emconfigure ./configure --enable-module-ecdh --disable-shared --enable-static --disable-tests --disable-benchmark --disable-openssl-tests --disable-exhaustive-tests"
+    emsdkEnv """
+emconfigure ./configure --enable-module-ecdh --disable-shared \
+--enable-static --disable-tests --disable-benchmark \
+--disable-openssl-tests --disable-exhaustive-tests
+"""
     emsdkEnv "emmake make -j$(nproc --all || sysctl -n hw.ncpu || getconf _NPROCESSORS_ONLN || echo 1)"
     exec "mkdir -p ../../src/zenyjs/deps/wasm-secp256k1/libs"
     exec "cp .libs/libsecp256k1.a ../../src/zenyjs/deps/wasm-secp256k1/libs/"
-
 task zbar, "make zbar":
   withDir "deps/zbar":
     exec "sed -i \"s/ -Werror//\" $(pwd)/configure.ac"
     exec "autoreconf -vfi"
-    emsdkEnv "emconfigure ./configure CPPFLAGS=-DNDEBUG=1 --without-x --without-jpeg --without-imagemagick --without-npapi --without-gtk --without-python --without-qt --without-xshm --disable-video --disable-pthread --enable-codes=all", "3.1.65"
+    emsdkEnv """
+emconfigure ./configure CPPFLAGS=-DNDEBUG=1 --without-x \
+--without-jpeg --without-imagemagick --without-npapi \
+--without-gtk --without-python --without-qt --without-xshm \
+--disable-video --disable-pthread --enable-codes=all
+""", "3.1.65"
     emsdkEnv "emmake make -j$(nproc --all || sysctl -n hw.ncpu || getconf _NPROCESSORS_ONLN || echo 1)", "3.1.65"
 
 task jsLevenshtein, "copy js-levenshtein":
