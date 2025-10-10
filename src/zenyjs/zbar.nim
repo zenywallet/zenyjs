@@ -12,7 +12,7 @@ const zbarPath = currentSourcePath.parentDir() / "deps/zbar"
 
 {.emit: """
 #include <stdint.h>
-#include "deps/zbar/include/zbar.h"
+#include """" & zbarPath & """/include/zbar.h"
 #include <emscripten.h>
 
 zbar_image_scanner_t *scanner;
