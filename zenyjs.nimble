@@ -39,6 +39,7 @@ emconfigure ./configure --enable-module-ecdh --disable-shared \
     emsdkEnv "emmake make -j$(nproc --all || sysctl -n hw.ncpu || getconf _NPROCESSORS_ONLN || echo 1)"
     exec "mkdir -p ../../src/zenyjs/deps/wasm-secp256k1/libs"
     exec "cp .libs/libsecp256k1.a ../../src/zenyjs/deps/wasm-secp256k1/libs/"
+
 task zbar, "make zbar":
   withDir "deps/zbar":
     exec "sed -i \"s/ -Werror//\" $(pwd)/configure.ac"
