@@ -61,7 +61,9 @@ proc execCode*(srcFileDir: string, code: string, rstr: string): string {.compile
 
 template execCode*(srcFileDir: string, code: string): string = execCode(srcFileDir, code, randomStr())
 
-template staticExecCode*(body: untyped): string =
+proc makeDiscardable[T](a: T): T {.discardable, inline.} = a
+
+template staticExecCode*(body: untyped): string = # discardable
   block:
     const srcFile = instantiationInfo(-1, true).filename
     const srcFileDir = splitFile(srcFile).dir
@@ -70,7 +72,7 @@ template staticExecCode*(body: untyped): string =
       nnkStmtList.newTree(
         newLit(execCode(srcFileDir, $bodyMacro.toStrLit))
       )
-    execCodeResult: body
+    makeDiscardable(execCodeResult(body))
 
 proc removeThreadVarPatch(code: string): string {.compileTime.} =
   var stage = 0
