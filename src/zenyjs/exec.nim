@@ -123,7 +123,7 @@ proc minifyJsCode*(srcFileDir: string, code: string, extern: string, rstr: strin
   writeFile(tmpSrcFile, code)
   writeFile(tmpExtFile, extern & basicExtern(tmpSrcFile))
   let srcPath = currentSourcePath().parentDir()
-  discard staticExec fmt"""
+  let downloadClosureCompiler = staticExec fmt"""
 if [ -x "$(command -v google-closure-compiler)" ]; then
   echo "download closure-compiler skip"
 elif ls "{srcPath}"/closure-compiler-*.jar 1> /dev/null 2>&1; then
@@ -132,6 +132,7 @@ else
   mvn dependency:get -Ddest="{srcPath}" -Dartifact=com.google.javascript:closure-compiler:LATEST
 fi
 """
+  echo downloadClosureCompiler
   let closureCompiler = staticExec fmt"""
 if [ -x "$(command -v google-closure-compiler)" ]; then
   closure_compiler="google-closure-compiler"
