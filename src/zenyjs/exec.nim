@@ -129,7 +129,7 @@ if [ -x "$(command -v google-closure-compiler)" ]; then
 elif ls "{srcPath}"/closure-compiler-*.jar 1> /dev/null 2>&1; then
   echo "download closure-compiler skip"
 else
-  mvn dependency:get -Ddest="{srcPath}" -Dartifact=com.google.javascript:closure-compiler:LATEST
+  mvn dependency:get -e -Ddest="{srcPath}" -Dartifact=com.google.javascript:closure-compiler:LATEST
 fi
 """
   echo downloadClosureCompiler
