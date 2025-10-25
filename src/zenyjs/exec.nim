@@ -9,7 +9,6 @@ import std/compilesettings
 const srcFile = currentSourcePath()
 const (srcFileDir, srcFileName, srcFileExt) = splitFile(srcFile)
 const binDir = srcFileDir / "bin"
-const cacheDir = srcFileDir / "nimcache"
 const execHelperExe = binDir / "exec_helper"
 const execHelperSrc = srcFileDir / "exec_helper" & srcFileExt
 
@@ -44,6 +43,7 @@ proc execCode*(srcFileDir: string, code: string, rstr: string): string {.compile
   let exeFileName = srcFileName & "_tmp" & $tmpFileId & rstr
   let tmpExeFile = srcFileDir / exeFileName
   let tmpSrcFile = tmpExeFile & srcFileExt
+  let cacheDir = srcFileDir / "nimcache"
   let tmpCacheDir = cacheDir / exeFileName
   writeFile(tmpSrcFile, code)
   echo staticExec("nim c --nimcache:" & tmpCacheDir & " " & tmpSrcFile)
