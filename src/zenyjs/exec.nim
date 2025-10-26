@@ -59,9 +59,10 @@ proc execCode*(srcFileDir: string, code: string, rstr: string): string {.compile
   echo staticExec("rm -rf \"" & tmpCacheDir & "\"")
   discard staticExec("rmdir \"" & cacheDir & "\"")
 
-template execCode*(srcFileDir: string, code: string): string = execCode(srcFileDir, code, randomStr())
-
 proc makeDiscardable[T](a: T): T {.discardable, inline.} = a
+
+template execCode*(srcFileDir: string, code: string): string = # discardable
+  makeDiscardable(execCode(srcFileDir, code, randomStr()))
 
 template staticExecCode*(body: untyped): string = # discardable
   block:
