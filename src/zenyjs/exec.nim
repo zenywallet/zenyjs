@@ -61,6 +61,17 @@ proc execCode*(srcFileDir: string, code: string, rstr: string): string {.compile
 
 proc makeDiscardable[T](a: T): T {.discardable, inline.} = a
 
+template execCode*(code: string): string = # discardable
+  block:
+    const srcFile = instantiationInfo(-1, true).filename
+    const srcFileDir = splitFile(srcFile).dir
+
+    macro execCodeResult(): string =
+      nnkStmtList.newTree(
+        newLit(execCode(srcFileDir, code, randomStr()))
+      )
+    makeDiscardable(execCodeResult())
+
 template execCode*(srcFileDir: string, code: string): string = # discardable
   makeDiscardable(execCode(srcFileDir, code, randomStr()))
 
