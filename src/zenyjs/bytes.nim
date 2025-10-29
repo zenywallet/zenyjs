@@ -159,8 +159,6 @@ else:
     concat(s)
 
   proc toBytes*[T](obj: Array[T]): Array[byte] =
-    when T is Array[byte]:
-      return obj
     var s: Array[Array[byte]]
     for val in obj:
       var b = val.toBytes
