@@ -104,7 +104,6 @@ proc compileJsCode*(srcFileDir: string, code: string, rstr: string): string {.co
   let tmpNameFile = srcFileDir / srcFileName & "_tmp" & $tmpFileId & rstr
   let tmpSrcFile = tmpNameFile & srcFileExt
   let tmpJsFile = tmpNameFile & ".js"
-  echo code
   writeFile(tmpSrcFile, code)
   var verbosity = ""
   let cl = querySetting(SingleValueSetting.commandLine)
