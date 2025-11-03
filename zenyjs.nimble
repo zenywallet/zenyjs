@@ -42,6 +42,7 @@ emconfigure ./configure --enable-module-ecdh --disable-shared \
 
 task zbar, "make zbar":
   withDir "deps/zbar":
+    exec "make clean"
     exec "sed -i \"s/ -Werror//\" $(pwd)/configure.ac"
     exec "autoreconf -vfi"
     emsdkEnv """
