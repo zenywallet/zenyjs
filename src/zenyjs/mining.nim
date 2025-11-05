@@ -202,12 +202,12 @@ try:
   cpuMaxCount = window.navigator.hardwareConcurrency.to(int)
   if cpuMaxCount.toJs == jsNull:
     raise newException(CatchableError, "")
+  cpuCount = cpuMaxCount
 except:
   cpuCount = 4
   cpuMaxCount = 16
   cpuMaxCountUnknown = true
 
-cpuCount = cpuMaxCount
 let cpuMaxCountStr = $cpuCount
 
 proc changeMiningWorker(num: int) =
