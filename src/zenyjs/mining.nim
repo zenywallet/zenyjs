@@ -142,8 +142,11 @@ proc convCoin(val: JsonNode): string =
 type Notify = enum
   Success
   Error
+  Warning
+  Info
 
-const NotifyVal = [Success: "success".cstring, Error: "error".cstring]
+const NotifyVal = [Success: "success".cstring, Error: "error".cstring,
+                  Warning: "warning".cstring, Info: "info".cstring]
 
 proc show(notify: Notify, msg: cstring, tag: string = "", infinite: bool = false) =
   let notifyVal = NotifyVal[notify]
