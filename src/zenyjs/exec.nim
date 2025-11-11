@@ -16,31 +16,31 @@ macro buildExecHelper() =
   echo staticExec("nim c -o:bin/ " & execHelperSrc)
 buildExecHelper()
 
-proc randomStr*(): string {.compileTime.} = staticExec(execHelperExe & " randomstr")
+proc randomStrCT*(): string {.compileTime.} = staticExec(execHelperExe & " randomstr")
 
-proc rmFile*(filename: string) {.compileTime.} =
+proc rmFileCT*(filename: string) {.compileTime.} =
   echo staticExec(execHelperExe & " rmfile " & filename)
 
-proc basicExtern*(filename: string): string {.compileTime.} =
+proc basicExternCT*(filename: string): string {.compileTime.} =
   staticExec(execHelperExe & " basicextern " & filename)
 
-proc removeTmpFiles(removeDir: string) {.compileTime.} =
+proc removeTmpFilesCT(removeDir: string) {.compileTime.} =
   var tmpFiles = removeDir / srcFileName & "_tmp" & "[[:digit:]]*"
   var ret = staticExec("find " & tmpFiles & " -type f -mmin +60 -print0 2> /dev/null | xargs -r0 rm")
   if ret.len > 0:
     echo ret
 
-proc removeCacheDirs(removeDir: string) {.compileTime.} =
+proc removeCacheDirsCT(removeDir: string) {.compileTime.} =
   var tmpFiles = removeDir / srcFileName & "_tmp" & "[[:digit:]]*"
   var ret = staticExec("find \"" & tmpFiles & "\" -type d -mmin +5 -print0 2> /dev/null | xargs -r0 rm -rf")
   if ret.len > 0:
     echo ret
 
-var tmpFileId {.compileTime.}: int = 0
+var tmpFileIdCT {.compileTime.}: int = 0
 
-proc execCode*(srcFileDir: string, code: string, rstr: string): string {.compileTime.} =
-  inc(tmpFileId)
-  let exeFileName = srcFileName & "_tmp" & $tmpFileId & rstr
+proc staticExecCode*(srcFileDir: string, code: string, rstr: string): string {.compileTime.} =
+  inc(tmpFileIdCT)
+  let exeFileName = srcFileName & "_tmp" & $tmpFileIdCT & rstr
   let tmpExeFile = srcFileDir / exeFileName
   let tmpSrcFile = tmpExeFile & srcFileExt
   let cacheDir = srcFileDir / "nimcache"
@@ -48,32 +48,32 @@ proc execCode*(srcFileDir: string, code: string, rstr: string): string {.compile
   writeFile(tmpSrcFile, code)
   echo staticExec("nim c --nimcache:" & tmpCacheDir & " " & tmpSrcFile)
   if not fileExists(tmpExeFile):
-    rmFile(tmpSrcFile)
+    rmFileCT(tmpSrcFile)
     echo staticExec("rm -rf \"" & tmpCacheDir & "\"")
     macros.error "nim c failed"
   result = staticExec("cd " & srcFileDir & " && " & tmpExeFile)
-  removeTmpFiles(srcFileDir)
-  removeCacheDirs(cacheDir)
-  rmFile(tmpExeFile)
-  rmFile(tmpSrcFile)
+  removeTmpFilesCT(srcFileDir)
+  removeCacheDirsCT(cacheDir)
+  rmFileCT(tmpExeFile)
+  rmFileCT(tmpSrcFile)
   echo staticExec("rm -rf \"" & tmpCacheDir & "\"")
   discard staticExec("rmdir \"" & cacheDir & "\"")
 
 proc makeDiscardable[T](a: T): T {.discardable, inline.} = a
 
-template execCode*(code: string): string = # discardable
+template staticExecCode*(code: string): string = # discardable
   block:
     const srcFile = instantiationInfo(-1, true).filename
     const srcFileDir = splitFile(srcFile).dir
 
     macro execCodeResult(): string =
       nnkStmtList.newTree(
-        newLit(execCode(srcFileDir, code, randomStr()))
+        newLit(staticExecCode(srcFileDir, code, randomStrCT()))
       )
     makeDiscardable(execCodeResult())
 
-template execCode*(srcFileDir: string, code: string): string = # discardable
-  makeDiscardable(execCode(srcFileDir, code, randomStr()))
+template staticExecCode*(srcFileDir: string, code: string): string = # discardable
+  makeDiscardable(staticExecCode(srcFileDir, code, randomStrCT()))
 
 template staticExecCode*(body: untyped): string = # discardable
   block:
@@ -82,11 +82,11 @@ template staticExecCode*(body: untyped): string = # discardable
 
     macro execCodeResult(bodyMacro: untyped): string =
       nnkStmtList.newTree(
-        newLit(execCode(srcFileDir, $bodyMacro.toStrLit))
+        newLit(staticExecCode(srcFileDir, $bodyMacro.toStrLit))
       )
     makeDiscardable(execCodeResult(body))
 
-proc removeThreadVarPatch(code: string): string {.compileTime.} =
+proc removeThreadVarPatchCT(code: string): string {.compileTime.} =
   var stage = 0
   for line in splitLines(code):
     if stage == 0 and line.startsWith("if (globalThis.") and line.endsWith(" === undefined) {"):
@@ -99,9 +99,9 @@ proc removeThreadVarPatch(code: string): string {.compileTime.} =
     else:
       result.add(line & "\n")
 
-proc compileJsCode*(srcFileDir: string, code: string, rstr: string): string {.compileTime.} =
-  inc(tmpFileId)
-  let tmpNameFile = srcFileDir / srcFileName & "_tmp" & $tmpFileId & rstr
+proc staticCompileJsCode*(srcFileDir: string, code: string, rstr: string): string {.compileTime.} =
+  inc(tmpFileIdCT)
+  let tmpNameFile = srcFileDir / srcFileName & "_tmp" & $tmpFileIdCT & rstr
   let tmpSrcFile = tmpNameFile & srcFileExt
   let tmpJsFile = tmpNameFile & ".js"
   writeFile(tmpSrcFile, code)
@@ -114,25 +114,25 @@ proc compileJsCode*(srcFileDir: string, code: string, rstr: string): string {.co
       break
   echo staticExec("nim js -d:release --mm:orc" & verbosity & " -o:" & tmpJsFile & " " & tmpSrcFile)
   if not fileExists(tmpJsFile):
-    rmFile(tmpSrcFile)
+    rmFileCT(tmpSrcFile)
     macros.error "nim js failed"
   result = readFile(tmpJsFile)
-  result = removeThreadVarPatch(result)
-  removeTmpFiles(srcFileDir)
-  rmFile(tmpJsFile)
-  rmFile(tmpSrcFile)
+  result = removeThreadVarPatchCT(result)
+  removeTmpFilesCT(srcFileDir)
+  rmFileCT(tmpJsFile)
+  rmFileCT(tmpSrcFile)
 
-template compileJsCode*(baseDir, code: string): string =
-  compileJsCode(baseDir, code, randomStr())
+template staticCompileJsCode*(baseDir, code: string): string =
+  staticCompileJsCode(baseDir, code, randomStrCT())
 
-proc minifyJsCode*(srcFileDir: string, code: string, extern: string, rstr: string): string {.compileTime.} =
-  inc(tmpFileId)
-  let tmpNameFile = srcFileDir / srcFileName & "_tmp" & $tmpFileId & rstr
+proc staticMinifyJsCode*(srcFileDir: string, code: string, extern: string, rstr: string): string {.compileTime.} =
+  inc(tmpFileIdCT)
+  let tmpNameFile = srcFileDir / srcFileName & "_tmp" & $tmpFileIdCT & rstr
   let tmpSrcFile = tmpNameFile & ".js"
   let tmpExtFile = tmpNameFile & "_extern.js"
   let tmpDstFile = tmpNameFile & "_min.js"
   writeFile(tmpSrcFile, code)
-  writeFile(tmpExtFile, extern & basicExtern(tmpSrcFile))
+  writeFile(tmpExtFile, extern & basicExternCT(tmpSrcFile))
   let downloadClosureCompiler = staticExec """
 ZENYJS_CACHE_DIR=${XDG_CACHE_HOME:-"$HOME/.cache"}/zenyjs
 if [ -x "$(command -v google-closure-compiler)" ]; then
@@ -164,16 +164,16 @@ echo $closure_compiler
     if retClosure.len > 0:
       echo retClosure
     result = readFile(tmpDstFile)
-    rmFile(tmpDstFile)
+    rmFileCT(tmpDstFile)
   else:
     echo "closure compiler: not found - skip"
     result = code
-  removeTmpFiles(srcFileDir)
-  rmFile(tmpExtFile)
-  rmFile(tmpSrcFile)
+  removeTmpFilesCT(srcFileDir)
+  rmFileCT(tmpExtFile)
+  rmFileCT(tmpSrcFile)
 
-template minifyJsCode*(baseDir, code, extern: string): string =
-  minifyJsCode(baseDir, code, extern, randomStr())
+template staticMinifyJsCode*(baseDir, code, extern: string): string =
+  staticMinifyJsCode(baseDir, code, extern, randomStrCT())
 
 
 when isMainModule:
@@ -181,6 +181,6 @@ when isMainModule:
 
   echo staticExecCode(echo "hello!")
 
-  echo compileJsCode(binDir, """
+  echo staticCompileJsCode(binDir, """
 echo "hello!"
 """)

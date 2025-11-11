@@ -22,7 +22,7 @@ template scriptMinifier*(code, extern: string): string =
 
     macro scriptMinifierMacro(): string =
       return nnkStmtList.newTree(
-        newLit(minifyJsCode(srcFileDir, code, extern))
+        newLit(staticMinifyJsCode(srcFileDir, code, extern))
       )
     scriptMinifierMacro()
 
@@ -48,7 +48,7 @@ template scriptMinifier*(code: string, extern: seq[string]): string =
 
     macro scriptMinifierMacro(): string =
       return nnkStmtList.newTree(
-        newLit(minifyJsCode(srcFileDir, code, externCode))
+        newLit(staticMinifyJsCode(srcFileDir, code, externCode))
       )
     scriptMinifierMacro()
 
