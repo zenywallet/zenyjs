@@ -295,6 +295,8 @@ when isMainModule:
 
   echo staticExecCode(echo "hello!")
 
-  echo staticCompileJsCode(binDir, """
-echo "hello!"
-""")
+  echo staticCompileJsCode(srcFileDir, """echo "hello!"""")
+
+  echo compileJsCode(srcFileDir, """echo "hello!"""")
+
+  echo minifyJsCode(srcFileDir, """console.log("Hello," + " " + "world!");""", "")
