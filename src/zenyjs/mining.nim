@@ -230,6 +230,7 @@ proc changeMiningWorker(num: int) =
       worker.id = miningWorkers.length
       worker.readyFlag = false
       worker.started = false
+      {.push warning[Deprecated]: off.}
       worker.onmessage = bindMethod proc(this: JsObject, e: JsObject) =
         if e.data["cmd"].to(cstring) == "find".cstring:
           let findData = strToUint8Array(JSON.stringify(e.data))
@@ -240,6 +241,7 @@ proc changeMiningWorker(num: int) =
           miningStatus[this.id.to(cstring)] = e.data["data"]
         elif e.data["cmd"].to(cstring) == "ready".cstring:
           this.readyFlag = true
+      {.pop.}
       miningWorkers.push(worker)
 
 let number0x100000000 = (0x7fffffff.toJs + 1.toJs) * 2.toJs
