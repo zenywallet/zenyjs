@@ -211,7 +211,7 @@ except:
   cpuMaxCount = 16
   cpuMaxCountUnknown = true
 
-let cpuMaxCountStr = $cpuCount
+let cpuMaxCountStr = $cpuMaxCount
 
 proc changeMiningWorker(num: int) =
   miningWorkersNumber.push(num)
