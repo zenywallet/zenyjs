@@ -37,6 +37,14 @@ else:
 #include <stdio.h>
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+int crypt_seed(unsigned char *seed, int size);
+#ifdef __cplusplus
+}
+#endif
+
 int crypt_seed(unsigned char *seed, int size) {
 #ifdef _WIN32
   HCRYPTPROV prov;
