@@ -11,14 +11,14 @@ type
     PushData2
     PushData4
 
-  ChunkData* = distinct Array[byte]
+  ChunkData* {.borrow: `.`.} = distinct Array[byte]
 
   Chunk* = object
     case chunkType*: ChunkType
     of Code:
       op*: Opcode
     of Data:
-      data*: Array[byte]
+      data*: ChunkData
     of PushData1, PushData2, PushData4:
       val*: uint
 
@@ -27,6 +27,8 @@ type
   Script* = distinct Array[byte]
 
   ScriptError* = object of CatchableError
+
+converter toArray*(data: ChunkData): Array[byte] = cast[Array[byte]](data)
 
 when defined(js):
   discard
@@ -46,7 +48,7 @@ else:
         var bval = reader.getUint8
         var op = OpcodeMap[bval]
         if bval < OP_PUSHDATA1.ord and bval > 0:
-          result.add(Chunk(chunkType: Data, data: reader.getBytes(bval.int)))
+          result.add(Chunk(chunkType: Data, data: ChunkData(reader.getBytes(bval.int))))
         elif op == OP_PUSHDATA1:
           result.add(Chunk(chunkType: PushData1, val: reader.getUint8.uint))
         elif op == OP_PUSHDATA2:
@@ -55,7 +57,7 @@ else:
           result.add(Chunk(chunkType: PushData4, val: reader.getUint32.uint))
         elif op == OP_RETURN:
           result.add(Chunk(chunkType: Code, op: op))
-          result.add(Chunk(chunkType: Data, data: reader.getBytes(reader.left)))
+          result.add(Chunk(chunkType: Data, data: ChunkData(reader.getBytes(reader.left))))
           return
         elif op != NA:
           result.add(Chunk(chunkType: Code, op: op))
@@ -116,9 +118,8 @@ else:
       result.add(chunk.toBytes)
 
   proc toBytes*(data: ChunkData): Array[byte] =
-    var b = cast[Array[byte]](data)
-    if b.len > 0:
-      result = concat(varInt(b.len), b)
+    if data.len > 0:
+      result = concat(varInt(data.len), data)
 
   proc `%`*(chunks: Chunks): JsonNode =
     var s: string
