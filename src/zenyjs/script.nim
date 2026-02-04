@@ -24,11 +24,12 @@ type
 
   Chunks* = Array[Chunk]
 
-  Script* = distinct Array[byte]
+  Script* {.borrow: `.`.} = distinct Array[byte]
 
   ScriptError* = object of CatchableError
 
 converter toArray*(data: ChunkData): Array[byte] = cast[Array[byte]](data)
+converter toArray*(data: Script): Array[byte] = cast[Array[byte]](data)
 
 when defined(js):
   discard
