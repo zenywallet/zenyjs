@@ -17,7 +17,7 @@ else:
   import zenyjs/zenyjs_externs
   export zenyjs
 
-  const ZenyWasm = staticRead(currentSourcePath().parentDir() / "zenyjs/zenyjs.wasm")
+  const ZenyWasm* = staticRead(currentSourcePath().parentDir() / "zenyjs/zenyjs.wasm")
 
   proc staticZenyJs*(src: static string, minify: bool = true): tuple[js: string, wasm: string] {.compileTime.} =
     if minify:
