@@ -38,8 +38,6 @@ else:
   import json
   import bytes, reader
 
-  proc `$`*(data: Script): string = $cast[Array[byte]](data)
-
   proc getScriptChunks*(script: Script): Chunks =
     var reader = newReader(script)
     try:
