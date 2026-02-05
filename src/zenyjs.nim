@@ -6,6 +6,14 @@ when defined(js):
   import zenyjs/zenyjs
   export zenyjs
 
+  import std/os
+  import std/compilesettings
+  const ZenyWasm = staticRead(currentSourcePath().parentDir() / "zenyjs/zenyjs.wasm")
+  macro writeWasm() =
+    var outputDir = querySetting(outDir)
+    writeFile(outputDir / "zenyjs.wasm", ZenyWasm)
+  writeWasm()
+
 elif defined(emscripten):
   import zenyjs/zenyjs
   export zenyjs
