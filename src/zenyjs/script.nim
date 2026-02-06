@@ -132,3 +132,18 @@ else:
         else:
           s.add(chunk.data.toHex)
     result = newJString(s)
+
+  proc bip34Sig*(height: uint32): Array[byte] =
+    var heightBytes = height.toBytes
+    if (heightBytes[3] and 0x80'u8) > 0:
+      (@^[byte 5'u8], heightBytes, @^[byte 0'u8]).toBytes
+    elif heightBytes[3] != 0 or (heightBytes[2] and 0x80'u8) > 0:
+      (@^[byte 4'u8], heightBytes).toBytes
+    elif heightBytes[2] != 0 or (heightBytes[1] and 0x80'u8) > 0:
+      (@^[byte 3'u8], heightBytes[0..2]).toBytes
+    elif heightBytes[1] != 0 or (heightBytes[0] and 0x80'u8) > 0:
+      (@^[byte 2'u8], heightBytes[0..1]).toBytes
+    elif heightBytes[0] != 0:
+      (@^[byte 1'u8], heightBytes[0]).toBytes
+    else:
+      @^[byte 0'u8]
