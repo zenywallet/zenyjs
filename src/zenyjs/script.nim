@@ -133,17 +133,21 @@ else:
           s.add(chunk.data.toHex)
     result = newJString(s)
 
+  import std/bitops
+
   proc bip34Sig*(height: uint32): Array[byte] =
-    var heightBytes = height.toBytes
-    if (heightBytes[3] and 0x80'u8) > 0:
-      (@^[byte 5'u8], heightBytes, @^[byte 0'u8]).toBytes
-    elif heightBytes[3] != 0 or (heightBytes[2] and 0x80'u8) > 0:
-      (@^[byte 4'u8], heightBytes).toBytes
-    elif heightBytes[2] != 0 or (heightBytes[1] and 0x80'u8) > 0:
-      (@^[byte 3'u8], heightBytes[0..2]).toBytes
-    elif heightBytes[1] != 0 or (heightBytes[0] and 0x80'u8) > 0:
-      (@^[byte 2'u8], heightBytes[0..1]).toBytes
-    elif heightBytes[0] != 0:
-      (@^[byte 1'u8], heightBytes[0]).toBytes
+    if height > 0:
+      let bits = fastLog2(height) + 1
+      let byteLen = ((bits + 7) shr 3) + (if (bits and 7) == 0: 1 else: 0)
+      result.newArray(byteLen + 1)
+      result[0] = byte(byteLen)
+      var val = height
+      var pos = 1
+      while true:
+        result[pos] = byte(val and 0xff)
+        val = val shr 8
+        if val == 0:
+          break
+        inc(pos)
     else:
       @^[byte 0'u8]
