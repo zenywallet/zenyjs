@@ -35,7 +35,7 @@ when defined(js):
   discard
 
 else:
-  import json
+  import std/json
   import bytes, reader
 
   proc getScriptChunks*(script: Script): Chunks =
