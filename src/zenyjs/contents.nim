@@ -11,7 +11,7 @@ template staticScript*(body: untyped): string =
 
     macro staticScriptMacro(bodyMacro: untyped): string =
       return nnkStmtList.newTree(
-        newLit(compileJsCode(srcFileDir, $bodyMacro.toStrLit))
+        newLit(staticCompileJsCode(srcFileDir, $bodyMacro.toStrLit))
       )
     staticScriptMacro: body
 
