@@ -55,7 +55,12 @@ when defined(js):
         printErr: proc() =
           console.error([].toJs.slice.call(arguments).join(' ')),
         setStatus: proc(text: JsObject) =
-          console.log("status: " & text.to(cstring)),
+          (when defined(SETSTATUS):
+            if text.length.to(int) > 0:
+              console.log("status: " & text.to(cstring))
+          else:
+            discard
+          ),
         monitorRunDependencies: proc(left: JsObject) = discard
       }
 
