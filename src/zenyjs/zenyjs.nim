@@ -75,6 +75,8 @@ when defined(js):
       wait_ready()
 
   template ready*(body: untyped) =
+    when not declared(asyncjs):
+      import asyncjs
     loadModule(proc(module: JsObject) =
       when declared(arraylib):
         arraylib.init(module)
