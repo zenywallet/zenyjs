@@ -23,10 +23,20 @@ A web wallet library for BitZeny
 ## Requirements
 Nim must be installed.
 
-    sudo apt install build-essential automake libtool autopoint openjdk-21-jre-headless maven
+    sudo apt install build-essential automake libtool autopoint pkg-config openjdk-25-jre-headless maven
 
 ## Install
     nimble install https://github.com/zenywallet/zenyjs
+
+Or
+
+    git clone https://github.com/zenywallet/zenyjs
+    cd zenyjs
+    nimble install --verbose
+
+## Update
+    git pull
+    nimble uninstall zenyjs --inclDeps --verbose; nimble install --verbose
 
 ## Quick Trial
 *sample.nim*
@@ -113,6 +123,12 @@ writeFile("zenyjs.wasm", App.wasm)
     nim c -r buildSample.nim
     node sample.js
 
+Or
+
+    nim js -r sample.nim
+
+*sample.js* and *zenyjs.wasm* will be created in the output folder.
+
 ### Troubleshooting
 > *Somehow wasm is not working on web browser*
 
@@ -121,7 +137,7 @@ ZenyJS needs to be reinstalled.
 
 > *Error: cannot open file: caprese*
 
-    sudo apt install build-essential automake autoconf libtool cmake pkg-config golang openjdk-19-jre maven
+    sudo apt install build-essential automake autoconf libtool cmake default-jre-headless maven
     nimble install https://github.com/zenywallet/caprese
 
 > *Error: internal error: ("genAddr: 2", skTemp)*  
