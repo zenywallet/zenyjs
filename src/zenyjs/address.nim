@@ -33,6 +33,7 @@ when defined(js):
     AddressMod.getSegwitAddress2 = Module.cwrap("getSegwitAddress2_c", jsNull, [NumVar, NumVar, NumVar])
     AddressMod.wif = Module.cwrap("wif_c", jsNull, [NumVar, NumVar, NumVar])
     AddressMod.prv = Module.cwrap("prv_c", jsNull, [NumVar, NumVar, NumVar])
+    AddressMod.getScript = Module.cwrap("getScript_c", jsNull, [NumVar, NumVar, NumVar])
 
     config.init(module)
 
@@ -90,13 +91,22 @@ when defined(js):
       result = newArray[byte]().PrivateKey
       AddressMod.prv(networkId, p, result.handle)
 
+  proc getScript*(networkId: NetworkId, address: cstring): Array[byte] =
+    withStack:
+      var addressUint8Array = strToUint8Array(address)
+      var p = Module.stackAlloc(addressUint8Array.length.to(int) + 1)
+      Module.HEAPU8.set(addressUint8Array, p)
+      Module.HEAPU8[p.to(int) + addressUint8Array.length.to(int)] = 0
+      result = newArray[byte]()
+      AddressMod.getScript(networkId, p, result.handle)
+
 else:
   type
     Wif* = string
 
   when defined(emscripten):
     const EXPORTED_FUNCTIONS* = ["_address_checkAddress", "_getAddress_c", "_getAddress2_c",
-      "_getSegwitAddress_c", "_getSegwitAddress2_c", "_wif_c", "_prv_c"]
+      "_getSegwitAddress_c", "_getSegwitAddress2_c", "_wif_c", "_prv_c", "_getScript_c"]
 
   import std/json
   import std/strutils
@@ -392,6 +402,9 @@ else:
 
   proc prv_c*(networkId: NetworkId, wif: cstring, prv: var PrivateKey) {.exportc: "$1".} =
     prv = prv(networkId, $wif)
+
+  proc getScript_c*(networkId: NetworkId, address: cstring, retArray: var Array[byte]) {.exportc: "$1".} =
+    retArray = getScript(networkId, $address)
 
 
   when isMainModule:
