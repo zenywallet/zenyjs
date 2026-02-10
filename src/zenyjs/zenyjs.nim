@@ -7,12 +7,7 @@ when defined(js):
   const zenyjsFilePath = srcDir / "zenyjs.js"
   macro loadZenyJS(): untyped =
     var zenyjsScript = readFile(zenyjsFilePath).replace("`", "``")
-    result = nnkStmtList.newTree(
-      nnkAsmStmt.newTree(
-        newEmptyNode(),
-        newLit(zenyjsScript)
-      )
-    )
+    nnkPragma.newTree(newColonExpr(ident("emit"), newLit(zenyjsScript)))
   loadZenyJS()
 
   import jsffi
