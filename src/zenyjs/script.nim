@@ -150,4 +150,4 @@ else:
           break
         inc(pos)
     else:
-      @^[byte 0'u8]
+      result = @^[byte 0'u8]
