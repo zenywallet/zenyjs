@@ -21,6 +21,21 @@ when defined(js):
     else:
       result = ""
 
+  import std/jsffi
+  import arraylib
+
+  proc toUint8*(x: Array[byte]): uint8 = x[0].uint8
+  proc toUint16*(x: Array[byte]): uint16 =
+    x[0].uint16 or (x[1].uint16 shl 8)
+  proc toUint32*(x: Array[byte]): uint32 =
+    x[0].uint32 or (x[1].uint32 shl 8) or
+    (x[2].uint32 shl 16) or (x[3].uint32 shl 24)
+  proc toUint64*(x: Array[byte]): uint64 =
+    x[0].uint64 or (x[1].uint64 shl 8) or
+    (x[2].uint64 shl 16) or (x[3].uint64 shl 24) or
+    (x[4].uint64 shl 32) or (x[5].uint64 shl 40) or
+    (x[6].uint64 shl 48) or (x[7].uint64 shl 56)
+
 else:
   import std/sequtils
   import std/strutils
