@@ -243,8 +243,6 @@ else:
         if j.kind != JNull:
           result[key] = %val
 
-  proc `%`*[T](a: Array[T]): JsonNode = %a.toSeq
-
   proc `%`*(tx: Tx): JsonNode = %tx.handle[]
 
   proc toJson*(tx: Tx, network: Network | NetworkId): JsonNode =
