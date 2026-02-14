@@ -212,8 +212,7 @@ else:
   #proc txid*(tx: Tx): Hash {.returnToLastParam, exportc: "tx_$1".}
 
   proc txid*(txh: TxHandle, result: var Hash) {.exportc: "tx_txid".} =
-    var tx = Tx(handle: txh)
-    result = tx.stripWitness.toBytes.hash
+    result = Tx(handle: txh).stripWitness.toBytes.hash
 
   proc hash*(tx: Tx): Hash {.inline.} = tx.toBytes.hash
 
