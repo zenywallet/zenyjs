@@ -24,6 +24,8 @@ type
     witnesses*: Array[Array[Witness]]
     locktime*: uint32
 
+converter toArray*(data: Witness): Array[byte] = cast[Array[byte]](data)
+
 when defined(js):
   import std/jsffi
 
