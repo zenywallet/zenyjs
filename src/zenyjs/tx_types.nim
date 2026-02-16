@@ -58,9 +58,10 @@ else:
     TxHandle* = ptr TxObj
 
     Tx* = object of HandleObj[TxHandle]
+      refFlag: bool
 
   proc free*(tx: Tx) {.exportc: "tx_$1".} =
-    if tx.handle.isNil: return
+    if tx.handle.isNil or tx.refFlag: return
     let tx = tx.handle
     `=destroy`(tx.witnesses)
     `=destroy`(tx.outs)
@@ -86,3 +87,7 @@ else:
     `=destroy`(a)
     wasMoved(a)
     a.handle = b.handle
+
+  proc refTx*(txh: TxHandle): Tx =
+    result = Tx(handle: txh)
+    result.refFlag = true
