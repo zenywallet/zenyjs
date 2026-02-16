@@ -39,6 +39,7 @@ when defined(js):
     TxMod.hash = Module.cwrap("tx_hash", jsNull, [NumVar, NumVar])
     TxMod.free = Module.cwrap("tx_free", jsNull, [NumVar])
     TxMod.duplicate = Module.cwrap("tx_duplicate", NumVar, [NumVar])
+    TxMod.toString = Module.cwrap("tx_toString", jsNull, [NumVar, NumVar])
 
   template init*(module: JsObject) = tx_init(module)
 
@@ -59,9 +60,15 @@ when defined(js):
     result = newArray[byte]().Hash
     TxMod.hash(tx, result.handle)
 
+  proc `$`*(tx: Tx): string =
+    var s = newArray[byte]()
+    TxMod.toString(tx.handle, s.handle)
+    result = $s.toString
+
 else:
   when defined(emscripten):
-    const EXPORTED_FUNCTIONS* = ["_tx_newTx", "_tx_toTx", "_tx_stripWitness", "_tx_txid", "_tx_hash", "_tx_free", "_tx_duplicate"]
+    const EXPORTED_FUNCTIONS* = ["_tx_newTx", "_tx_toTx", "_tx_stripWitness",
+      "_tx_txid", "_tx_hash", "_tx_free", "_tx_duplicate", "_tx_toString"]
 
   import sequtils, json
   import bytes, utils, reader, address, script
@@ -253,6 +260,9 @@ else:
       if addrs.len > 0:
         json["outs"][i]["addrs"] = %addrs
     json
+
+  proc toString*(txh: TxHandle, result: var Array[byte]) {.exportc: "tx_toString".} =
+    result = ($refTx(txh)).toBytes
 
 
 when isMainModule:
