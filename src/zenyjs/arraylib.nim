@@ -284,7 +284,7 @@ else:
 
   when defined(emscripten):
     proc `=destroy`*[T](x: var Array[T]) =
-      if x.data != nil:
+      if x.cap > 0:
         when T is not Ordinal and T is not ptr and T is not pointer:
           for i in 0..<x.len:
             `=destroy`(x.data[i])
@@ -295,21 +295,21 @@ else:
           compileOption("mm", "arc") or
           compileOption("mm", "atomicArc"):
         proc `=destroy`*[T](x: Array[T]) =
-          if x.data != nil:
+          if x.cap > 0:
             when T is not Ordinal and T is not ptr and T is not pointer:
               for i in 0..<x.len:
                 `=destroy`(x.data[i])
             x.data.deallocShared()
       else:
         proc `=destroy`*[T](x: var Array[T]) =
-          if x.data != nil:
+          if x.cap > 0:
             when T is not Ordinal and T is not ptr and T is not pointer:
               for i in 0..<x.len:
                 `=destroy`(x.data[i])
             x.data.deallocShared()
     else:
       proc `=destroy`*[T](x: var Array[T]) =
-        if x.data != nil:
+        if x.cap > 0:
           when T is not Ordinal and T is not ptr and T is not pointer:
             for i in 0..<x.len:
               `=destroy`(x.data[i])
@@ -321,7 +321,7 @@ else:
     wasMoved(a)
     a.len = b.len
     a.cap = b.cap
-    if b.data != nil:
+    if b.cap > 0:
       a.data = cast[typeof(a.data)](allocShared0(sizeof(T) * a.cap))
       when T is Ordinal or T is ptr or T is pointer:
         copyMem(a.data, b.data, sizeof(T) * a.len)
