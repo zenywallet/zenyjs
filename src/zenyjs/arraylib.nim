@@ -61,7 +61,12 @@ when defined(js):
     ArrayMod.newArrayByte = Module.cwrap("array_new", jsNull, [NumVar, NumVar])
     ArrayMod.destroy = Module.cwrap("array_destroy", jsNull, [NumVar])
 
-  proc newArray*[T](len: Natural or JsObject): Array[T] =
+  proc newArray*[T](len: Natural): Array[T] =
+    when not T is byte: raise
+    result.handle = Module.malloc(12)
+    discard ArrayMod.newArrayByte(len, result.handle)
+
+  proc newArray*[T](len: JsObject): Array[T] =
     when not T is byte: raise
     result.handle = Module.malloc(12)
     discard ArrayMod.newArrayByte(len, result.handle)
@@ -92,7 +97,10 @@ when defined(js):
 
   proc newArray*[T](): Array[T] = result.init()
 
-  proc newArray*[T](x: var Array[T], len: Natural or JsObject) =
+  proc newArray*[T](x: var Array[T], len: Natural) =
+    x = newArray[T](len)
+
+  proc newArray*[T](x: var Array[T], len: JsObject) =
     x = newArray[T](len)
 
   proc len*[T](x: Array[T]): int = Module.HEAPU32[x.handle.to(cint) div 4].to(int)
