@@ -65,14 +65,14 @@ proc `xor`[I, T](a: array[I, T], b: array[I, T] or ptr array[I, T] or ref array[
 
 proc setKey*(deoxyEncrypt: ptr DeoxyEncrypt, shared: Ed25519SharedSecret,
             myself: DeoxySalt, friend: DeoxySalt) {.exportc: "deoxy_setkey".} =
-  let shared_sha256 = sha256(cast[ptr UncheckedArray[byte]](addr shared), 32.uint32)
+  let shared_sha256 = sha256(cast[ptr UncheckedArray[byte]](unsafeAddr shared), 32.uint32)
   let shared_key = yespower(shared_sha256)
   let salt_myself = cast[ptr array[32, byte]](unsafeAddr myself[0])
   let salt_friend = cast[ptr array[32, byte]](unsafeAddr friend[0])
   let km = shared_key xor salt_myself
   let kf = shared_key xor salt_friend
-  let iv_myself_sha256 = sha256(cast[ptr UncheckedArray[byte]](addr km), 32.uint32)
-  let iv_friend_sha256 = sha256(cast[ptr UncheckedArray[byte]](addr kf), 32.uint32)
+  let iv_myself_sha256 = sha256(cast[ptr UncheckedArray[byte]](unsafeAddr km), 32.uint32)
+  let iv_friend_sha256 = sha256(cast[ptr UncheckedArray[byte]](unsafeAddr kf), 32.uint32)
   let iv_myself = yespower(iv_myself_sha256)
   let iv_friend = yespower(iv_friend_sha256)
   copyMem(addr deoxyEncrypt.enc_iv[0], unsafeAddr iv_myself[0], sizeof(DeoxyEncrypt.enc_iv))
