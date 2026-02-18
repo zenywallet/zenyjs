@@ -14,17 +14,17 @@ else:
     MDfinish(cast[ptr array[5, uint32]](result.data), data, size, 0)
 
   template ripemd160*(data: Array[byte]): Hash160 =
-    ripemd160(cast[ptr UncheckedArray[byte]](addr data[0]), data.len.uint32)
+    ripemd160(cast[ptr UncheckedArray[byte]](unsafeAddr data[0]), data.len.uint32)
 
   template ripemd160*(data: string): Hash160 =
-    ripemd160(cast[ptr UncheckedArray[byte]](addr data[0]), data.len.uint32)
+    ripemd160(cast[ptr UncheckedArray[byte]](unsafeAddr data[0]), data.len.uint32)
 
   template ripemd160*(data: static string): Hash160 =
     var dataBytes = data.toBytes
     ripemd160(cast[ptr UncheckedArray[byte]](addr dataBytes[0]), dataBytes.len.uint32)
 
   proc ripemd160*(data: openArray[byte]): Hash160 =
-    ripemd160(cast[ptr UncheckedArray[byte]](addr data[0]), data.len.uint32)
+    ripemd160(cast[ptr UncheckedArray[byte]](unsafeAddr data[0]), data.len.uint32)
 
   template ripemd160*(data: static openArray[byte]): Hash160 =
     var dataBytes = data.toBytes
