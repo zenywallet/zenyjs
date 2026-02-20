@@ -247,7 +247,7 @@ else:
       else:
         var j = %val
         if j.kind != JNull:
-          result[key] = %val
+          result[key] = j
 
   proc `%`*(tx: Tx): JsonNode = %tx.handle[]
 
