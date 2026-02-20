@@ -40,6 +40,7 @@ when defined(js):
     TxMod.free = Module.cwrap("tx_free", jsNull, [NumVar])
     TxMod.duplicate = Module.cwrap("tx_duplicate", NumVar, [NumVar])
     TxMod.toString = Module.cwrap("tx_toString", jsNull, [NumVar, NumVar])
+    TxMod.toJsonString = Module.cwrap("tx_toJsonString", jsNull, [NumVar, NumVar])
 
   template init*(module: JsObject) = tx_init(module)
 
@@ -65,10 +66,16 @@ when defined(js):
     TxMod.toString(tx.handle, s.handle)
     result = $s.toString
 
+  proc `%`*(tx: Tx): JsonNode =
+    var a = newArray[byte]()
+    TxMod.toJsonString(tx.handle, a.handle)
+    parseJson($a.toString)
+
 else:
   when defined(emscripten):
     const EXPORTED_FUNCTIONS* = ["_tx_newTx", "_tx_toTx", "_tx_stripWitness",
-      "_tx_txid", "_tx_hash", "_tx_free", "_tx_duplicate", "_tx_toString"]
+      "_tx_txid", "_tx_hash", "_tx_free", "_tx_duplicate", "_tx_toString",
+      "_tx_toJsonString"]
 
   import sequtils, json
   import bytes, utils, reader, address, script
@@ -263,6 +270,9 @@ else:
 
   proc toString*(txh: TxHandle, result: var Array[byte]) {.exportc: "tx_toString".} =
     result = ($refTx(txh)).toBytes
+
+  proc txToJsonString(txh: TxHandle, result: var Array[byte]) {.exportc: "tx_toJsonString".} =
+    result = ($(%refTx(txh))).toBytes
 
 
 when isMainModule:
