@@ -11,6 +11,8 @@ type
     P2SH_P2WPKH
     P2WPKH
 
+template getNetwork*(networkId: NetworkId): Network = networkList[networkId.int]
+
 when defined(js):
   import std/jsffi
   import std/json
@@ -119,8 +121,6 @@ else:
   import base58
   import arraylib
   import eckey
-
-  template getNetwork*(networkId: NetworkId): Network = networkList[networkId.int]
 
   template ripemd160hash*(pub: Array[byte]): Hash160 = ripemd160(sha256s(pub))
 
