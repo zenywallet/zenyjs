@@ -285,7 +285,7 @@ else:
   proc toString*(txh: TxHandle, result: var Array[byte]) {.exportc: "tx_toString".} =
     result = ($refTx(txh)).toBytes
 
-  proc txToJsonString(txh: TxHandle, result: var Array[byte]) {.exportc: "tx_toJsonString".} =
+  proc txToJsonString*(txh: TxHandle, result: var Array[byte]) {.exportc: "tx_toJsonString".} =
     result = ($(%refTx(txh))).toBytes
 
 
