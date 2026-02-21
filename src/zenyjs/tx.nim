@@ -127,8 +127,6 @@ else:
     for data in datas:
       result.add(data.toBytes)
 
-  proc `$`*(tx: Tx): string = $tx.handle
-
   proc `$`*(data: Flags): string = $cast[uint8](data)
 
   proc `$`*(data: Sig): string =
@@ -156,6 +154,8 @@ else:
       result = $sigBytes
 
   proc `$`*(data: Witness): string = $cast[Array[byte]](data)
+
+  proc `$`*(tx: Tx): string = $tx.handle
 
   const USE_SEQOFCAP_FOR_TX = true
 
