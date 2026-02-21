@@ -71,6 +71,11 @@ when defined(js):
     TxMod.toJsonString(tx.handle, a.handle)
     parseJson($a.toString)
 
+  proc toJs*(tx: Tx): JsObject =
+    var a = newArray[byte]()
+    TxMod.toJsonString(tx.handle, a.handle)
+    JSON.parse(a.toString())
+
 else:
   when defined(emscripten):
     const EXPORTED_FUNCTIONS* = ["_tx_newTx", "_tx_toTx", "_tx_stripWitness",
