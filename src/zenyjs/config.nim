@@ -39,6 +39,8 @@ macro networks*(networkConfig: untyped): untyped =
       `networkList`.add(`networkObj`)
     inc(curNetworkId)
 
+template getNetwork*(nid: NetworkId): Network = networkList[nid.int]
+
 template name*(nid: NetworkId): string = networkList[nid.int].name
 
 proc `$`*(nid: NetworkId): string = nid.name

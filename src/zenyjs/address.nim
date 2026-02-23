@@ -11,8 +11,6 @@ type
     P2SH_P2WPKH
     P2WPKH
 
-template getNetwork*(networkId: NetworkId): Network = networkList[networkId.int]
-
 when defined(js):
   import std/jsffi
   import std/json
