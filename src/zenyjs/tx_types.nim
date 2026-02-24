@@ -57,11 +57,13 @@ else:
   type
     TxHandle* = ptr TxObj
 
+    TxRefFlag = distinct bool
+
     Tx* = object of HandleObj[TxHandle]
-      refFlag: bool
+      refFlag: TxRefFlag
 
   proc free*(tx: Tx) {.exportc: "tx_$1".} =
-    if tx.handle.isNil or tx.refFlag: return
+    if tx.handle.isNil or cast[bool](tx.refFlag): return
     let tx = tx.handle
     `=destroy`(tx.witnesses)
     `=destroy`(tx.outs)
@@ -90,4 +92,6 @@ else:
 
   proc refTx*(txh: TxHandle): Tx =
     result = Tx(handle: txh)
-    result.refFlag = true
+    result.refFlag = cast[TxRefFlag](true)
+
+  proc toBytes*(refFlag: TxRefFlag): Array[byte] = discard
