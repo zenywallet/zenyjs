@@ -7,6 +7,7 @@ when defined(js):
   import arraylib
   import script
   import tx_types
+  import address
 
   borrowArrayProc(Hash)
 
@@ -41,6 +42,8 @@ when defined(js):
     TxMod.duplicate = Module.cwrap("tx_duplicate", NumVar, [NumVar])
     TxMod.toString = Module.cwrap("tx_toString", jsNull, [NumVar, NumVar])
     TxMod.toJsonString = Module.cwrap("tx_toJsonString", jsNull, [NumVar, NumVar])
+    TxMod.toJsonNetwork = Module.cwrap("tx_toJsonNetwork", jsNull, [NumVar, NumVar, NumVar])
+    TxMod.toJsonNetworkId = Module.cwrap("tx_toJsonNetworkId", jsNull, [NumVar, NumVar, NumVar])
 
   template init*(module: JsObject) = tx_init(module)
 
@@ -76,11 +79,26 @@ when defined(js):
     TxMod.toJsonString(tx.handle, a.handle)
     JSON.parse(a.toString())
 
+  proc toJson*(tx: Tx, network: Network): JsonNode =
+    withStack:
+      var nw = strToUint8Array(cstring($(%network)))
+      var pnw = Module.stackAlloc(nw.length.to(int) + 1)
+      Module.HEAPU8.set(nw, pnw)
+      Module.HEAPU8[pnw.to(int) + nw.length.to(int)] = 0
+      var a = newArray[byte]()
+      TxMod.toJsonNetwork(tx.handle, pnw, a.handle)
+      result = parseJson($a.toString)
+
+  proc toJson*(tx: Tx, networkId: NetworkId): JsonNode =
+    var a = newArray[byte]()
+    TxMod.toJsonNetworkId(tx.handle, networkId, a.handle)
+    parseJson($a.toString)
+
 else:
   when defined(emscripten):
     const EXPORTED_FUNCTIONS* = ["_tx_newTx", "_tx_toTx", "_tx_stripWitness",
       "_tx_txid", "_tx_hash", "_tx_free", "_tx_duplicate", "_tx_toString",
-      "_tx_toJsonString"]
+      "_tx_toJsonString", "_tx_toJsonNetwork", "_tx_toJsonNetworkId"]
 
   import sequtils, json
   import bytes, utils, reader, address, script
@@ -265,6 +283,7 @@ else:
 
   proc `%`*(obj: TxIn | TxOut): JsonNode =
     result = newJObject()
+
     for key, val in obj.fieldPairs:
       when val is uint64:
         result[key] = val.toJson
@@ -292,6 +311,15 @@ else:
 
   proc txToJsonString*(txh: TxHandle, result: var Array[byte]) {.exportc: "tx_toJsonString".} =
     result = ($(%refTx(txh))).toBytes
+
+  proc txToJsonNetwork*(txh: TxHandle, networkString: cstring, result: var Array[byte]) {.exportc: "tx_toJsonNetwork".} =
+    echo "networkString=", $networkString
+    var networkJson = parseJson($networkString)
+    var network: Network = networkJson.to(Network)
+    result = ($refTx(txh).toJson(network)).toBytes
+
+  proc txToJsonNetworkId*(txh: TxHandle, networkId: NetworkId, result: var Array[byte]) {.exportc: "tx_toJsonNetworkId".} =
+    result = ($refTx(txh).toJson(networkId)).toBytes
 
 
 when isMainModule:
