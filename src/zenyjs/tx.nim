@@ -44,6 +44,7 @@ when defined(js):
     TxMod.toJsonString = Module.cwrap("tx_toJsonString", jsNull, [NumVar, NumVar])
     TxMod.toJsonNetwork = Module.cwrap("tx_toJsonNetwork", jsNull, [NumVar, NumVar, NumVar])
     TxMod.toJsonNetworkId = Module.cwrap("tx_toJsonNetworkId", jsNull, [NumVar, NumVar, NumVar])
+    TxMod.toBytesTx = Module.cwrap("tx_toBytes", jsNull, [NumVar, NumVar])
 
   template init*(module: JsObject) = tx_init(module)
 
@@ -94,11 +95,17 @@ when defined(js):
     TxMod.toJsonNetworkId(tx.handle, networkId, a.handle)
     parseJson($a.toString)
 
+  proc toBytes*(tx: Tx): Array[byte] =
+    var a = newArray[byte]()
+    TxMod.toBytesTx(tx.handle, a.handle)
+    result = a
+
 else:
   when defined(emscripten):
     const EXPORTED_FUNCTIONS* = ["_tx_newTx", "_tx_toTx", "_tx_stripWitness",
       "_tx_txid", "_tx_hash", "_tx_free", "_tx_duplicate", "_tx_toString",
-      "_tx_toJsonString", "_tx_toJsonNetwork", "_tx_toJsonNetworkId"]
+      "_tx_toJsonString", "_tx_toJsonNetwork", "_tx_toJsonNetworkId",
+      "_tx_toBytes"]
 
   import sequtils, json
   import bytes, utils, reader, address, script
@@ -320,6 +327,9 @@ else:
 
   proc txToJsonNetworkId*(txh: TxHandle, networkId: NetworkId, result: var Array[byte]) {.exportc: "tx_toJsonNetworkId".} =
     result = ($refTx(txh).toJson(networkId)).toBytes
+
+  proc txToBytes*(txh: TxHandle, result: var Array[byte]) {.exportc: "tx_toBytes".} =
+    result = refTx(txh).toBytes
 
 
 when isMainModule:
