@@ -100,6 +100,14 @@ when defined(js):
     TxMod.toBytesTx(tx.handle, a.handle)
     result = a
 
+  proc ver*(tx: var Tx): int32 =
+    var p32 = tx.handle.to(cint) div 4
+    Module.HEAPU32[p32].to(int32)
+
+  proc `ver=`*(tx: var Tx, val: int32) =
+    var p32 = tx.handle.to(cint) div 4
+    Module.HEAPU32[p32] = val
+
 else:
   when defined(emscripten):
     const EXPORTED_FUNCTIONS* = ["_tx_newTx", "_tx_toTx", "_tx_stripWitness",
