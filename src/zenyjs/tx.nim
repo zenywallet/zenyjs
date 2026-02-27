@@ -108,6 +108,14 @@ when defined(js):
     var p32 = tx.handle.to(cint) div 4
     Module.HEAPU32[p32] = val
 
+  proc flags*(tx: var Tx): Flags =
+    var p8 = tx.handle.to(cint)
+    Module.HEAPU8[p8 + 4].to(uint8).Flags
+
+  proc `flags=`*(tx: var Tx, flags: Flags) =
+    var p8 = tx.handle.to(cint)
+    Module.HEAPU8[p8 + 4] = flags.uint8
+
 else:
   when defined(emscripten):
     const EXPORTED_FUNCTIONS* = ["_tx_newTx", "_tx_toTx", "_tx_stripWitness",
