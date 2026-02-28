@@ -116,6 +116,14 @@ when defined(js):
     var p8 = tx.handle.to(cint)
     Module.HEAPU8[p8 + 4] = flags.uint8
 
+  proc locktime*(tx: var Tx): uint32 =
+    var p32 = tx.handle.to(cint) div 4
+    Module.HEAPU32[p32 + 14].to(uint32)
+
+  proc `locktime=`*(tx: var Tx, locktime: uint32) =
+    var p32 = tx.handle.to(cint) div 4
+    Module.HEAPU32[p32 + 14] = locktime
+
 else:
   when defined(emscripten):
     const EXPORTED_FUNCTIONS* = ["_tx_newTx", "_tx_toTx", "_tx_stripWitness",
