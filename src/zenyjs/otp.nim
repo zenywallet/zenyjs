@@ -107,7 +107,12 @@ else:
     result = generateCounter(totp, tval)
 
 
-  when isMainModule:
+when isMainModule:
+  import std/times
+  import ../zenyjs
+  import ../zenyjs/base32
+
+  zenyjs.ready:
     # https://tools.ietf.org/html/rfc6238
     var totp_sha1 = newTotp("12345678901234567890", 8, 30, SHA1)
     var totp_sha256 = newTotp("12345678901234567890123456789012", 8, 30, SHA256)
@@ -133,6 +138,5 @@ else:
     echo "-----"
 
     # google authenticator test
-    import times, base32
     var t = newTotp(base32.dec("testtesttesttest")) # 6, 30, SHA1
     echo t.generate(epochTime().uint64)
