@@ -140,7 +140,7 @@ when defined(js):
         onOpen.add(b[1])
       elif b[0].eqIdent("onReady"):
         onReady.add(b[1])
-      elif b[0].eqIdent("onRecv"):
+      elif b[0].eqIdent("onRecv") or b[0].eqIdent("onMessage"):
         onRecv.add(b[1])
       elif b[0].eqIdent("onClose"):
         onClose.add(b[1])
