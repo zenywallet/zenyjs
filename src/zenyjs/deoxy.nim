@@ -66,7 +66,7 @@ when defined(js):
 
   proc connect0*(deoxy: ref Deoxy, url, protocols: cstring; onOpen: proc(evt: JsObject);
                 onReady: proc(evt: JsObject); onRecv: proc(evt: JsObject, data: Uint8Array);
-                onClose: proc(evt: JsObject)) =
+                onClose: proc(evt: JsObject); onError: proc(evt: JsObject)) =
     deoxy.ws = newWebSocket(url, protocols)
     deoxy.ws.binaryType = "arraybuffer".cstring
     if deoxy.reconnectCount == 0:
@@ -77,10 +77,11 @@ when defined(js):
         dec(deoxy.reconnectCount)
         let randomWait = Math.round(Math.random() * (RECONNECT_WAIT * 2 / 3).toJs).to(int)
         let ms = Math.round(RECONNECT_WAIT / 3).to(int) + randomWait
-        setTimeout(proc() = deoxy.connect0(url, protocols, onOpen, onReady, onRecv, onClose), ms)
+        setTimeout(proc() = deoxy.connect0(url, protocols, onOpen, onReady, onRecv, onClose, onError), ms)
 
     deoxy.ws.onerror = proc(evt: JsObject) =
       console.error("websocket error:", evt)
+      onError(evt)
 
     deoxy.ws.onopen = proc(evt: JsObject) =
       if deoxy.stream.isNil:
@@ -129,13 +130,14 @@ when defined(js):
 
   template connect*(deoxy: ref Deoxy, url, protocols: cstring;
                     onOpen, onReady, onRecv, onClose: untyped) =
-    connect0(deoxy, url, protocols, onOpen, onReady, onRecv, onClose)
+    connect0(deoxy, url, protocols, onOpen, onReady, onRecv, onClose, onError)
 
   macro connect*(deoxy: ref Deoxy, url, protocols: cstring; body: untyped): untyped =
     var onOpen = newStmtList()
     var onReady = newStmtList()
     var onRecv = newStmtList()
     var onClose = newStmtList()
+    var onError = newStmtList()
     for b in body:
       if b[0].eqIdent("onOpen"):
         onOpen.add(b[1])
@@ -145,6 +147,8 @@ when defined(js):
         onRecv.add(b[1])
       elif b[0].eqIdent("onClose"):
         onClose.add(b[1])
+      elif b[0].eqIdent("onError"):
+        onError.add(b[1])
     var evt = ident"evt"
     var data = ident"data"
     quote do:
@@ -152,7 +156,8 @@ when defined(js):
                       proc(`evt`: JsObject) = `onOpen`,
                       proc(`evt`: JsObject) = `onReady`,
                       proc(`evt`: JsObject, `data`: Uint8Array) = `onRecv`,
-                      proc(`evt`: JsObject) = `onClose`)
+                      proc(`evt`: JsObject) = `onClose`,
+                      proc(`evt`: JsObject) = `onError`)
 
   proc close*(deoxy: ref Deoxy) =
     if not deoxy.ws.isNil:
