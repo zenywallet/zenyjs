@@ -64,8 +64,9 @@ when defined(js):
     Module.free(pOutBuf)
     Module.free(p)
 
-  proc connect0*(deoxy: ref Deoxy, url, protocols: cstring; onOpen: proc();
-                onReady: proc(); onRecv: proc(data: Uint8Array); onClose: proc()) =
+  proc connect0*(deoxy: ref Deoxy, url, protocols: cstring; onOpen: proc(evt: JsObject);
+                onReady: proc(evt: JsObject); onRecv: proc(evt: JsObject, data: Uint8Array);
+                onClose: proc(evt: JsObject)) =
     deoxy.ws = newWebSocket(url, protocols)
     deoxy.ws.binaryType = "arraybuffer".cstring
     if deoxy.reconnectCount == 0:
@@ -85,7 +86,7 @@ when defined(js):
       if deoxy.stream.isNil:
         deoxy.reconnectCount = RECONNECT_COUNT
         deoxy.stream = DeoxyMod.cipherCreate()
-      onOpen()
+      onOpen(evt)
 
     deoxy.ws.onclose = proc(evt: JsObject) =
       console.log("websocket close:", evt.code)
@@ -93,7 +94,7 @@ when defined(js):
         DeoxyMod.cipherFree(deoxy.stream)
         deoxy.stream = jsNull
         deoxy.ready = false
-      onClose() # In case of an error, a close event may occur without an open event
+      onClose(evt) # In case of an error, a close event may occur without an open event
       reconnect()
 
     deoxy.ws.onmessage = proc(evt: JsObject) =
@@ -112,7 +113,7 @@ when defined(js):
 
       if retProcess == CipherProcessMode.Recv.int:
         getOutData()
-        onRecv(outData)
+        onRecv(evt, outData)
       elif retProcess == CipherProcessMode.SendPub.int or retProcess == CipherProcessMode.SendReady.int:
         getOutData()
         let sendRet = deoxy.rawSend(outData)
@@ -120,7 +121,7 @@ when defined(js):
           raise newException(CipherError, "rawSend failed")
         if retProcess == CipherProcessMode.SendReady.int:
           deoxy.ready = true
-          onReady()
+          onReady(evt)
 
       Module.free(pOutBufLen)
       Module.free(pOutBuf)
@@ -144,13 +145,14 @@ when defined(js):
         onRecv.add(b[1])
       elif b[0].eqIdent("onClose"):
         onClose.add(b[1])
+    var evt = ident"evt"
     var data = ident"data"
     quote do:
       `deoxy`.connect0(`url`, `protocols`,
-                      proc() = `onOpen`,
-                      proc() = `onReady`,
-                      proc(`data`: Uint8Array) = `onRecv`,
-                      proc() = `onClose`)
+                      proc(`evt`: JsObject) = `onOpen`,
+                      proc(`evt`: JsObject) = `onReady`,
+                      proc(`evt`: JsObject, `data`: Uint8Array) = `onRecv`,
+                      proc(`evt`: JsObject) = `onClose`)
 
   proc close*(deoxy: ref Deoxy) =
     if not deoxy.ws.isNil:
