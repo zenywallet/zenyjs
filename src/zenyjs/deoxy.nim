@@ -39,13 +39,13 @@ when defined(js):
     DeoxyMod.cipherProcess = Module.cwrap("cipher_process", NumVar, [NumVar, NumVar, NumVar, NumVar, NumVar])
     DeoxyMod.cipherEncrypt = Module.cwrap("cipher_encrypt", NumVar, [NumVar, NumVar, NumVar, NumVar, NumVar])
 
-  proc rawSend*(deoxy: ref Deoxy, data: Uint8Array): bool {.discardable.} =
+  proc rawSend*(deoxy: ref Deoxy; data: Uint8Array): bool {.discardable.} =
     if not deoxy.ws.isNil and deoxy.ws.readyState == WebSocket.OPEN:
       deoxy.ws.send(data)
       return true
     return false
 
-  proc send*(deoxy: ref Deoxy, data: Uint8Array): bool {.discardable.} =
+  proc send*(deoxy: ref Deoxy; data: Uint8Array): bool {.discardable.} =
     if not deoxy.ready: return false
     var size = data.length.to(cint)
     var p = Module.malloc(size)
@@ -64,7 +64,7 @@ when defined(js):
     Module.free(pOutBuf)
     Module.free(p)
 
-  proc connect0*(deoxy: ref Deoxy, url, protocols: cstring; onOpen: proc(evt: JsObject);
+  proc connect0*(deoxy: ref Deoxy; url, protocols: cstring; onOpen: proc(evt: JsObject);
                 onReady: proc(evt: JsObject); onRecv: proc(evt: JsObject, data: Uint8Array);
                 onClose: proc(evt: JsObject); onError: proc(evt: JsObject)) =
     deoxy.ws = newWebSocket(url, protocols)
@@ -128,11 +128,11 @@ when defined(js):
       Module.free(pOutBuf)
       Module.free(p)
 
-  template connect*(deoxy: ref Deoxy, url, protocols: cstring;
+  template connect*(deoxy: ref Deoxy; url, protocols: cstring;
                     onOpen, onReady, onRecv, onClose: untyped) =
     connect0(deoxy, url, protocols, onOpen, onReady, onRecv, onClose, onError)
 
-  macro connect*(deoxy: ref Deoxy, url, protocols: cstring; body: untyped): untyped =
+  macro connect*(deoxy: ref Deoxy; url, protocols: cstring; body: untyped): untyped =
     var onOpen = newStmtList()
     var onReady = newStmtList()
     var onRecv = newStmtList()
@@ -165,7 +165,7 @@ when defined(js):
       deoxy.ws.close()
       deoxy.ws = jsNull
 
-  template ready*(deoxy: ref Deoxy, body: untyped) =
+  template ready*(deoxy: ref Deoxy; body: untyped) =
     block ready:
       proc bodyMain() {.async, discardable.} =
         while not deoxy.ready:
