@@ -137,6 +137,8 @@ else:
         else:
           result.add(chunk.data.toHex)
 
+  proc `$`*(script: Script): string = $cast[Array[byte]](script)
+
   proc `%`*(chunks: Chunks): JsonNode = newJString($chunks)
 
   import std/bitops
