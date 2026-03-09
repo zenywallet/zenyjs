@@ -137,20 +137,7 @@ else:
         else:
           result.add(chunk.data.toHex)
 
-  proc `%`*(chunks: Chunks): JsonNode =
-    var s: string
-    for chunk in chunks:
-      if chunk.chunkType == Code:
-        if s.len > 0:
-          s.add(" " & $chunk.op)
-        else:
-          s.add($chunk.op)
-      elif chunk.chunkType == Data:
-        if s.len > 0:
-          s.add(" " & chunk.data.toHex)
-        else:
-          s.add(chunk.data.toHex)
-    result = newJString(s)
+  proc `%`*(chunks: Chunks): JsonNode = newJString($chunks)
 
   import std/bitops
 
