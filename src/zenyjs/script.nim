@@ -141,6 +141,8 @@ else:
 
   proc `%`*(chunks: Chunks): JsonNode = newJString($chunks)
 
+  proc `%`*(script: Script): JsonNode = newJString($script)
+
   import std/bitops
 
   proc bip34Sig*(height: uint32): Array[byte] =
