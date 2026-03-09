@@ -28,6 +28,9 @@ when defined(js):
     Hash {.borrow: `.`.} = distinct Array[byte]
     InternalExportedHash* {.deprecated: "use hash.Hash instead".} = Hash
 
+    Script {.borrow: `.`.} = distinct Array[byte]
+    InternalExportedScript* {.deprecated: "use script.Script instead".} = Script
+
   var ArrayMod = JsObject{}
   var Module: JsObject
 

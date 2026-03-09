@@ -24,8 +24,14 @@ type
 
   Chunks* = Array[Chunk]
 
-  Script* {.borrow: `.`.} = distinct Array[byte]
+when defined(js):
+  type
+    Script* = InternalExportedScript
+else:
+  type
+    Script* {.borrow: `.`.} = distinct Array[byte]
 
+type
   ScriptError* = object of CatchableError
 
 converter toArray*(data: ChunkData): Array[byte] = cast[Array[byte]](data)
