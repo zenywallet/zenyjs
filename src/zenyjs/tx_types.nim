@@ -10,12 +10,22 @@ type
 
   Witness* {.borrow: `.`.} = distinct Array[byte]
 
-  Sig* {.borrow: `.`.} = distinct Array[byte]
+when defined(js):
+  type
+    Sig* = InternalExportedSig
 
-  TxIn* = tuple[tx: Hash, n: uint32, sig: Sig, sequence: uint32]
+    TxIn* = InternalExportedTxIn
 
-  TxOut* = tuple[value: uint64, script: Script]
+    TxOut* = InternalExportedTxOut
+else:
+  type
+    Sig* {.borrow: `.`.} = distinct Array[byte]
 
+    TxIn* = tuple[tx: Hash, n: uint32, sig: Sig, sequence: uint32]
+
+    TxOut* = tuple[value: uint64, script: Script]
+
+type
   TxObj* = object
     ver*: int32
     flags*: Flags

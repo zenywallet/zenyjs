@@ -31,6 +31,15 @@ when defined(js):
     Script {.borrow: `.`.} = distinct Array[byte]
     InternalExportedScript* {.deprecated: "use script.Script instead".} = Script
 
+    Sig {.borrow: `.`.} = distinct Array[byte]
+    InternalExportedSig* {.deprecated: "use tx_types.Sig instead".} = Sig
+
+    TxIn = tuple[tx: Hash, n: uint32, sig: Sig, sequence: uint32]
+    InternalExportedTxIn* {.deprecated: "use tx_types.TxIn instead".} = TxIn
+
+    TxOut = tuple[value: uint64, script: Script]
+    InternalExportedTxOut* {.deprecated: "use tx_types.TxOut instead".} = TxOut
+
   var ArrayMod = JsObject{}
   var Module: JsObject
 
