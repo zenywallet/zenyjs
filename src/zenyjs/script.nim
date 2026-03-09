@@ -124,6 +124,19 @@ else:
     if data.len > 0:
       result = concat(varInt(data.len), data)
 
+  proc `$`*(chunks: Chunks): string =
+    for chunk in chunks:
+      if chunk.chunkType == Code:
+        if result.len > 0:
+          result.add(" " & $chunk.op)
+        else:
+          result.add($chunk.op)
+      elif chunk.chunkType == Data:
+        if result.len > 0:
+          result.add(" " & chunk.data.toHex)
+        else:
+          result.add(chunk.data.toHex)
+
   proc `%`*(chunks: Chunks): JsonNode =
     var s: string
     for chunk in chunks:
