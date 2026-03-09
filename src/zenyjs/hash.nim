@@ -2,8 +2,12 @@
 
 import arraylib
 
-type
-  Hash* {.borrow: `.`.} = distinct Array[byte]
+when defined(js):
+  type
+    Hash* = InternalExportedHash
+else:
+  type
+    Hash* {.borrow: `.`.} = distinct Array[byte]
 
 when defined(js):
   import jsffi

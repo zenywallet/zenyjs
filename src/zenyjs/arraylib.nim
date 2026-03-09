@@ -25,6 +25,9 @@ when defined(js):
       data: seq[T]
       dirty: ArrayDirty
 
+    Hash {.borrow: `.`.} = distinct Array[byte]
+    InternalExportedHash* {.deprecated: "use hash.Hash instead".} = Hash
+
   var ArrayMod = JsObject{}
   var Module: JsObject
 
