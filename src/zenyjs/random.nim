@@ -33,10 +33,20 @@ else:
         echo e.name, ": ", e.msg
 
 
-  when isMainModule:
-    import bytes
-    import address
+when isMainModule:
+  import ../zenyjs
+  import ../zenyjs/core
+  import ../zenyjs/address
+  import ../zenyjs/config
 
+  networks:
+    bitcoin:
+      pubKeyPrefix: 0'u8
+      scriptPrefix: 5'u8
+      wif: 128'u8
+      bech32: "bc"
+
+  zenyjs.ready:
     var pair = randomKey()
     echo pair
-    echo pair.pub.toAddress()
+    echo bitcoin.getAddress(pair.pub)
