@@ -92,16 +92,18 @@ proc getVarInt*(r: Reader): int =
     result = u64.int
 
 proc getBytes*(r: ArrayReader, size: int): Array[byte] =
-  if r.size < r.pos + size:
-    raise newException(ReaderError, "bytes: out of range")
-  result = r.data[r.pos..<r.pos+size]
-  inc(r.pos, size)
+  if size > 0:
+    if r.size < r.pos + size:
+      raise newException(ReaderError, "bytes: out of range")
+    result = r.data[r.pos..<r.pos+size]
+    inc(r.pos, size)
 
 proc getBytes*(r: PtrReader, size: int): Array[byte] =
-  if r.size < r.pos + size:
-    raise newException(ReaderError, "bytes: out of range")
-  result = cast[ptr UncheckedArray[byte]](addr r.data[r.pos]).toBytes(size)
-  inc(r.pos, size)
+  if size > 0:
+    if r.size < r.pos + size:
+      raise newException(ReaderError, "bytes: out of range")
+    result = cast[ptr UncheckedArray[byte]](addr r.data[r.pos]).toBytes(size)
+    inc(r.pos, size)
 
 proc getVarStr*(r: Reader): string =
   var len = r.getVarInt
