@@ -39,9 +39,17 @@ macro networks*(networkConfig: untyped): untyped =
       `networkList`.add(`networkObj`)
     inc(curNetworkId)
 
-template getNetwork*(nid: NetworkId): Network = networkList[nid.int]
+proc getNetwork*(nid: NetworkId): Network =
+  if nid.int >= 0 and networkList.len > nid.int:
+    networkList[nid.int]
+  else:
+    raise newException(NetworkError, "invalid network id")
 
-template name*(nid: NetworkId): string = networkList[nid.int].name
+proc name*(nid: NetworkId): string =
+  if nid.int >= 0 and networkList.len > nid.int:
+    networkList[nid.int].name
+  else:
+    raise newException(NetworkError, "invalid network id")
 
 proc `$`*(nid: NetworkId): string = nid.name
 
