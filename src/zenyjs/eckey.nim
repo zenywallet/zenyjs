@@ -9,6 +9,12 @@ type
 
   EcError* = object of CatchableError
 
+converter toBytes*(o: PrivateKey | PublicKey | PublicKeyObj): Array[byte] {.inline.} =
+  cast[Array[byte]](o)
+converter toPrivateKey*(s: Array[byte]): PrivateKey {.inline.} = PrivateKey(s)
+converter toPublicKey*(s: Array[byte]): PublicKey {.inline.} = PublicKey(s)
+converter toPublicKeyObj*(s: Array[byte]): PublicKeyObj {.inline.} = PublicKeyObj(s)
+
 when defined(js):
   import jsffi
   import jslib except Array
@@ -109,11 +115,6 @@ else:
   import secp256k1
   import custom
 
-  converter toBytes*(o: PrivateKey | PublicKey | PublicKeyObj): Array[byte] {.inline.} =
-    cast[Array[byte]](o)
-  converter toPrivateKey*(s: Array[byte]): PrivateKey {.inline.} = PrivateKey(s)
-  converter toPublicKey*(s: Array[byte]): PublicKey {.inline.} = PublicKey(s)
-  converter toPublicKeyObj*(s: Array[byte]): PublicKeyObj {.inline.} = PublicKeyObj(s)
   converter toBytes*(o: secp256k1_pubkey): Array[byte] {.inline.} =
     (cast[array[64, byte]](o.data)).toArray
   converter toPublicKeyObj*(o: secp256k1_pubkey): PublicKeyObj {.inline.} =
