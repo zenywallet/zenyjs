@@ -199,7 +199,7 @@ else:
     else:
       result = ""
 
-  var defaultNetworkId* {.threadvar.}: NetworkId
+  var defaultNetworkId*: NetworkId
 
   proc setDefaultNetworkId*(networkId: NetworkId) {.inline.} =
     defaultNetworkId = networkId
