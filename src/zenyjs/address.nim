@@ -100,6 +100,17 @@ when defined(js):
       result = newArray[byte]()
       AddressMod.getScript(networkId, p, result.handle)
 
+  var defaultNetworkId*: NetworkId
+
+  proc setDefaultNetworkId*(networkId: NetworkId) {.inline.} =
+    defaultNetworkId = networkId
+
+  template toAddress*(pub: Array[byte], networkId: NetworkId = defaultNetworkId): cstring = getAddress(networkId, pub)
+  template toAddress*(pub: Array[byte], network: Network): cstring = getAddress(network, pub)
+
+  template toSegwitAddress*(pub: Array[byte], networkId: NetworkId = defaultNetworkId): cstring = getSegwitAddress(networkId, pub)
+  template toSegwitAddress*(pub: Array[byte], network: Network): cstring = getSegwitAddress(network, pub)
+
 else:
   type
     Wif* = string
