@@ -263,4 +263,4 @@ else:
 
   proc tweakAdd*(publicKeyObj: PublicKeyObj, tweak: Array[byte]): PublicKeyObj {.returnToLastParam, exportc: "eckey_$1_pubobj".}
 
-  proc `$`*(data: PrivateKey | PublicKey): string = $cast[Array[byte]](data)
+  proc `$`*(data: PrivateKey | PublicKey | PublicKeyObj): string = $cast[Array[byte]](data)
