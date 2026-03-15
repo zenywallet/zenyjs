@@ -9,21 +9,11 @@ when defined(js):
 
   type
     Array*[T] = object
-      handle: JsObject
-      cache: cint
+      handle*: JsObject
 
     ArrayByte* = Array[byte]
 
     ArrayError* = object of CatchableError
-
-    ArrayDirty {.pure.} = enum
-      None
-      Handle
-      Data
-
-    ArrayCache[T] = object
-      data: seq[T]
-      dirty: ArrayDirty
 
     Hash {.borrow: `.`.} = distinct Array[byte]
     InternalExportedHash* {.deprecated: "use hash.Hash instead".} = Hash
@@ -42,34 +32,6 @@ when defined(js):
 
   var ArrayMod = JsObject{}
   var Module: JsObject
-
-  var arrayCache = JsObject{}
-  var arrayCacheIdx = 1.cint
-
-  proc getNewArrayCacheIdx(): cint =
-    var flag = false
-    while arrayCache[arrayCacheIdx] != jsNull:
-      if arrayCacheIdx >= cint.high:
-        if flag: raise
-        flag = true
-        arrayCacheIdx = 1.cint
-      else:
-        inc(arrayCacheIdx)
-    result = arrayCacheIdx
-
-  proc handle*[T](a: Array[T]): JsObject =
-    when T is byte:
-      if a.cache != 0 and arrayCache[a.cache] != jsNull:
-        var cache = arrayCache[a.cache].to(ArrayCache[byte])
-        if cache.dirty == ArrayDirty.Data:
-          var pData = Module.HEAPU32[(a.handle.to(cint) + 8) div 4].to(int)
-          for i, d in cache.data:
-            Module.HEAPU8[pData + i] = d
-          cache.data = @[]
-          cache.dirty = ArrayDirty.None
-    else:
-      discard
-    result = a.handle
 
   proc init*(module: JsObject) =
     Module = module
@@ -91,9 +53,6 @@ when defined(js):
       ArrayMod.destroy(x.handle)
       Module.free(x.handle)
       x.handle = jsNull
-      if x.cache != 0.cint:
-        discard jsDelete(arrayCache[x.cache])
-        x.cache = 0.cint
 
   proc `=copy`*[T](a: var Array[T]; b: Array[T]) =
     raise newException(ArrayError, "unsupported =copy")
@@ -102,7 +61,6 @@ when defined(js):
     `=destroy`(a)
     wasMoved(a)
     a.handle = b.handle
-    a.cache = b.cache
 
   proc init*[T](x: var Array[T]) =
     `=destroy`(x)
@@ -161,11 +119,6 @@ when defined(js):
   proc toBytesFromHex*(s: string): Array[byte] = s.cstring.hexToUint8Array.toBytes
 
   proc toHex*(x: Array[byte]): cstring =
-    var cacheJsObj = arrayCache[x.cache]
-    if cacheJsObj != jsNull:
-      var cache = cacheJsObj.to(ArrayCache[byte])
-      if cache.dirty == ArrayDirty.Data:
-        return uint8ArrayToHex(cache.data.toUint8Array)
     var arrayObj = newUint32Array(newUint8Array(Module.HEAPU8.buffer, x.handle.to(cint), 12).slice().buffer, 0, 3)
     var uint8Array = newUint8Array(Module.HEAPU8.buffer, arrayObj[2].to(int), arrayObj[0].to(int)).slice()
     result = uint8ArrayToHex(uint8Array)
@@ -184,43 +137,23 @@ when defined(js):
 
   proc `@^`*[IDX, T](a: sink array[IDX, T]): Array[T] =
     when T is byte:
-      var y = newSeq[byte](a.len)
-      for i in 0..a.len-1:
-        y[i] = a[i]
-      var cacheIdx = getNewArrayCacheIdx()
-      arrayCache[cacheIdx] = ArrayCache[byte](data: y, dirty: ArrayDirty.Data)
       result = newArray[T](a.len)
-      result.cache = cacheIdx
-      echo y
+      var arrayObj = newUint32Array(newUint8Array(Module.HEAPU8.buffer, result.handle.to(cint), 12).slice().buffer, 0, 3)
+      var pData = arrayObj[2].to(int)
+      var y = newUint8Array(Module.HEAPU8.buffer, pData, arrayObj[0].to(int))
+      for i in 0..<a.len:
+        y[i] = a[i]
     else:
       discard
 
   proc add*[T](x: var Array[T]; y: sink seq[T]) =
     when T is byte:
-      if arrayCache[x.cache] != jsNull:
-        var cache = arrayCache[x.cache].to(ArrayCache[byte])
-        cache.data.add(y)
-      else:
-        var p32 = x.handle.to(cint) div 4
-        var ua = newUint8Array(Module.HEAPU8.buffer, Module.HEAPU32[p32 + 2].to(int), Module.HEAPU32[p32].to(int)).slice().to(Uint8Array)
-        var s = newSeq[byte](ua.length.to(int))
-        for i in 0..<ua.length.to(int):
-          s[i] = ua[i].to(byte)
-        s.add(y)
-        var cacheIdx = getNewArrayCacheIdx()
-        arrayCache[cacheIdx] = ArrayCache[byte](data: s, dirty: ArrayDirty.Data)
-        x.cache = cacheIdx
+      raise
     else:
       discard
 
   proc `[]`*[T](x: Array[T]; i: Natural): T =
     when T is byte:
-      var cacheJsObj = arrayCache[x.cache]
-      if cacheJsObj != jsNull:
-        var cache = cacheJsObj.to(ArrayCache[byte])
-        if cache.dirty == ArrayDirty.Data:
-          var uint8Array = cache.data.toUint8Array
-          return uint8Array[i].to(byte)
       var arrayObj = newUint32Array(newUint8Array(Module.HEAPU8.buffer, x.handle.to(cint), 12).slice().buffer, 0, 3)
       var uint8Array = newUint8Array(Module.HEAPU8.buffer, arrayObj[2].to(int), arrayObj[0].to(int)).slice()
       result = uint8Array[i].to(byte)
@@ -229,30 +162,9 @@ when defined(js):
 
   proc `[]=`*[T](x: var Array[T]; i: Natural; y: sink T) =
     when T is byte:
-      var cacheJsObj = arrayCache[x.cache]
-
-      if cacheJsObj != jsNull:
-        var cache = cacheJsObj.to(ArrayCache[byte])
-        if cache.dirty == ArrayDirty.Data:
-          cache.data[i] = y
-        else:
-          var p32 = x.handle.to(cint) div 4
-          var ua = newUint8Array(Module.HEAPU8.buffer, Module.HEAPU32[p32 + 2].to(int), Module.HEAPU32[p32].to(int)).slice().to(Uint8Array)
-          var s = newSeq[byte](ua.length.to(int))
-          for j in 0..<ua.length.to(int):
-            s[j] = ua[j].to(byte)
-          s[i] = y
-          arrayCache[x.cache] = ArrayCache[byte](data: s, dirty: ArrayDirty.Data)
-      else:
-        var p32 = x.handle.to(cint) div 4
-        var ua = newUint8Array(Module.HEAPU8.buffer, Module.HEAPU32[p32 + 2].to(int), Module.HEAPU32[p32].to(int)).slice().to(Uint8Array)
-        var s = newSeq[byte](ua.length.to(int))
-        for j in 0..<ua.length.to(int):
-          s[j] = ua[j].to(byte)
-        s[i] = y
-        var cacheIdx = getNewArrayCacheIdx()
-        arrayCache[cacheIdx] = ArrayCache[byte](data: s, dirty: ArrayDirty.Data)
-        x.cache = cacheIdx
+      var p32 = x.handle.to(cint) div 4
+      var ua = newUint8Array(Module.HEAPU8.buffer, Module.HEAPU32[p32 + 2].to(int), Module.HEAPU32[p32].to(int))
+      ua[i] = y
     else:
       raise
 
@@ -292,7 +204,6 @@ when defined(js):
     proc data*(x: typ): int {.borrow.}
     proc toUint8Array*(x: typ): Uint8Array {.borrow.}
     proc toHex*(x: typ): cstring {.borrow.}
-    proc handle*(x: typ): JsObject {.borrow.}
 
 else:
   when defined(emscripten):
