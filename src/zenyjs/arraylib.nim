@@ -37,6 +37,7 @@ when defined(js):
     Module = module
     ArrayMod.newArrayByte = Module.cwrap("array_new", jsNull, [NumVar, NumVar])
     ArrayMod.destroy = Module.cwrap("array_destroy", jsNull, [NumVar])
+    ArrayMod.realloc = Module.cwrap("array_realloc", jsNull, [NumVar, NumVar, NumVar])
 
   proc newArray*[T](len: Natural): Array[T] =
     when not T is byte: raise
@@ -61,6 +62,9 @@ when defined(js):
     `=destroy`(a)
     wasMoved(a)
     a.handle = b.handle
+
+  proc reallocArray*[T](a: var Array[T], newLen: Natural, sizeT: int) =
+    ArrayMod.realloc(a.handle, newLen, sizeT)
 
   proc init*[T](x: var Array[T]) =
     `=destroy`(x)
@@ -148,7 +152,11 @@ when defined(js):
 
   proc add*[T](x: var Array[T]; y: sink seq[T]) =
     when T is byte:
-      raise
+      let curLen = x.len
+      let newLen = x.len + y.len
+      x.reallocArray(newLen, 1)
+      for i, a in y:
+        x[curLen + i] = a
     else:
       discard
 
@@ -207,7 +215,7 @@ when defined(js):
 
 else:
   when defined(emscripten):
-    const EXPORTED_FUNCTIONS* = ["_array_new", "_array_destroy"]
+    const EXPORTED_FUNCTIONS* = ["_array_new", "_array_destroy", "_array_realloc"]
 
   import std/json
 
@@ -215,6 +223,10 @@ else:
     Array*[T] = object
       len*, cap*: int
       data* {.align(8).}: ptr UncheckedArray[T]
+
+    ArrayPointer* = object
+      len*, cap*: int
+      data* {.align(8).}: pointer
 
   when defined(emscripten):
     proc `=destroy`*[T](x: var Array[T]) =
@@ -539,3 +551,9 @@ else:
       result.newArray(len)
 
     proc destroy*(x: var Array[byte]) {.exportc: "array_destroy".} = `=destroy`(x)
+
+    proc realloc*(x: var ArrayPointer, newLen, sizeT: int) {.exportc: "array_realloc".} =
+      if newLen > x.cap:
+        x.cap = nextCap(newLen)
+        x.data = reallocShared0(x.data, sizeT * x.len, sizeT * x.cap)
+        x.len = newlen
