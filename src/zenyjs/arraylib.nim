@@ -150,16 +150,6 @@ when defined(js):
     else:
       discard
 
-  proc add*[T](x: var Array[T]; y: sink seq[T]) =
-    when T is byte:
-      let curLen = x.len
-      let newLen = x.len + y.len
-      x.reallocArray(newLen, 1)
-      for i, a in y:
-        x[curLen + i] = a
-    else:
-      discard
-
   proc `[]`*[T](x: Array[T]; i: Natural): T =
     when T is byte:
       var arrayObj = newUint32Array(newUint8Array(Module.HEAPU8.buffer, x.handle.to(cint), 12).slice().buffer, 0, 3)
@@ -198,6 +188,16 @@ when defined(js):
     for i in xa..xb:
       result[idx] = a[i]
       inc(idx)
+
+  proc add*[T](x: var Array[T]; y: sink seq[T]) =
+    when T is byte:
+      let curLen = x.len
+      let newLen = x.len + y.len
+      x.reallocArray(newLen, 1)
+      for i, a in y:
+        x[curLen + i] = a
+    else:
+      discard
 
   proc toSeq*[T](x: Array[T]): seq[T] =
     result.newSeq(x.len)
