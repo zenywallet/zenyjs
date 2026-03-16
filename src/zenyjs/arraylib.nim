@@ -152,9 +152,9 @@ when defined(js):
 
   proc `[]`*[T](x: Array[T]; i: Natural): T =
     when T is byte:
-      var arrayObj = newUint32Array(newUint8Array(Module.HEAPU8.buffer, x.handle.to(cint), 12).slice().buffer, 0, 3)
-      var uint8Array = newUint8Array(Module.HEAPU8.buffer, arrayObj[2].to(int), arrayObj[0].to(int)).slice()
-      result = uint8Array[i].to(byte)
+      let a = newDataView(Module.HEAPU8.buffer, x.handle.to(cint), 12)
+      let d = newDataView(Module.HEAPU8.buffer, a.getUint32(8, true).to(int) + i, 1)
+      result = d.getUint8(0).to(byte)
     else:
       raise
 
