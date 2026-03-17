@@ -30,6 +30,11 @@ when defined(js):
     TxOut = tuple[value: uint64, script: Script]
     InternalExportedTxOut* {.deprecated: "use tx_types.TxOut instead".} = TxOut
 
+  template csizeof*(T: typedesc): int = sizeof(T)
+  template csizeof*(T: typedesc[Hash | Script | Sig]): int = 16
+  template csizeof*(T: typedesc[TxIn]): int = 48
+  template csizeof*(T: typedesc[TxOut | InternalExportedTxOut]): int = 24
+
   var ArrayMod = JsObject{}
   var Module: JsObject
 
@@ -42,12 +47,12 @@ when defined(js):
   proc newArray*[T](len: Natural): Array[T] =
     when not T is byte: raise
     result.handle = Module.malloc(12)
-    discard ArrayMod.newArrayT(len, 1, result.handle)
+    discard ArrayMod.newArrayT(len, csizeof(T), result.handle)
 
   proc newArray*[T](len: JsObject): Array[T] =
     when not T is byte: raise
     result.handle = Module.malloc(12)
-    discard ArrayMod.newArrayT(len, 1, result.handle)
+    discard ArrayMod.newArrayT(len, csizeof(T), result.handle)
 
   proc `=destroy`*[T](x: var Array[T]) =
     if not x.handle.isNull:
