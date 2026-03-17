@@ -35,19 +35,19 @@ when defined(js):
 
   proc init*(module: JsObject) =
     Module = module
-    ArrayMod.newArrayByte = Module.cwrap("array_new", jsNull, [NumVar, NumVar])
+    ArrayMod.newArrayT = Module.cwrap("array_new", jsNull, [NumVar, NumVar, NumVar])
     ArrayMod.destroy = Module.cwrap("array_destroy", jsNull, [NumVar])
     ArrayMod.realloc = Module.cwrap("array_realloc", jsNull, [NumVar, NumVar, NumVar])
 
   proc newArray*[T](len: Natural): Array[T] =
     when not T is byte: raise
     result.handle = Module.malloc(12)
-    discard ArrayMod.newArrayByte(len, result.handle)
+    discard ArrayMod.newArrayT(len, 1, result.handle)
 
   proc newArray*[T](len: JsObject): Array[T] =
     when not T is byte: raise
     result.handle = Module.malloc(12)
-    discard ArrayMod.newArrayByte(len, result.handle)
+    discard ArrayMod.newArrayT(len, 1, result.handle)
 
   proc `=destroy`*[T](x: var Array[T]) =
     if not x.handle.isNull:
@@ -547,8 +547,10 @@ else:
   proc `%`*[T](a: Array[T]): JsonNode = %a.toSeq
 
   when defined(emscripten):
-    proc newArrayByte*(len: int, result: var Array[byte]) {.exportc: "array_new".} =
-      result.newArray(len)
+    proc newArrayT*(len, sizeT: int, result: var ArrayPointer) {.exportc: "array_new".} =
+      result.data = cast[typeof(result.data)](allocShared0(sizeT * len))
+      result.len = len
+      result.cap = len
 
     proc destroy*(x: var ArrayPointer) {.exportc: "array_destroy".} = `=destroy`(x)
 
