@@ -550,7 +550,7 @@ else:
     proc newArrayByte*(len: int, result: var Array[byte]) {.exportc: "array_new".} =
       result.newArray(len)
 
-    proc destroy*(x: var Array[byte]) {.exportc: "array_destroy".} = `=destroy`(x)
+    proc destroy*(x: var ArrayPointer) {.exportc: "array_destroy".} = `=destroy`(x)
 
     proc realloc*(x: var ArrayPointer, newLen, sizeT: int) {.exportc: "array_realloc".} =
       if newLen > x.cap:
