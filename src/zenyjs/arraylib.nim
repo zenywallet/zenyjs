@@ -168,7 +168,7 @@ when defined(js):
     else:
       raise
 
-  proc `[]=`*[T](x: var Array[T]; i: Natural; y: sink T) =
+  proc `[]=`*[T](x: var Array[T] | Array[T]; i: Natural; y: sink T) =
     when T is byte:
       var p32 = x.handle.to(cint) div 4
       var ua = newUint8Array(Module.HEAPU8.buffer, Module.HEAPU32[p32 + 2].to(int), Module.HEAPU32[p32].to(int))
