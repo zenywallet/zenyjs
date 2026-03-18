@@ -160,6 +160,11 @@ when defined(js):
       let a = newDataView(Module.HEAPU8.buffer, x.handle.to(cint), 12)
       let d = newDataView(Module.HEAPU8.buffer, a.getUint32(8, true).to(int) + i, 1)
       result = d.getUint8(0).to(byte)
+    elif T is TxOut:
+      let a = newDataView(Module.HEAPU8.buffer, x.handle.to(cint), 12)
+      let p = a.getUint32(8, true).to(int) + i * csizeof(T)
+      let d = newDataView(Module.HEAPU8.buffer, p, csizeof(uint64))
+      (value: d.getBigUint64(0, true).to(uint64), script: cast[Script](Array[byte](handle: (p + csizeof(uint64)).toJs)))
     else:
       raise
 
