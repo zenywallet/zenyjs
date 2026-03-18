@@ -173,6 +173,13 @@ when defined(js):
       var p32 = x.handle.to(cint) div 4
       var ua = newUint8Array(Module.HEAPU8.buffer, Module.HEAPU32[p32 + 2].to(int), Module.HEAPU32[p32].to(int))
       ua[i] = y
+    elif T is TxOut:
+      let a = newDataView(Module.HEAPU8.buffer, x.handle.to(cint), 12)
+      let p = a.getUint32(8, true).to(int) + i * csizeof(T)
+      let d = newDataView(Module.HEAPU8.buffer, p, csizeof(uint64))
+      d.setBigUint64(0, y.value, true)
+      let s = newUint8Array(Module.HEAPU8.buffer, y.script.handle.to(cint), 12)
+      Module.HEAPU8.set(s, p + csizeof(uint64))
     else:
       raise
 
