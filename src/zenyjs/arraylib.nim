@@ -590,7 +590,7 @@ else:
     if x.cap < newLen:
       x.cap = nextCap(newLen)
       x.data = cast[ptr UncheckedArray[T]](reallocShared0(x.data, sizeof(T) * x.len, sizeof(T) * x.cap))
-    x.len = newlen
+    x.len = newLen
 
   proc toString*(x: Array[byte] or Array[char]): string =
     let xlen = len(x)
@@ -611,4 +611,4 @@ else:
       if newLen > x.cap:
         x.cap = nextCap(newLen)
         x.data = reallocShared0(x.data, sizeT * x.len, sizeT * x.cap)
-        x.len = newlen
+        x.len = newLen
