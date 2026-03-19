@@ -611,4 +611,4 @@ else:
       if newLen > x.cap:
         x.cap = nextCap(newLen)
         x.data = reallocShared0(x.data, sizeT * x.len, sizeT * x.cap)
-        x.len = newLen
+      x.len = newLen
