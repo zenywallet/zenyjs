@@ -160,6 +160,14 @@ when defined(js):
       let a = newDataView(Module.HEAPU8.buffer, x.handle.to(cint), 12)
       let d = newDataView(Module.HEAPU8.buffer, a.getUint32(8, true).to(int) + i, 1)
       result = d.getUint8(0).to(byte)
+    elif T is TxIn:
+      let a = newDataView(Module.HEAPU8.buffer, x.handle.to(cint), 12)
+      let p = a.getUint32(8, true).to(int) + i * csizeof(T)
+      let d = newDataView(Module.HEAPU8.buffer, p, csizeof(T))
+      (tx: cast[Hash](Array[byte](handle: p.toJs)),
+        n: d.getUint32(csizeof(Hash), true).to(uint32),
+        sig: cast[Sig](Array[byte](handle: (p + csizeof(Hash) + csizeof(uint32) + 4).toJs)),
+        sequence: d.getUint32(csizeof(Hash) + csizeof(uint32) + 4 + csizeof(Sig), true).to(uint32))
     elif T is TxOut:
       let a = newDataView(Module.HEAPU8.buffer, x.handle.to(cint), 12)
       let p = a.getUint32(8, true).to(int) + i * csizeof(T)
