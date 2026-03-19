@@ -68,7 +68,7 @@ when defined(js):
     wasMoved(a)
     a.handle = b.handle
 
-  proc reallocArray*[T](a: var Array[T], newLen: Natural, sizeT: int) =
+  proc reallocArray*[T](a: var Array[T] | Array[T], newLen: Natural, sizeT: int) =
     ArrayMod.realloc(a.handle, newLen, sizeT)
 
   proc init*[T](x: var Array[T]) =
