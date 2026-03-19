@@ -224,7 +224,7 @@ when defined(js):
       result[idx] = a[i]
       inc(idx)
 
-  proc add*[T](x: var Array[T]; y: sink seq[T]) =
+  proc add*[T](x: var Array[T] | Array[T]; y: sink seq[T]) =
     let curLen = x.len
     let newLen = curLen + y.len
     x.reallocArray(newLen, csizeof(T))
