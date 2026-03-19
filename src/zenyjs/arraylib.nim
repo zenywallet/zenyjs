@@ -226,7 +226,7 @@ when defined(js):
 
   proc add*[T](x: var Array[T]; y: sink seq[T]) =
     let curLen = x.len
-    let newLen = x.len + y.len
+    let newLen = curLen + y.len
     x.reallocArray(newLen, csizeof(T))
     for i, a in y:
       x[curLen + i] = a
