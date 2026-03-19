@@ -181,6 +181,16 @@ when defined(js):
       var p32 = x.handle.to(cint) div 4
       var ua = newUint8Array(Module.HEAPU8.buffer, Module.HEAPU32[p32 + 2].to(int), Module.HEAPU32[p32].to(int))
       ua[i] = y
+    elif T is TxIn:
+      let a = newDataView(Module.HEAPU8.buffer, x.handle.to(cint), 12)
+      let p = a.getUint32(8, true).to(int) + i * csizeof(T)
+      let d = newDataView(Module.HEAPU8.buffer, p, csizeof(T))
+      let tx = newUint8Array(Module.HEAPU8.buffer, y.tx.handle.to(cint), 12)
+      Module.HEAPU8.set(tx, p)
+      d.setUint32(csizeof(Hash), y.n, true)
+      let sig = newUint8Array(Module.HEAPU8.buffer, y.sig.handle.to(cint), 12)
+      Module.HEAPU8.set(sig, p  + csizeof(Hash) + csizeof(uint32) + 4)
+      d.setUint32(csizeof(Hash) + csizeof(uint32) + 4 + csizeof(Sig), y.sequence, true)
     elif T is TxOut:
       let a = newDataView(Module.HEAPU8.buffer, x.handle.to(cint), 12)
       let p = a.getUint32(8, true).to(int) + i * csizeof(T)
