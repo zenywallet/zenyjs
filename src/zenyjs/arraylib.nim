@@ -224,7 +224,28 @@ when defined(js):
       result[idx] = a[i]
       inc(idx)
 
+  proc add*[T](x: var Array[T] | Array[T]; y: sink Array[T]) =
+    let curLen = x.len
+    let newLen = curLen + y.len
+    x.reallocArray(newLen, csizeof(T))
+    for i, a in y:
+      x[curLen + i] = a
+
+  proc add*[T](x: var Array[T] | Array[T]; y: sink T) =
+    let curLen = x.len
+    let newLen = curLen + 1
+    echo "curLen=", curLen, " newLen=", newLen
+    x.reallocArray(newLen, csizeof(T))
+    x[curLen] = y
+
   proc add*[T](x: var Array[T] | Array[T]; y: sink seq[T]) =
+    let curLen = x.len
+    let newLen = curLen + y.len
+    x.reallocArray(newLen, csizeof(T))
+    for i, a in y:
+      x[curLen + i] = a
+
+  proc add*[T](x: var Array[T] | Array[T]; y: sink openArray[T]) =
     let curLen = x.len
     let newLen = curLen + y.len
     x.reallocArray(newLen, csizeof(T))
