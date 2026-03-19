@@ -225,14 +225,11 @@ when defined(js):
       inc(idx)
 
   proc add*[T](x: var Array[T]; y: sink seq[T]) =
-    when T is byte:
-      let curLen = x.len
-      let newLen = x.len + y.len
-      x.reallocArray(newLen, 1)
-      for i, a in y:
-        x[curLen + i] = a
-    else:
-      discard
+    let curLen = x.len
+    let newLen = x.len + y.len
+    x.reallocArray(newLen, csizeof(T))
+    for i, a in y:
+      x[curLen + i] = a
 
   proc toSeq*[T](x: Array[T]): seq[T] =
     result.newSeq(x.len)
