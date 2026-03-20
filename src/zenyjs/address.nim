@@ -426,7 +426,7 @@ else:
     retArray = getScript(networkId, $address)
 
   proc p2pkh_script_c*(address: cstring, retArray: var Array[byte]) {.exportc: "$1".} =
-    var binaddr = base58.dec($address)
+    var binaddr = base58.dec(address)
     if binaddr.len == 25: # prefix(1), hash160(20), checksum(4)
       retArray = (OP_DUP, OP_HASH160, ChunkData(binaddr[1..^5]), OP_EQUALVERIFY, OP_CHECKSIG).toBytes
 

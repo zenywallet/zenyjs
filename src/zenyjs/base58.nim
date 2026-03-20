@@ -96,7 +96,7 @@ else:
     for i in 0..<bLen:
       result.add(cast[char](b[i]))
 
-  proc dec*(data: string): Array[byte] =
+  proc dec*(data: string | cstring): Array[byte] =
     var zeroLen = 0
 
     for d in data:
