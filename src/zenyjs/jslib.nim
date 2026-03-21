@@ -70,6 +70,7 @@ template newWebSocket*(url, protocols: string): WebSocket = newWebSocket(url.cst
 template newWebSocket*(url: cstring, protocols: string): WebSocket = newWebSocket(url, protocols.cstring)
 template newWebSocket*(url: string, protocols: cstring): WebSocket = newWebSocket(url.cstring, protocols)
 template newWebSocket*(url: string): WebSocket = newWebSocket(url.cstring)
+proc newArrayBuffer*(length: int): JsObject {.importcpp: "new ArrayBuffer(#)".}
 proc newUint8Array*(): Uint8Array {.importcpp: "new Uint8Array()".}
 proc newUint8Array*(length: int): Uint8Array {.importcpp: "new Uint8Array(#)".}
 proc newUint8Array*(obj: JsObject): Uint8Array {.importcpp: "new Uint8Array(#)".} # typedArray, buffer
