@@ -64,8 +64,9 @@ when defined(js):
     Module.free(pOutBuf)
     Module.free(p)
 
-  proc connect0*(deoxy: ref Deoxy; url, protocols: cstring; onOpen: proc(evt: JsObject);
-                onReady: proc(evt: JsObject); onRecv: proc(evt: JsObject, data: Uint8Array);
+  proc connect0*(deoxy: ref Deoxy; url: cstring; protocols: JsObject;
+                onOpen: proc(evt: JsObject); onReady: proc(evt: JsObject);
+                onRecv: proc(evt: JsObject, data: Uint8Array);
                 onClose: proc(evt: JsObject); onError: proc(evt: JsObject)) =
     deoxy.ws = newWebSocket(url, protocols)
     deoxy.ws.binaryType = "arraybuffer".cstring
@@ -128,11 +129,15 @@ when defined(js):
       Module.free(pOutBuf)
       Module.free(p)
 
-  template connect*(deoxy: ref Deoxy; url, protocols: cstring;
-                    onOpen, onReady, onRecv, onClose: untyped) =
+  template connect*(deoxy: ref Deoxy; url: cstring; protocols: JsObject;
+                    onOpen, onReady, onRecv, onClose, onError: untyped) =
     connect0(deoxy, url, protocols, onOpen, onReady, onRecv, onClose, onError)
 
-  macro connect*(deoxy: ref Deoxy; url, protocols: cstring; body: untyped): untyped =
+  template connect*(deoxy: ref Deoxy; url, protocols: cstring;
+                    onOpen, onReady, onRecv, onClose, onError: untyped) =
+    connect0(deoxy, url, protocols, onOpen, onReady, onRecv, onClose, onError)
+
+  macro connect*(deoxy: ref Deoxy; url: cstring; protocols: JsObject; body: untyped): untyped =
     var onOpen = newStmtList()
     var onReady = newStmtList()
     var onRecv = newStmtList()
@@ -158,6 +163,9 @@ when defined(js):
                       proc(`evt`: JsObject, `data`: Uint8Array) = `onRecv`,
                       proc(`evt`: JsObject) = `onClose`,
                       proc(`evt`: JsObject) = `onError`)
+
+  template connect*(deoxy: ref Deoxy; url: cstring; protocols: cstring; body: untyped): untyped =
+    connect(deoxy, url, protocols.toJs, body)
 
   proc close*(deoxy: ref Deoxy) =
     if not deoxy.ws.isNil:
