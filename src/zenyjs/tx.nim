@@ -124,6 +124,8 @@ when defined(js):
     var p32 = tx.handle.to(cint) div 4
     Module.HEAPU32[p32 + 14] = locktime
 
+  proc `$`*(data: Flags): string = $cast[uint8](data)
+
 else:
   when defined(emscripten):
     const EXPORTED_FUNCTIONS* = ["_tx_newTx", "_tx_toTx", "_tx_stripWitness",
