@@ -148,3 +148,5 @@ template withStack*(body: untyped) =
     defer:
       Module.stackRestore(stack)
     body
+
+proc addEventListener*(obj: JsObject, ev: cstring, cb: proc(evt: JsObject)) {.importcpp.}
