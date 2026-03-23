@@ -220,6 +220,20 @@ else:
         if (sigHashType and SIGHASH_ANYONECANPAY.uint8) > 0:
           result.add(" SIGHASH_ANYONECANPAY")
         result.add(" " & $pub)
+      try:
+        var left = reader.left
+        while left > 0:
+          var len = reader.getVarInt
+          var sigData = reader.getBytes(len)
+          block FindString:
+            for b in sigData:
+              if b < 0x20'u8 or b > 0x7e'u8:
+                result.add(" " & $sigData)
+                break FindString
+            result.add(" " & sigData.toString())
+          left = reader.left
+      except:
+        discard
     except:
       result = $sigBytes
 
