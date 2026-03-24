@@ -119,6 +119,9 @@ when defined(js):
   proc ins*(tx: var Tx): Array[TxIn] =
     result.handle = (tx.handle.to(cint) + 8).toJs
 
+  proc outs*(tx: var Tx): Array[TxOut] =
+    result.handle = (tx.handle.to(cint) + 24).toJs
+
   proc locktime*(tx: var Tx): uint32 =
     var p32 = tx.handle.to(cint) div 4
     Module.HEAPU32[p32 + 14].to(uint32)
