@@ -134,6 +134,21 @@ when defined(js):
 
   proc `$`*(x: Array[byte]): string = $x.toHex
 
+  proc `$`*[T](a: Array[T]): string =
+    if a.len > 0:
+      when T is string:
+        result = "@^[\"" & $a[0]
+        for i in 1..<a.len:
+          result.add("\", \"" & $a[i])
+        result.add("\"]")
+      else:
+        result = "@^[" & $a[0]
+        for i in 1..<a.len:
+          result.add(", " & $a[i])
+        result.add("]")
+    else:
+      result = "@^[]"
+
   proc `==`*[T](x: Array[T], y: Array[T]): bool =
     if x.len != y.len:
       return false
