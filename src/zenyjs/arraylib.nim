@@ -274,6 +274,14 @@ when defined(js):
 
   proc `%`*[T](a: Array[T]): JsonNode = %a.toSeq
 
+  iterator items*[T](a: Array[T]): T =
+    for i in 0..<a.len:
+      yield a[i]
+
+  iterator pairs*[T](a: Array[T]): tuple[key: int, val: T] =
+    for i in 0..<a.len:
+      yield (i, a[i])
+
   template borrowArrayProc*(typ: typedesc) =
     proc len*(x: typ): int {.borrow.}
     proc cap*(x: typ): int {.borrow.}
