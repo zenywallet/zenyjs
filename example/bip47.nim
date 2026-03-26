@@ -118,7 +118,6 @@ zenyjs.ready:
   var alicePub = alicePrv.pub
   var tx1 = newTx()
 
-  #[
   tx1.ver = 1'i32
   tx1.ins.add((tx: outputAlice[0..31].Hash, n: outputAlice[32..^1].toUint32,
                sig: bitcoin.getScript(bitcoin.getAddress(alicePub)).Sig, sequence: 0xffffffff'u32))
@@ -135,4 +134,3 @@ zenyjs.ready:
   echo tx1.toBytes
 
   echo "Notification transaction hash: ", tx1.hash
-  ]#
