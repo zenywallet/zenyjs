@@ -170,6 +170,28 @@ when defined(js):
     else:
       discard
 
+  proc concat*[T](arrays: varargs[Array[T]]): Array[T] =
+    var allLen = 0
+    for a in arrays:
+      inc(allLen, a.len)
+    result.newArray(allLen)
+    var i = 0
+    for a in arrays:
+      for item in a:
+        result[i] = item
+        inc(i)
+
+  proc concat*[T](arrays: Array[Array[T]]): Array[T] =
+    var allLen = 0
+    for a in arrays:
+      inc(allLen, a.len)
+    result.newArray(allLen)
+    var i = 0
+    for a in arrays:
+      for item in a:
+        result[i] = item
+        inc(i)
+
   proc `[]`*[T](x: Array[T]; i: Natural): T =
     when T is byte:
       let a = newDataView(Module.HEAPU8.buffer, x.handle.to(cint), 12)
