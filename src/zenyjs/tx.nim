@@ -8,6 +8,7 @@ when defined(js):
   import script
   import tx_types
   import address
+  export tx_types
 
   borrowArrayProc(Hash)
 
@@ -146,6 +147,7 @@ else:
   import macros
   import tx_types
   export custom
+  export tx_types
 
   const
     SIGHASH_ALL* = 1
