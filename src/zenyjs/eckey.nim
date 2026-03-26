@@ -210,7 +210,7 @@ else:
     if secp256k1_ecdsa_sign(ctx(), addr sig, cast[ptr uint8](unsafeAddr hash32[0]), priv,
                             secp256k1_nonce_function_rfc6979, nil) != 1:
       raise newException(EcError, "secp256k1_ecdsa_sign")
-    if grind and not cast[array[64, byte]](sig)[31] < 0x80.byte:
+    if grind and cast[array[64, byte]](sig)[63] >= 0x80.byte:
       var ndata = newArray[byte](32)
       var counter: uint32 = 1
       while true:
@@ -218,7 +218,7 @@ else:
         if secp256k1_ecdsa_sign(ctx(), addr sig, cast[ptr uint8](unsafeAddr hash32[0]), priv,
                                 secp256k1_nonce_function_rfc6979, addr ndata[0]) != 1:
           raise newException(EcError, "secp256k1_ecdsa_sign")
-        if cast[array[64, byte]](sig)[31] < 0x80.byte:
+        if cast[array[64, byte]](sig)[63] < 0x80.byte:
           break
         inc(counter)
     var der = newArray[byte](75)
