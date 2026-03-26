@@ -214,7 +214,8 @@ else:
     var derLen = 75.csize_t
     if secp256k1_ecdsa_signature_serialize_der(ctx(), cast[ptr uint8](addr der[0]), addr derLen, addr sig) != 1:
       raise newException(EcError, "secp256k1_ecdsa_signature_serialize_der")
-    result = der[0..<derLen]
+    der.setLen(derLen)
+    result = der
 
   proc sign*(privateKey: PrivateKey, hash32: Array[byte]): Array[byte] {.returnToLastParam, exportc: "eckey_$1".}
 
