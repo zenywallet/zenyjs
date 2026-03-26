@@ -36,7 +36,7 @@ when defined(js):
     EckeyMod.pub_obj = Module.cwrap("eckey_pub_obj", jsNull, [NumVar, NumVar])
     EckeyMod.pubObj_prv = Module.cwrap("eckey_pubObj_prv", jsNull, [NumVar, NumVar])
     EckeyMod.pubObj_pub = Module.cwrap("eckey_pubObj_pub", jsNull, [NumVar, NumVar])
-    EckeyMod.sign = Module.cwrap("eckey_sign", jsNull, [NumVar, NumVar, NumVar, NumVar])
+    EckeyMod.sign = Module.cwrap("eckey_sign", jsNull, [NumVar, NumVar, NumVar])
     EckeyMod.verify_obj = Module.cwrap("eckey_verify_obj", NumVar, [NumVar, NumVar, NumVar])
     EckeyMod.verify = Module.cwrap("eckey_verify", NumVar, [NumVar, NumVar, NumVar])
     EckeyMod.tweakAdd_prv = Module.cwrap("eckey_tweakAdd_prv", jsNull, [NumVar, NumVar, NumVar])
@@ -82,9 +82,9 @@ when defined(js):
     result = newArray[byte]().PublicKeyObj
     EckeyMod.pubObj_pub(publicKey.handle, result.handle)
 
-  proc sign*(privateKey: PrivateKey, hash32: Array[byte], grind: bool = true): Array[byte] =
+  proc sign*(privateKey: PrivateKey, hash32: Array[byte]): Array[byte] =
     result = newArray[byte]()
-    EckeyMod.sign(privateKey.handle, hash32.handle, grind, result.handle)
+    EckeyMod.sign(privateKey.handle, hash32.handle, result.handle)
 
   proc verify*(publicKeyObj: PublicKeyObj, hash: Array[byte], der: Array[byte]): bool =
     (EckeyMod.verify_obj(publicKeyObj.handle, hash.handle, der.handle) > 0.toJs).to(bool)
@@ -204,30 +204,19 @@ else:
 
   proc pubObj*(publicKey: PublicKey): PublicKeyObj {.returnToLastParam, exportc: "eckey_$1_pub".}
 
-  proc sign*(privateKey: PrivateKey, hash32: Array[byte], grind: bool = true): Array[byte] =
+  proc sign*(privateKey: PrivateKey, hash32: Array[byte]): Array[byte] =
     var sig: secp256k1_ecdsa_signature
     let priv = cast[ptr uint8](addr cast[ptr Array[byte]](unsafeAddr privateKey)[][0])
     if secp256k1_ecdsa_sign(ctx(), addr sig, cast[ptr uint8](unsafeAddr hash32[0]), priv,
                             secp256k1_nonce_function_rfc6979, nil) != 1:
       raise newException(EcError, "secp256k1_ecdsa_sign")
-    if grind and cast[array[64, byte]](sig)[63] >= 0x80.byte:
-      var ndata = newArray[byte](32)
-      var counter: uint32 = 1
-      while true:
-        copyMem(addr ndata[0], addr counter, sizeof(counter))
-        if secp256k1_ecdsa_sign(ctx(), addr sig, cast[ptr uint8](unsafeAddr hash32[0]), priv,
-                                secp256k1_nonce_function_rfc6979, addr ndata[0]) != 1:
-          raise newException(EcError, "secp256k1_ecdsa_sign")
-        if cast[array[64, byte]](sig)[63] < 0x80.byte:
-          break
-        inc(counter)
     var der = newArray[byte](75)
     var derLen = 75.csize_t
     if secp256k1_ecdsa_signature_serialize_der(ctx(), cast[ptr uint8](addr der[0]), addr derLen, addr sig) != 1:
       raise newException(EcError, "secp256k1_ecdsa_signature_serialize_der")
     result = der[0..<derLen]
 
-  proc sign*(privateKey: PrivateKey, hash32: Array[byte], grind: bool = true): Array[byte] {.returnToLastParam, exportc: "eckey_$1".}
+  proc sign*(privateKey: PrivateKey, hash32: Array[byte]): Array[byte] {.returnToLastParam, exportc: "eckey_$1".}
 
   proc verify*(publicKeyObj: PublicKeyObj, hash: Array[byte], der: Array[byte]): bool {.exportc: "eckey_$1_obj".} =
     var sig: secp256k1_ecdsa_signature
