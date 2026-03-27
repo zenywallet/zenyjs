@@ -1,5 +1,15 @@
 # Copyright (c) 2020 zenywallet
 
+const
+  SIGHASH_ALL* = 1
+  SIGHASH_NONE* = 2
+  SIGHASH_SINGLE* = 3
+  SIGHASH_ANYONECANPAY* = 0x80
+
+  SIGHASH_DEFAULT* = 0
+  SIGHASH_OUTPUT_MASK* = 3
+  SIGHASH_INPUT_MASK* = 0x80
+
 when defined(js):
   import std/json
   import std/jsffi
@@ -148,16 +158,6 @@ else:
   import tx_types
   export custom
   export tx_types
-
-  const
-    SIGHASH_ALL* = 1
-    SIGHASH_NONE* = 2
-    SIGHASH_SINGLE* = 3
-    SIGHASH_ANYONECANPAY* = 0x80
-
-    SIGHASH_DEFAULT* = 0
-    SIGHASH_OUTPUT_MASK* = 3
-    SIGHASH_INPUT_MASK* = 0x80
 
   proc duplicate*(node: Tx): Tx =
     var h = cast[TxHandle](allocShared0(sizeof(TxObj)))
