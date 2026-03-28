@@ -271,7 +271,6 @@ when defined(js):
   proc add*[T](x: var Array[T] | Array[T]; y: sink T) =
     let curLen = x.len
     let newLen = curLen + 1
-    echo "curLen=", curLen, " newLen=", newLen
     x.reallocArray(newLen, csizeof(T))
     x[curLen] = y
 
