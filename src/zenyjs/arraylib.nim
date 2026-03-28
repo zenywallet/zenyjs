@@ -27,7 +27,9 @@ when defined(js):
     TxIn = tuple[tx: Hash, n: uint32, sig: Sig, sequence: uint32]
     InternalExportedTxIn* {.deprecated: "use tx_types.TxIn instead".} = TxIn
 
-    TxOut = tuple[value: uint64, script: Script]
+    TxOutObj = tuple[value: uint64, script: Script]
+    TxOut = object
+      handle*: JsObject
     InternalExportedTxOut* {.deprecated: "use tx_types.TxOut instead".} = TxOut
 
   template csizeof*(T: typedesc): int = sizeof(T)
@@ -208,10 +210,37 @@ when defined(js):
     elif T is TxOut:
       let a = newDataView(Module.HEAPU8.buffer, x.handle.to(cint), 12)
       let p = a.getUint32(8, true).to(int) + i * csizeof(T)
-      let d = newDataView(Module.HEAPU8.buffer, p, csizeof(uint64))
-      (value: d.getBigUint64(0, true).to(uint64), script: cast[Script](Array[byte](handle: (p + csizeof(uint64)).toJs)))
+      result.handle = p.toJs
     else:
       raise
+
+  proc value*(txOut: TxOut): uint64 =
+    let d = newDataView(Module.HEAPU8.buffer, txOut.handle.to(cint), csizeof(uint64))
+    d.getBigUint64(0, true).to(uint64)
+
+  proc script*(txOut: TxOut): Script =
+    cast[Script](Array[byte](handle: (txOut.handle.to(cint) + csizeof(uint64)).toJs))
+
+  proc `value=`*(txOut: TxOut, value: uint64) =
+    let d = newDataView(Module.HEAPU8.buffer, txOut.handle.to(cint), csizeof(uint64))
+    d.setBigUint64(0, value, true)
+
+  proc `script=`*(txOut: TxOut, script: Script) =
+    let s = newUint8Array(Module.HEAPU8.buffer, script.handle.to(cint), 12)
+    Module.HEAPU8.set(s, txOut.handle.to(cint) + csizeof(uint64))
+
+  converter toTxOut*(txOut: TxOutObj): TxOut =
+    let p = Module.malloc(csizeof(TxOut))
+    let d = newDataView(Module.HEAPU8.buffer, p.to(cint), csizeof(uint64))
+    d.setBigUint64(0, txOut.value, true)
+    let s = newUint8Array(Module.HEAPU8.buffer, txOut.script.handle.to(cint), 12)
+    Module.HEAPU8.set(s, p.to(cint) + csizeof(uint64))
+    result.handle = p
+
+  proc `$`*(txOut: TxOut): string =
+    let d = newDataView(Module.HEAPU8.buffer, txOut.handle.to(cint), csizeof(uint64))
+    let script = Array[byte](handle: (txOut.handle.to(cint) + csizeof(uint64)).toJs)
+    "(value: " & $d.getBigUint64(0, true).to(uint64) & ", script: " & $script & ")"
 
   proc `[]=`*[T](x: var Array[T] | Array[T]; i: Natural; y: sink T) =
     when T is byte:
