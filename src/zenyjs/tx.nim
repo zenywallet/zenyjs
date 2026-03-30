@@ -145,7 +145,7 @@ when defined(js):
 
   proc `$`*(txOut: TxOut): string =
     let d = newDataView(Module.HEAPU8.buffer, txOut.handle.to(cint), csizeof(uint64))
-    let script = Array[byte](handle: (txOut.handle.to(cint) + csizeof(uint64)).toJs)
+    let script = cast[Script](Array[byte](handle: (txOut.handle.to(cint) + csizeof(uint64)).toJs))
     "(value: " & $d.getBigUint64(0, true).to(uint64) & ", script: " & $script & ")"
 
 else:
