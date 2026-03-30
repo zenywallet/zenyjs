@@ -143,6 +143,11 @@ when defined(js):
 
   proc `$`*(data: Flags): string = $cast[uint8](data)
 
+  proc `$`*(txOut: TxOut): string =
+    let d = newDataView(Module.HEAPU8.buffer, txOut.handle.to(cint), csizeof(uint64))
+    let script = Array[byte](handle: (txOut.handle.to(cint) + csizeof(uint64)).toJs)
+    "(value: " & $d.getBigUint64(0, true).to(uint64) & ", script: " & $script & ")"
+
 else:
   when defined(emscripten):
     const EXPORTED_FUNCTIONS* = ["_tx_newTx", "_tx_toTx", "_tx_stripWitness",

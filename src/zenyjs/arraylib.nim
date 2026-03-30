@@ -237,11 +237,6 @@ when defined(js):
     Module.HEAPU8.set(s, p.to(cint) + csizeof(uint64))
     result.handle = p
 
-  proc `$`*(txOut: TxOut): string =
-    let d = newDataView(Module.HEAPU8.buffer, txOut.handle.to(cint), csizeof(uint64))
-    let script = Array[byte](handle: (txOut.handle.to(cint) + csizeof(uint64)).toJs)
-    "(value: " & $d.getBigUint64(0, true).to(uint64) & ", script: " & $script & ")"
-
   proc `[]=`*[T](x: var Array[T] | Array[T]; i: Natural; y: sink T) =
     when T is byte:
       var p32 = x.handle.to(cint) div 4
