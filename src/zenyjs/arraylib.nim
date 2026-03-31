@@ -24,7 +24,9 @@ when defined(js):
     Sig {.borrow: `.`.} = distinct Array[byte]
     InternalExportedSig* {.deprecated: "use tx_types.Sig instead".} = Sig
 
-    TxIn = tuple[tx: Hash, n: uint32, sig: Sig, sequence: uint32]
+    TxInObj = tuple[tx: Hash, n: uint32, sig: Sig, sequence: uint32]
+    TxIn = object
+      handle*: JsObject
     InternalExportedTxIn* {.deprecated: "use tx_types.TxIn instead".} = TxIn
 
     TxOutObj = tuple[value: uint64, script: Script]
@@ -202,17 +204,58 @@ when defined(js):
     elif T is TxIn:
       let a = newDataView(Module.HEAPU8.buffer, x.handle.to(cint), 12)
       let p = a.getUint32(8, true).to(int) + i * csizeof(T)
-      let d = newDataView(Module.HEAPU8.buffer, p, csizeof(T))
-      (tx: cast[Hash](Array[byte](handle: p.toJs)),
-        n: d.getUint32(csizeof(Hash), true).to(uint32),
-        sig: cast[Sig](Array[byte](handle: (p + csizeof(Hash) + csizeof(uint32) + 4).toJs)),
-        sequence: d.getUint32(csizeof(Hash) + csizeof(uint32) + 4 + csizeof(Sig), true).to(uint32))
+      result.handle = p.toJs
     elif T is TxOut:
       let a = newDataView(Module.HEAPU8.buffer, x.handle.to(cint), 12)
       let p = a.getUint32(8, true).to(int) + i * csizeof(T)
       result.handle = p.toJs
     else:
       raise
+
+  proc tx*(txIn: TxIn): Hash =
+    cast[Hash](Array[byte](handle: txIn.handle))
+
+  proc n*(txIn: TxIn): uint32 =
+    let d = newDataView(Module.HEAPU8.buffer, txIn.handle.to(cint) + csizeof(Hash), csizeof(uint32))
+    d.getUint32(0, true).to(uint32)
+
+  proc sig*(txIn: TxIn): Sig =
+    cast[Sig](Array[byte](handle: (txIn.handle.to(cint) + csizeof(Hash) + csizeof(uint32) + 4).toJs))
+
+  proc sequence*(txIn: TxIn): uint32 =
+    let d = newDataView(Module.HEAPU8.buffer, txIn.handle.to(cint) + csizeof(Hash) +
+                        csizeof(uint32) + 4 + csizeof(Sig), csizeof(uint32))
+    d.getUint32(0, true).to(uint32)
+
+  proc `tx=`*(txIn: TxIn, txid: Hash) =
+    let s = newUint8Array(Module.HEAPU8.buffer, txid.handle.to(cint), 12)
+    Module.HEAPU8.set(s, txIn.handle.to(cint))
+
+  proc `n=`*(txIn: TxIn, n: uint32) =
+    let d = newDataView(Module.HEAPU8.buffer, txIn.handle.to(cint) + csizeof(Hash), csizeof(uint32))
+    d.setUint32(0, n, true)
+
+  proc `sig=`*(txIn: TxIn, sig: Sig) =
+    let s = newUint8Array(Module.HEAPU8.buffer, sig.handle.to(cint), 12)
+    Module.HEAPU8.set(s, txIn.handle.to(cint) + csizeof(Hash) + csizeof(uint32) + 4)
+
+  proc `sequence=`*(txIn: TxIn, sequence: uint32) =
+    let d = newDataView(Module.HEAPU8.buffer, txIn.handle.to(cint) + csizeof(Hash) +
+                        csizeof(uint32) + 4 + csizeof(Sig), csizeof(uint32))
+    d.setUint32(0, sequence, true)
+
+  converter toTxIn*(txIn: TxInObj): TxIn =
+    let p = Module.malloc(csizeof(TxIn))
+    let a = newUint8Array(Module.HEAPU8.buffer, txIn.tx.handle.to(cint), 12)
+    Module.HEAPU8.set(a, p.to(cint))
+    let d = newDataView(Module.HEAPU8.buffer, p.to(cint) + csizeof(Hash), csizeof(uint32))
+    d.setUint32(0, txIn.n, true)
+    let a2 = newUint8Array(Module.HEAPU8.buffer, txIn.sig.handle.to(cint), 12)
+    Module.HEAPU8.set(a2, p.to(cint) + csizeof(Hash) + csizeof(uint32) + 4)
+    let d2 = newDataView(Module.HEAPU8.buffer, p.to(cint) + csizeof(Hash) +
+                        csizeof(uint32) + 4 + csizeof(Sig), csizeof(uint32))
+    d2.setUint32(0, txIn.sequence, true)
+    result.handle = p
 
   proc value*(txOut: TxOut): uint64 =
     let d = newDataView(Module.HEAPU8.buffer, txOut.handle.to(cint), csizeof(uint64))
