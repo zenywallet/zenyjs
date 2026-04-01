@@ -38,6 +38,7 @@ when defined(js):
   template csizeof*(T: typedesc[Hash | Script | Sig]): int = 16
   template csizeof*(T: typedesc[TxIn]): int = 48
   template csizeof*(T: typedesc[TxOut | InternalExportedTxOut]): int = 24
+  template csizeof*(T: typedesc[Array[byte]]): int = 16
 
   var ArrayMod = JsObject{}
   var Module: JsObject
@@ -209,6 +210,10 @@ when defined(js):
       let a = newDataView(Module.HEAPU8.buffer, x.handle.to(cint), 12)
       let p = a.getUint32(8, true).to(int) + i * csizeof(T)
       result.handle = p.toJs
+    elif T is Array[byte]:
+      let a = newDataView(Module.HEAPU8.buffer, x.handle.to(cint), 12)
+      let p = a.getUint32(8, true).to(int) + i * csizeof(T)
+      result.handle = p.toJs
     else:
       raise
 
@@ -302,6 +307,11 @@ when defined(js):
       d.setBigUint64(0, y.value, true)
       let s = newUint8Array(Module.HEAPU8.buffer, y.script.handle.to(cint), 12)
       Module.HEAPU8.set(s, p + csizeof(uint64))
+    elif T is Array[byte]:
+      let a = newDataView(Module.HEAPU8.buffer, x.handle.to(cint), 12)
+      let p = a.getUint32(8, true).to(int) + i * csizeof(T)
+      let s = newUint8Array(Module.HEAPU8.buffer, y.handle.to(cint), 12)
+      Module.HEAPU8.set(s, p)
     else:
       raise
 
