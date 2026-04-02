@@ -278,7 +278,7 @@ else:
   proc toHash*(x: var byte): Hash {.inline.} = Hash((cast[ptr array[32, byte]](addr x)[]).toArray)
   proc toHash*(x: Array[byte]): Hash {.inline.} = Hash(x)
   proc toHash*(x: openarray[byte]): Hash {.inline.} = Hash(x.toArray)
-  proc toHash*(x: Hex): Hash {.inline} = x.toBytes.toReverse.Hash
+  proc toHash*(x: Hex): Hash {.inline.} = x.toBytes.toReverse.Hash
 
   proc toHash160*(x: var byte): Hash160 {.inline.} = Hash160((cast[ptr array[20, byte]](addr x)[]).toArray)
   proc toHash160*(x: Array[byte]): Hash160 {.inline.} = Hash160(x)
