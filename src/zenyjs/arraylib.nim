@@ -164,6 +164,10 @@ when defined(js):
         return false
     result = true
 
+  proc high*[T](x: Array[T]): int = x.len - 1
+
+  proc low*[T](x: Array[T]): int = 0
+
   proc `@^`*[IDX, T](a: sink array[IDX, T]): Array[T] =
     when T is byte:
       result = newArray[T](a.len)
