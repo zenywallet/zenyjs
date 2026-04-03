@@ -12,7 +12,7 @@ when TOHEX_COMPACT:
   const hexChars = "0123456789abcdef"
 
   when defined(js):
-    proc toHex*(a: openarray[byte]): string =
+    proc toHex*(a: openArray[byte]): string =
       for i in 0..a.high:
         result.add(hexChars[(a[i] and 0xf0'u8) shr 4])
         result.add(hexChars[a[i] and 0x0f'u8])
@@ -23,7 +23,7 @@ when TOHEX_COMPACT:
         result.add(hexChars[s[i].byte and 0x0f'u8])
 
   else:
-    proc toHex*(a: openarray[byte]): string =
+    proc toHex*(a: openArray[byte]): string =
       result = newStringOfCap(a.len * 2)
       for i in 0..a.high:
         result.add(hexChars[(a[i] and 0xf0'u8) shr 4])
@@ -64,7 +64,7 @@ else:
                   "f8", "f9", "fa", "fb", "fc", "fd", "fe", "ff"]
 
   when defined(js):
-    proc toHex*(a: openarray[byte]): string =
+    proc toHex*(a: openArray[byte]): string =
       for i in 0..a.high:
         result.add(hexStr[a[i]])
 
@@ -77,7 +77,7 @@ else:
         result.add(hexStr[s[i].byte])
 
   else:
-    proc toHex*(a: openarray[byte]): string =
+    proc toHex*(a: openArray[byte]): string =
       result = newStringOfCap(a.len * 2)
       for i in 0..a.high:
         result.add(hexStr[a[i]])
