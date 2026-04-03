@@ -7,7 +7,7 @@ when defined(js):
   when not defined(CSTRING_SAFE):
     proc toString*(s: seq[byte]): string = cast[string](s)
 
-  proc toString*(s: openarray[byte]): string =
+  proc toString*(s: openArray[byte]): string =
     for c in s:
       result.add(cast[char](c))
 
@@ -128,7 +128,7 @@ else:
     else:
       raiseAssert("pushData: overflow")
 
-  proc pushData*(data: openarray[byte]): Array[byte] {.inline.} = pushData(data)
+  proc pushData*(data: openArray[byte]): Array[byte] {.inline.} = pushData(data)
 
   proc pad*(len: int): Array[byte] {.inline.} = newArray[byte](len)
 
@@ -146,7 +146,7 @@ else:
       concat(cast[seq[byte]](str).toArray, pad(size - str.len))
 
   proc toBytes*(x: Array[byte]): Array[byte] {.inline.} = x
-  proc toBytes*(x: openarray[byte]): Array[byte] {.inline.} = x.toArray
+  proc toBytes*(x: openArray[byte]): Array[byte] {.inline.} = x.toArray
   proc toBytes*(val: VarInt): Array[byte] {.inline.} = varInt(cast[int](val))
   proc toBytes*(str: VarStr): Array[byte] {.inline.} = varStr(cast[string](str))
   proc toBytes*(len: Pad): Array[byte] {.inline.} = pad(cast[int](len))
@@ -166,7 +166,7 @@ else:
       s.add(b)
     concat(s)
 
-  proc toBytes*[T](obj: openarray[T]): Array[byte] =
+  proc toBytes*[T](obj: openArray[T]): Array[byte] =
     var s: Array[Array[byte]]
     for val in obj:
       var b = val.toBytes
@@ -195,7 +195,7 @@ else:
   proc Bytes*(args: varargs[Array[byte], toBytes]): Array[byte] = concat(args)
 
   proc toBytesBE*(x: Array[byte]): Array[byte] {.inline.} = x
-  proc toBytesBE*(x: openarray[byte]): Array[byte] {.inline.} = x.toArray
+  proc toBytesBE*(x: openArray[byte]): Array[byte] {.inline.} = x.toArray
   proc toBytesBE*(hash: Hash): Array[byte] {.inline.} = cast[Array[byte]](hash)
   proc toBytesBE*(hash: Hash160): Array[byte] {.inline.} = cast[Array[byte]](hash)
   proc toBytesBE*(x: string): Array[byte] {.inline.} =
@@ -245,11 +245,11 @@ else:
   proc toUint32*(x: var byte): uint32 {.inline.} = cast[ptr uint32](addr x)[]
   proc toUint64*(x: var byte): uint64 {.inline.} = cast[ptr uint64](addr x)[]
 
-  proc to*(x: openarray[byte], T: typedesc): T {.inline.} = cast[ptr T](unsafeAddr x[0])[]
-  proc toUint8*(x: openarray[byte]): uint8 {.inline.} = x[0].uint8
-  proc toUint16*(x: openarray[byte]): uint16 {.inline.} = cast[ptr uint16](unsafeAddr x[0])[]
-  proc toUint32*(x: openarray[byte]): uint32 {.inline.} = cast[ptr uint32](unsafeAddr x[0])[]
-  proc toUint64*(x: openarray[byte]): uint64 {.inline.} = cast[ptr uint64](unsafeAddr x[0])[]
+  proc to*(x: openArray[byte], T: typedesc): T {.inline.} = cast[ptr T](unsafeAddr x[0])[]
+  proc toUint8*(x: openArray[byte]): uint8 {.inline.} = x[0].uint8
+  proc toUint16*(x: openArray[byte]): uint16 {.inline.} = cast[ptr uint16](unsafeAddr x[0])[]
+  proc toUint32*(x: openArray[byte]): uint32 {.inline.} = cast[ptr uint32](unsafeAddr x[0])[]
+  proc toUint64*(x: openArray[byte]): uint64 {.inline.} = cast[ptr uint64](unsafeAddr x[0])[]
 
   proc to*(x: Array[byte], T: typedesc): T {.inline.} = cast[ptr T](unsafeAddr x[0])[]
   proc toUint8*(x: Array[byte]): uint8 {.inline.} = x[0].uint8
@@ -263,11 +263,11 @@ else:
   proc toUint32BE*(x: var byte): uint32 {.inline.} = x.toUint32.toBE
   proc toUint64BE*(x: var byte): uint64 {.inline.} = x.toUint64.toBE
 
-  proc toBE*(x: openarray[byte], T: typedesc): T {.inline.} = cast[ptr T](unsafeAddr x[0])[]
-  proc toUint8BE*(x: openarray[byte]): uint8 {.inline.} = x[0].uint8
-  proc toUint16BE*(x: openarray[byte]): uint16 {.inline.} = x.toUint16.toBE
-  proc toUint32BE*(x: openarray[byte]): uint32 {.inline.} = x.toUint32.toBE
-  proc toUint64BE*(x: openarray[byte]): uint64 {.inline.} = x.toUint64.toBE
+  proc toBE*(x: openArray[byte], T: typedesc): T {.inline.} = cast[ptr T](unsafeAddr x[0])[]
+  proc toUint8BE*(x: openArray[byte]): uint8 {.inline.} = x[0].uint8
+  proc toUint16BE*(x: openArray[byte]): uint16 {.inline.} = x.toUint16.toBE
+  proc toUint32BE*(x: openArray[byte]): uint32 {.inline.} = x.toUint32.toBE
+  proc toUint64BE*(x: openArray[byte]): uint64 {.inline.} = x.toUint64.toBE
 
   proc toBE*(x: Array[byte], T: typedesc): T {.inline.} = cast[ptr T](unsafeAddr x[0])[]
   proc toUint8BE*(x: Array[byte]): uint8 {.inline.} = x[0].uint8
@@ -277,17 +277,17 @@ else:
 
   proc toHash*(x: var byte): Hash {.inline.} = Hash((cast[ptr array[32, byte]](addr x)[]).toArray)
   proc toHash*(x: Array[byte]): Hash {.inline.} = Hash(x)
-  proc toHash*(x: openarray[byte]): Hash {.inline.} = Hash(x.toArray)
+  proc toHash*(x: openArray[byte]): Hash {.inline.} = Hash(x.toArray)
   proc toHash*(x: Hex): Hash {.inline.} = x.toBytes.toReverse.Hash
 
   proc toHash160*(x: var byte): Hash160 {.inline.} = Hash160((cast[ptr array[20, byte]](addr x)[]).toArray)
   proc toHash160*(x: Array[byte]): Hash160 {.inline.} = Hash160(x)
-  proc toHash160*(x: openarray[byte]): Hash160 {.inline.} = Hash160(x.toArray)
+  proc toHash160*(x: openArray[byte]): Hash160 {.inline.} = Hash160(x.toArray)
 
   when not defined(CSTRING_SAFE):
     proc toString*(s: seq[byte]): string = cast[string](s)
 
-  proc toString*(s: openarray[byte]): string =
+  proc toString*(s: openArray[byte]): string =
     result = newStringOfCap(len(s))
     for c in s:
       result.add(cast[char](c))
