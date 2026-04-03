@@ -1,6 +1,7 @@
 # Copyright (c) 2021 zenywallet
 
 import arraylib
+import hash
 
 type
   PrivateKey* {.borrow: `.`.} = distinct Array[byte]
@@ -91,6 +92,15 @@ when defined(js):
 
   proc verify*(publicKey: PublicKey, hash: Array[byte], der: Array[byte]): bool =
     (EckeyMod.verify(publicKey.handle, hash.handle, der.handle) > 0.toJs).to(bool)
+
+  template sign*(privateKey: PrivateKey, hash32: Hash): Array[byte] =
+    sign(privateKey, cast[Array[byte]](hash32))
+
+  template verify*(publicKeyObj: PublicKeyObj, hash: Hash, der: Array[byte]): bool =
+    verify(publicKeyObj, cast[Array[byte]](hash), der)
+
+  template verify*(publicKey: PublicKey, hash: Hash, der: Array[byte]): bool =
+    verify(publicKey, cast[Array[byte]](hash), der)
 
   proc tweakAdd*(privateKey: PrivateKey, tweak: Array[byte]): PrivateKey =
     result = newArray[byte]().PrivateKey
@@ -204,10 +214,10 @@ else:
 
   proc pubObj*(publicKey: PublicKey): PublicKeyObj {.returnToLastParam, exportc: "eckey_$1_pub".}
 
-  proc sign*(privateKey: PrivateKey, hash32: Array[byte]): Array[byte] =
+  proc sign*(privateKey: PrivateKey, hash32: Array[byte] | Hash): Array[byte] =
     var sig: secp256k1_ecdsa_signature
     let priv = cast[ptr uint8](addr cast[ptr Array[byte]](unsafeAddr privateKey)[][0])
-    if secp256k1_ecdsa_sign(ctx(), addr sig, cast[ptr uint8](unsafeAddr hash32[0]), priv,
+    if secp256k1_ecdsa_sign(ctx(), addr sig, cast[ptr uint8](unsafeAddr cast[Array[byte]](hash32)[0]), priv,
                             secp256k1_nonce_function_rfc6979, nil) != 1:
       raise newException(EcError, "secp256k1_ecdsa_sign")
     var der = newArray[byte](75)
@@ -217,18 +227,18 @@ else:
     der.setLen(derLen)
     result = der
 
-  proc sign*(privateKey: PrivateKey, hash32: Array[byte]): Array[byte] {.returnToLastParam, exportc: "eckey_$1".}
+  proc sign*(privateKey: PrivateKey, hash32: Array[byte] | Hash): Array[byte] {.returnToLastParam, exportc: "eckey_$1".}
 
-  proc verify*(publicKeyObj: PublicKeyObj, hash: Array[byte], der: Array[byte]): bool {.exportc: "eckey_$1_obj".} =
+  proc verify*(publicKeyObj: PublicKeyObj, hash: Array[byte] | Hash, der: Array[byte]): bool {.exportc: "eckey_$1_obj".} =
     var sig: secp256k1_ecdsa_signature
     var derLen = der.len.csize_t
     if secp256k1_ecdsa_signature_parse_der(ctx(), addr sig, cast[ptr uint8](unsafeAddr der[0]), derLen) != 1:
       return false
     secp256k1_ecdsa_signature_normalize(ctx(), addr sig, addr sig)
     let pubkey = cast[ptr secp256k1_pubkey](addr cast[ptr Array[byte]](unsafeAddr publicKeyObj)[][0])
-    result = secp256k1_ecdsa_verify(ctx(), addr sig, cast[ptr uint8](unsafeAddr hash[0]), pubkey) == 1
+    result = secp256k1_ecdsa_verify(ctx(), addr sig, cast[ptr uint8](unsafeAddr cast[Array[byte]](hash)[0]), pubkey) == 1
 
-  proc verify*(publicKey: PublicKey, hash: Array[byte], der: Array[byte]): bool {.exportc: "eckey_$1".} =
+  proc verify*(publicKey: PublicKey, hash: Array[byte] | Hash, der: Array[byte]): bool {.exportc: "eckey_$1".} =
     publicKey.pubObj.verify(hash, der)
 
   proc tweakAdd*(privateKey: PrivateKey, tweak: Array[byte]): PrivateKey =
