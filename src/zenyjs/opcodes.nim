@@ -113,10 +113,10 @@ type
     OP_NOP8
     OP_NOP9
     OP_NOP10
+    NA
     OP_PUBKEYHASH = 253
     OP_PUBKEY
     OP_INVALIDOPCODE
-    NA
 
 const
   OP_FALSE* = 0
