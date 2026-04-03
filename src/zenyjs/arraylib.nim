@@ -349,11 +349,24 @@ when defined(js):
     for i, a in y:
       x[curLen + i] = a
 
-  proc add*[T](x: var Array[T] | Array[T]; y: sink T) =
-    let curLen = x.len
-    let newLen = curLen + 1
-    x.reallocArray(newLen, csizeof(T))
-    x[curLen] = y
+  proc add*[T](x: var Array[T]; y: sink T) =
+    if x.handle.isNull:
+      x.newArray(1)
+      x[0] = y
+    else:
+      let curLen = x.len
+      let newLen = curLen + 1
+      x.reallocArray(newLen, csizeof(T))
+      x[curLen] = y
+
+  proc add*[T](x: Array[T]; y: sink T) =
+    if x.handle.isNull:
+      raise newException(ArrayError, "array is nil")
+    else:
+      let curLen = x.len
+      let newLen = curLen + 1
+      x.reallocArray(newLen, csizeof(T))
+      x[curLen] = y
 
   proc add*[T](x: var Array[T] | Array[T]; y: sink seq[T]) =
     let curLen = x.len
