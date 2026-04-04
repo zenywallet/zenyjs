@@ -383,12 +383,27 @@ when defined(js):
       x.reallocArray(newLen, csizeof(T))
       x[curLen] = y
 
-  proc add*[T](x: var Array[T] | Array[T]; y: sink seq[T]) =
-    let curLen = x.len
-    let newLen = curLen + y.len
-    x.reallocArray(newLen, csizeof(T))
-    for i, a in y:
-      x[curLen + i] = a
+  proc add*[T](x: var Array[T]; y: sink seq[T]) =
+    if x.handle.isNull:
+      x.newArray(y.len)
+      for i, a in y:
+        x[i] = a
+    else:
+      let curLen = x.len
+      let newLen = curLen + y.len
+      x.reallocArray(newLen, csizeof(T))
+      for i, a in y:
+        x[curLen + i] = a
+
+  proc add*[T](x: Array[T]; y: sink seq[T]) =
+    if x.handle.isNull:
+      raise newException(ArrayError, "array is nil")
+    else:
+      let curLen = x.len
+      let newLen = curLen + y.len
+      x.reallocArray(newLen, csizeof(T))
+      for i, a in y:
+        x[curLen + i] = a
 
   proc add*[T](x: var Array[T] | Array[T]; y: sink openArray[T]) =
     let curLen = x.len
