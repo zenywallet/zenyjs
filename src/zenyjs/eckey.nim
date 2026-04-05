@@ -227,9 +227,9 @@ else:
     der.setLen(derLen)
     result = der
 
-  proc sign*(privateKey: PrivateKey, hash32: Array[byte] | Hash): Array[byte] {.returnToLastParam, exportc: "eckey_$1".}
+  proc sign*(privateKey: PrivateKey, hash32: Hash): Array[byte] {.returnToLastParam, exportc: "eckey_$1".}
 
-  proc verify*(publicKeyObj: PublicKeyObj, hash: Array[byte] | Hash, der: Array[byte]): bool {.exportc: "eckey_$1_obj".} =
+  proc verify*(publicKeyObj: PublicKeyObj, hash: Hash, der: Array[byte]): bool {.exportc: "eckey_$1_obj".} =
     var sig: secp256k1_ecdsa_signature
     var derLen = der.len.csize_t
     if secp256k1_ecdsa_signature_parse_der(ctx(), addr sig, cast[ptr uint8](unsafeAddr der[0]), derLen) != 1:
@@ -238,7 +238,13 @@ else:
     let pubkey = cast[ptr secp256k1_pubkey](addr cast[ptr Array[byte]](unsafeAddr publicKeyObj)[][0])
     result = secp256k1_ecdsa_verify(ctx(), addr sig, cast[ptr uint8](unsafeAddr cast[Array[byte]](hash)[0]), pubkey) == 1
 
-  proc verify*(publicKey: PublicKey, hash: Array[byte] | Hash, der: Array[byte]): bool {.exportc: "eckey_$1".} =
+  template verify*(publicKeyObj: PublicKeyObj, hash: Array[byte], der: Array[byte]): bool =
+    verify(publicKeyObj, cast[Hash](hash), der)
+
+  proc verify*(publicKey: PublicKey, hash: Hash, der: Array[byte]): bool {.exportc: "eckey_$1".} =
+    publicKey.pubObj.verify(hash, der)
+
+  template verify*(publicKey: PublicKey, hash: Array[byte], der: Array[byte]): bool =
     publicKey.pubObj.verify(hash, der)
 
   proc tweakAdd*(privateKey: PrivateKey, tweak: Array[byte]): PrivateKey =
