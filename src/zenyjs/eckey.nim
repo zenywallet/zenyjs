@@ -118,8 +118,8 @@ else:
   when defined(emscripten):
     const EXPORTED_FUNCTIONS* = ["_eckey_ecPubKeyCreate", "_eckey_ecPubKeySerializeCompressed",
       "_eckey_ecPubKeySerializeUncompressed", "_eckey_pubUncompressed",
-      "_eckey_pub", "_eckey_pub_obj", "_eckey_pubObj_prv", "_eckey_pubObj_pub"
-      , "_eckey_sign", "_eckey_verify_obj", "_eckey_verify",
+      "_eckey_pub", "_eckey_pub_obj", "_eckey_pubObj_prv", "_eckey_pubObj_pub",
+      "_eckey_sign", "_eckey_verify_obj", "_eckey_verify",
       "_eckey_tweakAdd_prv", "_eckey_tweakAdd_pubobj"]
 
   import secp256k1
