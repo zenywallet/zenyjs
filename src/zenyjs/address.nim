@@ -17,6 +17,7 @@ when defined(js):
   import jslib except Array
   import arraylib
   import eckey
+  import script
 
   type
     Wif* = cstring
@@ -92,22 +93,22 @@ when defined(js):
       result = newArray[byte]().PrivateKey
       AddressMod.prv(networkId, p, result.handle)
 
-  proc getScript*(networkId: NetworkId, address: cstring): Array[byte] =
+  proc getScript*(networkId: NetworkId, address: cstring): Script =
     withStack:
       var addressUint8Array = strToUint8Array(address)
       var p = Module.stackAlloc(addressUint8Array.length.to(int) + 1)
       Module.HEAPU8.set(addressUint8Array, p)
       Module.HEAPU8[p.to(int) + addressUint8Array.length.to(int)] = 0
-      result = newArray[byte]()
+      result = cast[Script](newArray[byte]())
       AddressMod.getScript(networkId, p, result.handle)
 
-  proc p2pkh_script*(address: cstring): Array[byte] =
+  proc p2pkh_script*(address: cstring): Script =
     withStack:
       var addressUint8Array = strToUint8Array(address)
       var p = Module.stackAlloc(addressUint8Array.length.to(int) + 1)
       Module.HEAPU8.set(addressUint8Array, p)
       Module.HEAPU8[p.to(int) + addressUint8Array.length.to(int)] = 0
-      result = newArray[byte]()
+      result = cast[Script](newArray[byte]())
       AddressMod.p2pkh_script(p, result.handle)
 
   var defaultNetworkId*: NetworkId
@@ -327,33 +328,33 @@ else:
           return p2wpkh_hash160(address, bech32)
     return getHash160(address)
 
-  proc p2pkh_script*(address: string): Array[byte] =
+  proc p2pkh_script*(address: string): Script =
     var binaddr = base58.dec(address)
     if binaddr.len == 25: # prefix(1), hash160(20), checksum(4)
-      result = (OP_DUP, OP_HASH160, ChunkData(binaddr[1..^5]), OP_EQUALVERIFY, OP_CHECKSIG).toBytes
+      result = (OP_DUP, OP_HASH160, ChunkData(binaddr[1..^5]), OP_EQUALVERIFY, OP_CHECKSIG).toBytes.Script
 
-  proc p2sh_script*(address: string): Array[byte] =
+  proc p2sh_script*(address: string): Script =
     var binaddr = base58.dec(address)
     if binaddr.len == 25: # prefix(1), hash160(20), checksum(4)
-      result = (OP_HASH160, ChunkData(binaddr[1..^5]), OP_EQUAL).toBytes
+      result = (OP_HASH160, ChunkData(binaddr[1..^5]), OP_EQUAL).toBytes.Script
 
-  proc p2wpkh_script*(address: string, bech32Prefix: string): Array[byte] =
+  proc p2wpkh_script*(address: string, bech32Prefix: string): Script =
     var version: cint = 0
     var programm = newArray[byte](40)
     var programmlen: csize_t = 0
     if segwit_addr_decode(addr version, addr programm[0], addr programmlen, bech32Prefix, address) == 1:
       if programmlen == 20:
-        result = (OP_0, ChunkData(programm[0..<20])).toBytes
+        result = (OP_0, ChunkData(programm[0..<20])).toBytes.Script
 
-  proc getScript*(network: NetWork | NetworkId, address: string): Array[byte] =
+  proc getScript*(network: NetWork | NetworkId, address: string): Script =
     when network is NetworkId:
       let network = network.getNetwork
     var binaddr = base58.dec(address)
     if binaddr.len == 25:
       if binaddr[0] == network.pubKeyPrefix:
-        result = (OP_DUP, OP_HASH160, ChunkData(binaddr[1..^5]), OP_EQUALVERIFY, OP_CHECKSIG).toBytes
+        result = (OP_DUP, OP_HASH160, ChunkData(binaddr[1..^5]), OP_EQUALVERIFY, OP_CHECKSIG).toBytes.Script
       elif binaddr[0] == network.scriptPrefix:
-        result = (OP_HASH160, ChunkData(binaddr[1..^5]), OP_EQUAL).toBytes
+        result = (OP_HASH160, ChunkData(binaddr[1..^5]), OP_EQUAL).toBytes.Script
     elif address.startsWith(network.bech32):
       result = p2wpkh_script(address, network.bech32)
     else:
@@ -422,13 +423,13 @@ else:
   proc prv_c*(networkId: NetworkId, wif: cstring, prv: var PrivateKey) {.exportc: "$1".} =
     prv = prv(networkId, $wif)
 
-  proc getScript_c*(networkId: NetworkId, address: cstring, retArray: var Array[byte]) {.exportc: "$1".} =
-    retArray = getScript(networkId, $address)
+  proc getScript_c*(networkId: NetworkId, address: cstring, retArray: var Script) {.exportc: "$1".} =
+    retArray = getScript(networkId, $address).Script
 
-  proc p2pkh_script_c*(address: cstring, retArray: var Array[byte]) {.exportc: "$1".} =
+  proc p2pkh_script_c*(address: cstring, retArray: var Script) {.exportc: "$1".} =
     var binaddr = base58.dec(address)
     if binaddr.len == 25: # prefix(1), hash160(20), checksum(4)
-      retArray = (OP_DUP, OP_HASH160, ChunkData(binaddr[1..^5]), OP_EQUALVERIFY, OP_CHECKSIG).toBytes
+      retArray = (OP_DUP, OP_HASH160, ChunkData(binaddr[1..^5]), OP_EQUALVERIFY, OP_CHECKSIG).toBytes.Script
 
 
   when isMainModule:
