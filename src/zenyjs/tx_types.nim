@@ -36,6 +36,7 @@ type
 
 converter toArray*(data: Witness): Array[byte] = cast[Array[byte]](data)
 converter toArray*(data: Sig): Array[byte] = cast[Array[byte]](data)
+converter toSig*(data: Script): Sig = cast[Sig](data)
 
 when defined(js):
   import std/jsffi
