@@ -36,6 +36,8 @@ when defined(js):
     AddressMod.prv = Module.cwrap("prv_c", jsNull, [NumVar, NumVar, NumVar])
     AddressMod.getScript = Module.cwrap("getScript_c", jsNull, [NumVar, NumVar, NumVar])
     AddressMod.p2pkh_script = Module.cwrap("p2pkh_script_c", jsNull, [NumVar, NumVar])
+    AddressMod.p2sh_script = Module.cwrap("p2sh_script_c", jsNull, [NumVar, NumVar])
+    AddressMod.p2wpkh_script = Module.cwrap("p2wpkh_script_c", jsNull, [NumVar, NumVar, NumVar])
 
     config.init(module)
 
@@ -111,6 +113,28 @@ when defined(js):
       result = cast[Script](newArray[byte]())
       AddressMod.p2pkh_script(p, result.handle)
 
+  proc p2sh_script*(address: cstring): Script =
+    withStack:
+      var addressUint8Array = strToUint8Array(address)
+      var p = Module.stackAlloc(addressUint8Array.length.to(int) + 1)
+      Module.HEAPU8.set(addressUint8Array, p)
+      Module.HEAPU8[p.to(int) + addressUint8Array.length.to(int)] = 0
+      result = cast[Script](newArray[byte]())
+      AddressMod.p2sh_script(p, result.handle)
+
+  proc p2wpkh_script*(address: cstring, bech32Prefix: cstring): Script =
+    withStack:
+      var addressUint8Array = strToUint8Array(address)
+      var p = Module.stackAlloc(addressUint8Array.length.to(int) + 1)
+      Module.HEAPU8.set(addressUint8Array, p)
+      Module.HEAPU8[p.to(int) + addressUint8Array.length.to(int)] = 0
+      var bech32PrefixUint8Array = strToUint8Array(bech32Prefix)
+      var p2 = Module.stackAlloc(bech32PrefixUint8Array.length.to(int) + 1)
+      Module.HEAPU8.set(bech32PrefixUint8Array, p2)
+      Module.HEAPU8[p2.to(int) + bech32PrefixUint8Array.length.to(int)] = 0
+      result = cast[Script](newArray[byte]())
+      AddressMod.p2wpkh_script(p, p2, result.handle)
+
   var defaultNetworkId*: NetworkId
 
   proc setDefaultNetworkId*(networkId: NetworkId) {.inline.} =
@@ -128,7 +152,8 @@ else:
 
   when defined(emscripten):
     const EXPORTED_FUNCTIONS* = ["_address_checkAddress", "_getAddress_c", "_getAddress2_c",
-      "_getSegwitAddress_c", "_getSegwitAddress2_c", "_wif_c", "_prv_c", "_getScript_c", "_p2pkh_script_c"]
+      "_getSegwitAddress_c", "_getSegwitAddress2_c", "_wif_c", "_prv_c", "_getScript_c",
+      "_p2pkh_script_c", "_p2sh_script_c", "_p2wpkh_script_c"]
 
   import std/json
   import std/strutils
@@ -430,6 +455,19 @@ else:
     var binaddr = base58.dec(address)
     if binaddr.len == 25: # prefix(1), hash160(20), checksum(4)
       retArray = (OP_DUP, OP_HASH160, ChunkData(binaddr[1..^5]), OP_EQUALVERIFY, OP_CHECKSIG).toBytes.Script
+
+  proc p2sh_script_c*(address: cstring, retArray: var Script) {.exportc: "$1".} =
+    var binaddr = base58.dec(address)
+    if binaddr.len == 25: # prefix(1), hash160(20), checksum(4)
+      retArray = (OP_HASH160, ChunkData(binaddr[1..^5]), OP_EQUAL).toBytes.Script
+
+  proc p2wpkh_script_c*(address: cstring, bech32Prefix: cstring, retArray: var Script) {.exportc: "$1".} =
+    var version: cint = 0
+    var programm = newArray[byte](40)
+    var programmlen: csize_t = 0
+    if segwit_addr_decode(addr version, addr programm[0], addr programmlen, bech32Prefix, address) == 1:
+      if programmlen == 20:
+        retArray = (OP_0, ChunkData(programm[0..<20])).toBytes.Script
 
 
   when isMainModule:
