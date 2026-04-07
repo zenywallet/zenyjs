@@ -2,6 +2,8 @@
 
 import arraylib
 import hash
+import hex
+import bytes
 
 type
   PrivateKey* {.borrow: `.`.} = distinct Array[byte]
@@ -15,6 +17,12 @@ converter toBytes*(o: PrivateKey | PublicKey | PublicKeyObj): Array[byte] {.inli
 converter toPrivateKey*(s: Array[byte]): PrivateKey {.inline.} = PrivateKey(s)
 converter toPublicKey*(s: Array[byte]): PublicKey {.inline.} = PublicKey(s)
 converter toPublicKeyObj*(s: Array[byte]): PublicKeyObj {.inline.} = PublicKeyObj(s)
+converter toPrivateKey*(x: Hex): PrivateKey = x.toBytes.PrivateKey
+converter toPublicKey*(x: Hex): PublicKey = x.toBytes.PublicKey
+converter toPrivateKey*(x: string): PrivateKey = x.Hex.toBytes.PrivateKey
+converter toPublicKey*(x: string): PublicKey = x.Hex.toBytes.PublicKey
+converter toPrivateKey*(x: cstring): PrivateKey = Hex($x).toBytes.PrivateKey
+converter toPublicKey*(x: cstring): PublicKey = Hex($x).toBytes.PublicKey
 
 when defined(js):
   import jsffi
