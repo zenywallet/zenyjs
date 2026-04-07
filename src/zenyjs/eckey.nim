@@ -220,8 +220,8 @@ else:
     if secp256k1_ecdsa_sign(ctx(), addr sig, cast[ptr uint8](unsafeAddr cast[Array[byte]](hash32)[0]), priv,
                             secp256k1_nonce_function_rfc6979, nil) != 1:
       raise newException(EcError, "secp256k1_ecdsa_sign")
-    var der = newArray[byte](75)
-    var derLen = 75.csize_t
+    var der = newArray[byte](72)
+    var derLen = 72.csize_t
     if secp256k1_ecdsa_signature_serialize_der(ctx(), cast[ptr uint8](addr der[0]), addr derLen, addr sig) != 1:
       raise newException(EcError, "secp256k1_ecdsa_signature_serialize_der")
     der.setLen(derLen)
