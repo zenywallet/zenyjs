@@ -23,6 +23,8 @@ when defined(js):
 
   import std/jsffi
   import arraylib
+  import bytes_types
+  export bytes_types
 
   proc toUint8*(x: Array[byte]): uint8 = x[0].uint8
   proc toUint16*(x: Array[byte]): uint16 =
@@ -45,6 +47,8 @@ else:
   import arraylib
   import hash
   export hash
+  import bytes_types
+  export bytes_types
 
   type
     VarInt* = distinct int
@@ -58,8 +62,6 @@ else:
       size*: int
 
     Hash160* {.borrow: `.`.} = distinct Array[byte]
-
-    PushData* {.borrow: `.`.} = distinct Array[byte]
 
 
   proc toBytes*(x: SomeOrdinal | SomeFloat): Array[byte] =
