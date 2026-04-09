@@ -26,6 +26,26 @@ when defined(js):
   import bytes_types
   export bytes_types
 
+  proc toBytes*(x: SomeOrdinal | SomeFloat): Array[byte] =
+    when sizeof(x) == 1:
+      @^[byte x]
+    else:
+      when sizeof(x) == 2:
+        var x = x.uint16
+        @^[(x and 0xff'u16).uint8, ((x shr 8) and 0xff'u16).uint8]
+      elif sizeof(x) == 4:
+        var x = x.uint32
+        @^[(x and 0xff'u32).uint8, ((x shr 8) and 0xff'u32).uint8,
+          ((x shr 16) and 0xff'u32).uint8, ((x shr 24) and 0xff'u32).uint8]
+      elif sizeof(x) == 8:
+        var x = x.uint64
+        @^[(x and 0xff'u64).uint8, ((x shr 8) and 0xff'u64).uint8,
+          ((x shr 16) and 0xff'u64).uint8, ((x shr 24) and 0xff'u64).uint8,
+          ((x shr 32) and 0xff'u64).uint8, ((x shr 40) and 0xff'u64).uint8,
+          ((x shr 48) and 0xff'u64).uint8, ((x shr 56) and 0xff'u64).uint8]
+      else:
+        raiseAssert("toBytes: unsupported type")
+
   proc toUint8*(x: Array[byte]): uint8 = x[0].uint8
   proc toUint16*(x: Array[byte]): uint16 =
     x[0].uint16 or (x[1].uint16 shl 8)
