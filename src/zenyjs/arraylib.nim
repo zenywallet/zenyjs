@@ -782,6 +782,14 @@ else:
 
   proc `%`*[T](a: Array[T]): JsonNode = %a.toSeq
 
+  proc join*(a: Array[string], sep: string = ""): string =
+    if a.len > 0:
+      result.add(a[0])
+      for i in 1..<a.len:
+        result.add(sep & a[i])
+    else:
+      result = ""
+
   when defined(emscripten):
     proc newArrayT*(len, sizeT: int, result: var ArrayPointer) {.exportc: "array_new".} =
       result.data = cast[typeof(result.data)](allocShared0(sizeT * len))
