@@ -11,6 +11,7 @@ srcDir        = "src"
 
 requires "nim >= 1.6.4"
 requires "regex"
+requires "normalize"
 
 
 import std/os
