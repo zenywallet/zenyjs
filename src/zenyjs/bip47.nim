@@ -176,7 +176,7 @@ when isMainModule:
   var sigHashType: uint32 = SIGHASH_ALL
   var txSign = (tx1, sigHashType).toBytes
   var txSignHash = sha256d(txSign).toBytes
-  var signDer = alicePrv.sign(txSignHash, grind = false) # grind false is only used to match test vectors
+  var signDer = alicePrv.sign(txSignHash)
   assert alicePub.verify(txSignHash, signDer) == true
   var sig0 = (PushData((signDer, sigHashType.uint8).toBytes), PushData(alicePub)).toBytes
   tx1.ins[0].sig = sig0.Sig
