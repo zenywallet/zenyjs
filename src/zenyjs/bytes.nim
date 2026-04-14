@@ -23,6 +23,7 @@ when defined(js):
 
   import std/jsffi
   import arraylib
+  import opcodes
   import bytes_types
   export bytes_types
 
@@ -45,6 +46,22 @@ when defined(js):
           ((x shr 48) and 0xff'u64).uint8, ((x shr 56) and 0xff'u64).uint8]
       else:
         raiseAssert("toBytes: unsupported type")
+
+  proc pushData*(data: Array[byte]): Array[byte] =
+    if data.len <= 0:
+      raiseAssert("pushData: empty")
+    elif data.len < OP_PUSHDATA1.ord:
+      result = concat(@^[byte data.len], data)
+    elif data.len <= 0xff:
+      result = concat(@^[byte OP_PUSHDATA1], (data.len).uint8.toBytes, data)
+    elif data.len <= 0xffff:
+      result = concat(@^[byte OP_PUSHDATA2], (data.len).uint16.toBytes, data)
+    elif data.len <= 0xffffffff:
+      result = concat(@^[byte OP_PUSHDATA4], (data.len).uint32.toBytes, data)
+    else:
+      raiseAssert("pushData: overflow")
+
+  proc toBytes*(p: PushData): Array[byte] {.inline.} = pushData(cast[Array[byte]](p))
 
   proc toUint8*(x: Array[byte]): uint8 = x[0].uint8
   proc toUint16*(x: Array[byte]): uint16 =
