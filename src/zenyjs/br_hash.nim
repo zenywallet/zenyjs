@@ -133,7 +133,7 @@ proc br_hmac_update*(ctx: ptr br_hmac_context; data: pointer; len: csize_t) {.im
 
 proc br_hmac_out*(ctx: ptr br_hmac_context; `out`: pointer): csize_t {.importc, cdecl, gcsafe.}
 
-proc sha256Hmac*(key: ptr UncheckedArray[byte], keySize: uint32, data: ptr UncheckedArray[byte], dataSize: uint32): array[br_sha256_SIZE, byte] =
+proc hmac_sha256*(key: ptr UncheckedArray[byte], keySize: uint32, data: ptr UncheckedArray[byte], dataSize: uint32): array[br_sha256_SIZE, byte] =
   var hmacKeyCtx: br_hmac_key_context
   var hmacCtx: br_hmac_context
   br_hmac_key_init(addr hmacKeyCtx, addr br_sha256_vtable, cast[pointer](key), keySize.csize_t)
@@ -141,7 +141,7 @@ proc sha256Hmac*(key: ptr UncheckedArray[byte], keySize: uint32, data: ptr Unche
   br_hmac_update(addr hmacCtx, cast[pointer](data), dataSize.csize_t)
   discard br_hmac_out(addr hmacCtx, addr result)
 
-proc sha512Hmac*(key: ptr UncheckedArray[byte], keySize: uint32, data: ptr UncheckedArray[byte], dataSize: uint32): array[br_sha512_SIZE, byte] =
+proc hmac_sha512*(key: ptr UncheckedArray[byte], keySize: uint32, data: ptr UncheckedArray[byte], dataSize: uint32): array[br_sha512_SIZE, byte] =
   var hmacKeyCtx: br_hmac_key_context
   var hmacCtx: br_hmac_context
   br_hmac_key_init(addr hmacKeyCtx, addr br_sha512_vtable, cast[pointer](key), keySize.csize_t)
@@ -154,7 +154,7 @@ const
 
 var br_sha1_vtable* {.importc.}: br_hash_class
 
-proc sha1Hmac*(key: ptr UncheckedArray[byte], keySize: uint32, data: ptr UncheckedArray[byte], dataSize: uint32): array[br_sha1_SIZE, byte] =
+proc hmac_sha1*(key: ptr UncheckedArray[byte], keySize: uint32, data: ptr UncheckedArray[byte], dataSize: uint32): array[br_sha1_SIZE, byte] =
   var hmacKeyCtx: br_hmac_key_context
   var hmacCtx: br_hmac_context
   br_hmac_key_init(addr hmacKeyCtx, addr br_sha1_vtable, cast[pointer](key), keySize.csize_t)

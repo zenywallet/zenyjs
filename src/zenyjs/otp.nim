@@ -77,13 +77,13 @@ else:
     var hash: seq[byte]
     case totp.algo
     of SHA1:
-      hash = sha1Hmac(cast[ptr UncheckedArray[byte]](addr totp.key[0]), totp.key.len.uint32,
+      hash = hmac_sha1(cast[ptr UncheckedArray[byte]](addr totp.key[0]), totp.key.len.uint32,
                       cast[ptr UncheckedArray[byte]](addr c[0]), c.len.uint32).toSeq
     of SHA256:
-      hash = sha256Hmac(cast[ptr UncheckedArray[byte]](addr totp.key[0]), totp.key.len.uint32,
+      hash = hmac_sha256(cast[ptr UncheckedArray[byte]](addr totp.key[0]), totp.key.len.uint32,
                         cast[ptr UncheckedArray[byte]](addr c[0]), c.len.uint32).toSeq
     of SHA512:
-      hash = sha512Hmac(cast[ptr UncheckedArray[byte]](addr totp.key[0]), totp.key.len.uint32,
+      hash = hmac_sha512(cast[ptr UncheckedArray[byte]](addr totp.key[0]), totp.key.len.uint32,
                         cast[ptr UncheckedArray[byte]](addr c[0]), c.len.uint32).toSeq
     let pos = hash[^1] and 0x0f'u8
     let code = hash[pos].toUint32BE and 0x7fffffff'u32

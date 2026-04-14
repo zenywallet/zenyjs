@@ -255,8 +255,8 @@ else:
               versionPub: VersionPrefix = xpub): HDNode {.exportc: "bip32_$1".} =
     result = cast[HDNode](allocShared0(sizeof(HDNodeObj)))
     var k = "Bitcoin seed"
-    var I = sha512Hmac(cast[ptr UncheckedArray[byte]](addr k[0]), k.len.uint32,
-                      cast[ptr UncheckedArray[byte]](addr seed[0]), seed.len.uint32)
+    var I = hmac_sha512(cast[ptr UncheckedArray[byte]](addr k[0]), k.len.uint32,
+                        cast[ptr UncheckedArray[byte]](addr seed[0]), seed.len.uint32)
     result.depth = 0
     result.fingerprint = 0
     result.childNumber = 0
@@ -417,8 +417,8 @@ else:
         raise newException(HdError, "derive privateKey len=" & $node.privateKey.len)
     var childNumber = (0x80000000'u32 or index)
     var data = (0x00'u8, node.privateKey, childNumber).toBytesBE
-    var I = sha512Hmac(cast[ptr UncheckedArray[byte]](addr node.chainCode[0]), node.chainCode.len.uint32,
-                      cast[ptr UncheckedArray[byte]](addr data[0]), data.len.uint32)
+    var I = hmac_sha512(cast[ptr UncheckedArray[byte]](addr node.chainCode[0]), node.chainCode.len.uint32,
+                        cast[ptr UncheckedArray[byte]](addr data[0]), data.len.uint32)
     var privateKey: PrivateKey = I[0..31].toBytes
     var chainCode: ChainCode = I[32..63].toBytes
     var deriveNode = cast[HDNode](allocShared0(sizeof(HDNodeObj)))
@@ -435,8 +435,8 @@ else:
   proc derive*(node: HDNode, index: uint32): HDNode {.exportc: "bip32_$1".} =
     var childNumber = index
     var data = (node.publicKey, childNumber).toBytesBE
-    var I = sha512Hmac(cast[ptr UncheckedArray[byte]](addr node.chainCode[0]), node.chainCode.len.uint32,
-                      cast[ptr UncheckedArray[byte]](addr data[0]), data.len.uint32)
+    var I = hmac_sha512(cast[ptr UncheckedArray[byte]](addr node.chainCode[0]), node.chainCode.len.uint32,
+                        cast[ptr UncheckedArray[byte]](addr data[0]), data.len.uint32)
     var privateKey: PrivateKey = I[0..31].toBytes
     var chainCode: ChainCode = I[32..63].toBytes
     var deriveNode = cast[HDNode](allocShared0(sizeof(HDNodeObj)))
