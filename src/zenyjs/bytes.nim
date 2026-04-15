@@ -75,6 +75,34 @@ when defined(js):
     (x[4].uint64 shl 32) or (x[5].uint64 shl 40) or
     (x[6].uint64 shl 48) or (x[7].uint64 shl 56)
 
+  proc toBytes*(obj: tuple | object): Array[byte] =
+    var s: Array[Array[byte]]
+    for val in obj.fields:
+      var b = val.toBytes
+      s.add(b)
+    concat(s)
+
+  proc toBytes*[T](obj: openArray[T]): Array[byte] =
+    var s: Array[Array[byte]]
+    for val in obj:
+      var b = val.toBytes
+      s.add(b)
+    concat(s)
+
+  proc toBytes*[T](obj: Array[T]): Array[byte] =
+    var s: Array[Array[byte]]
+    for val in obj:
+      var b = val.toBytes
+      s.add(b)
+    concat(s)
+
+  proc toBytes*(obj: ref tuple | ref object | ptr tuple | ptr object): Array[byte] =
+    var s: Array[Array[byte]]
+    for val in obj[].fields:
+      var b = val.toBytes
+      s.add(b)
+    concat(s)
+
 else:
   import std/sequtils
   import std/strutils
