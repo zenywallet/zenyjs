@@ -364,6 +364,10 @@ else:
   proc toHash160*(x: Array[byte]): Hash160 {.inline.} = Hash160(x)
   proc toHash160*(x: openArray[byte]): Hash160 {.inline.} = Hash160(x.toArray)
 
+  converter toPushData*(args: tuple | object): PushData = cast[PushData](concat(args.toBytes))
+  converter toPushData*(args: varargs[Array[byte], toBytes]): PushData = cast[PushData](concat(args.toBytes))
+  proc PushData*(args: varargs[Array[byte], toBytes]): PushData = cast[PushData](concat(args.toBytes))
+
   when not defined(CSTRING_SAFE):
     proc toString*(s: seq[byte]): string = cast[string](s)
 
