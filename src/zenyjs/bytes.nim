@@ -103,6 +103,17 @@ when defined(js):
       s.add(b)
     concat(s)
 
+  proc toReverse*(a: Array[byte]): Array[byte] =
+    var x = 0
+    var y = a.high
+    while x < y:
+      var t = a[x]
+      a[x] = a[y]
+      a[y] = t
+      dec(y)
+      inc(x)
+    result = a
+
 else:
   import std/sequtils
   import std/strutils
