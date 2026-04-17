@@ -353,10 +353,10 @@ else:
   proc toUint32BE*(x: Array[byte]): uint32 {.inline.} = x.toUint32.toBE
   proc toUint64BE*(x: Array[byte]): uint64 {.inline.} = x.toUint64.toBE
 
-  proc toHash*(x: var byte): Hash {.inline.} = Hash((cast[ptr array[32, byte]](addr x)[]).toArray)
-  proc toHash*(x: Array[byte]): Hash {.inline.} = Hash(x)
-  proc toHash*(x: openArray[byte]): Hash {.inline.} = Hash(x.toArray)
-  proc toHash*(x: Hex): Hash {.inline.} = x.toBytes.toReverse.Hash
+  converter toHash*(x: var byte): Hash {.inline.} = Hash((cast[ptr array[32, byte]](addr x)[]).toArray)
+  converter toHash*(x: Array[byte]): Hash {.inline.} = Hash(x)
+  converter toHash*(x: openArray[byte]): Hash {.inline.} = Hash(x.toArray)
+  converter toHash*(x: Hex): Hash {.inline.} = x.toBytes.toReverse.Hash
 
   proc toHash160*(x: var byte): Hash160 {.inline.} = Hash160((cast[ptr array[20, byte]](addr x)[]).toArray)
   proc toHash160*(x: Array[byte]): Hash160 {.inline.} = Hash160(x)
