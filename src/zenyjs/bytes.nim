@@ -24,6 +24,8 @@ when defined(js):
   import std/jsffi
   import arraylib
   import opcodes
+  import hash
+  import jslib except Array
   import bytes_types
   export bytes_types
 
@@ -113,6 +115,10 @@ when defined(js):
       dec(y)
       inc(x)
     result = a
+
+  converter toHash*(x: Uint8Array): Hash = x.toBytes.Hash
+  converter toHash*(x: Hex): Hash = x.toBytes.toReverse.Hash
+  converter toHash*(x: string): Hash = x.Hex.toBytes.toReverse.Hash
 
 else:
   import std/sequtils
