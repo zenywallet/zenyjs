@@ -124,6 +124,8 @@ when defined(js):
 
   proc Bytes*(args: varargs[Array[byte], toBytes]): Array[byte] = concat(args)
 
+  proc PushData*(args: varargs[Array[byte], toBytes]): PushData = cast[PushData](concat(args.toBytes))
+
 else:
   import std/sequtils
   import std/strutils
