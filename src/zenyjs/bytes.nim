@@ -120,6 +120,8 @@ when defined(js):
   converter toHash*(x: Hex): Hash = x.toBytes.toReverse.Hash
   converter toHash*(x: string): Hash = x.Hex.toBytes.toReverse.Hash
 
+  converter toArray*(x: Uint8Array): Array[byte] = x.toBytes
+
 else:
   import std/sequtils
   import std/strutils
@@ -238,6 +240,7 @@ else:
   proc toBytes*(hash: Hash): Array[byte] {.inline.} = cast[Array[byte]](hash)
   proc toBytes*(hash: Hash160): Array[byte] {.inline.} = cast[Array[byte]](hash)
   proc toBytes*(p: PushData): Array[byte] {.inline.} = pushData(cast[Array[byte]](p))
+
   proc toBytes*(x: string): Array[byte] {.inline.} =
     result.newArray(x.len)
     for i in 0..x.len-1:
@@ -440,3 +443,6 @@ else:
   proc `$`*(o: ref tuple | ref object | ptr tuple | ptr object): string = $o[]
 
   proc `==`*(x, y: Hash | Hash160): bool = x.toBytes == y.toBytes
+
+
+converter toArray*(h: Hex): Array[byte] = h.toBytes
