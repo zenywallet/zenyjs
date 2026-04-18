@@ -122,6 +122,8 @@ when defined(js):
 
   converter toArray*(x: Uint8Array): Array[byte] = x.toBytes
 
+  proc Bytes*(args: varargs[Array[byte], toBytes]): Array[byte] = concat(args)
+
 else:
   import std/sequtils
   import std/strutils
