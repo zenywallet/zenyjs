@@ -74,7 +74,7 @@ when defined(js):
 
   proc hash*(tx: Tx): Hash =
     result = newArray[byte]().Hash
-    TxMod.hash(tx, result.handle)
+    TxMod.hash(tx.handle, result.handle)
 
   proc `$`*(tx: Tx): string =
     var s = newArray[byte]()
@@ -337,7 +337,8 @@ else:
 
   proc hash*(tx: Tx): Hash {.inline.} = tx.toBytes.hash
 
-  proc hash*(tx: Tx): Hash {.returnToLastParam, exportc: "tx_$1".}
+  proc hash*(txh: TxHandle, result: var Hash) {.exportc: "tx_$1".} =
+    result = refTx(txh).toBytes.hash
 
   proc hashBin(data: Array[byte]): Array[byte] = sha256d(data).toArray
 
