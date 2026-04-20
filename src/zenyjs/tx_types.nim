@@ -49,7 +49,7 @@ when defined(js):
 
   proc `=destroy`*(tx: var Tx) =
     if not tx.handle.isNil:
-      TxMod.free(tx)
+      TxMod.free(tx.handle)
       tx.handle = jsNull
 
   proc `=copy`*(a: var Tx; b: Tx) =
@@ -73,15 +73,16 @@ else:
     Tx* = object of HandleObj[TxHandle]
       refFlag: TxRefFlag
 
-  proc free*(tx: Tx) {.exportc: "tx_$1".} =
-    if tx.handle.isNil or cast[bool](tx.refFlag): return
-    let tx = tx.handle
+
+  proc free*(tx: TxHandle) {.exportc: "tx_$1".} =
     `=destroy`(tx.witnesses)
     `=destroy`(tx.outs)
     `=destroy`(tx.ins)
     tx.deallocShared()
 
-  proc `=destroy`*(tx: var Tx) = tx.free()
+  proc `=destroy`*(tx: var Tx) =
+    if not tx.handle.isNil and not cast[bool](tx.refFlag):
+      tx.handle.free()
 
   proc `=copy`*(a: var Tx; b: Tx) =
     if a.handle == b.handle: return
