@@ -66,7 +66,7 @@ when defined(js):
     result.handle = TxMod.toTx(data.handle)
 
   proc stripWitness*(tx: Tx): Tx =
-    result.handle = TxMod.stripWitness(tx)
+    result.handle = TxMod.stripWitness(tx.handle)
 
   proc txid*(tx: Tx): Hash =
     result = newArray[byte]().Hash
@@ -322,7 +322,13 @@ else:
     txh.locktime = tx.locktime
     result.handle = txh
 
-  proc stripWitness(tx: Tx): Tx {.returnToHandle, exportc: "tx_stripWitness".}
+  proc stripWitnessHandle(tx: TxHandle): TxHandle {.exportc: "tx_stripWitness".} =
+    var txh = cast[TxHandle](allocShared0(sizeof(TxObj)))
+    txh.ver = tx.ver
+    txh.ins = tx.ins
+    txh.outs = tx.outs
+    txh.locktime = tx.locktime
+    result = txh
 
   proc hash(data: Array[byte]): Hash = Hash(sha256d(data).toArray)
 
