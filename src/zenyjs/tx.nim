@@ -174,7 +174,7 @@ else:
   export custom
   export tx_types
 
-  proc duplicate*(node: Tx): Tx =
+  proc duplicate*(node: TxHandle): TxHandle {.exportc: "tx_duplicate".} =
     var h = cast[TxHandle](allocShared0(sizeof(TxObj)))
     h.ver = node.ver
     h.flags = node.flags
@@ -182,9 +182,7 @@ else:
     h.outs = node.outs
     h.witnesses = node.witnesses
     h.locktime = node.locktime
-    result.handle = h
-
-  proc duplicate*(node: Tx): Tx {.returnToHandle, exportc: "tx_duplicate".}
+    result = h
 
   proc toBytes*(flags: Flags): Array[byte] =
     var val = cast[uint8](flags)
