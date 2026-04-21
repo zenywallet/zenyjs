@@ -7,13 +7,32 @@ when defined(js):
   import std/json
   import jslib
 
+  var ArrayMod = JsObject{}
+  var Module: JsObject
+
+  type
+    ArrayError* = object of CatchableError
+
   type
     Array*[T] = object
       handle*: JsObject
 
-    ArrayByte* = Array[byte]
+  proc `=destroy`*[T](x: var Array[T]) =
+    if not x.handle.isNull:
+      ArrayMod.destroy(x.handle)
+      Module.free(x.handle)
+      x.handle = jsNull
 
-    ArrayError* = object of CatchableError
+  proc `=copy`*[T](a: var Array[T]; b: Array[T]) =
+    raise newException(ArrayError, "unsupported =copy")
+
+  proc `=sink`*[T](a: var Array[T]; b: Array[T]) =
+    `=destroy`(a)
+    wasMoved(a)
+    a.handle = b.handle
+
+  type
+    ArrayByte* = Array[byte]
 
     Hash {.borrow: `.`.} = distinct Array[byte]
     InternalExportedHash* {.deprecated: "use hash.Hash instead".} = Hash
@@ -40,9 +59,6 @@ when defined(js):
   template csizeof*(T: typedesc[TxOut | InternalExportedTxOut]): int = 24
   template csizeof*(T: typedesc[Array[byte]]): int = 16
 
-  var ArrayMod = JsObject{}
-  var Module: JsObject
-
   proc init*(module: JsObject) =
     Module = module
     ArrayMod.newArrayT = Module.cwrap("array_new", jsNull, [NumVar, NumVar, NumVar])
@@ -58,20 +74,6 @@ when defined(js):
     when not T is byte: raise
     result.handle = Module.malloc(12)
     discard ArrayMod.newArrayT(len, csizeof(T), result.handle)
-
-  proc `=destroy`*[T](x: var Array[T]) =
-    if not x.handle.isNull:
-      ArrayMod.destroy(x.handle)
-      Module.free(x.handle)
-      x.handle = jsNull
-
-  proc `=copy`*[T](a: var Array[T]; b: Array[T]) =
-    raise newException(ArrayError, "unsupported =copy")
-
-  proc `=sink`*[T](a: var Array[T]; b: Array[T]) =
-    `=destroy`(a)
-    wasMoved(a)
-    a.handle = b.handle
 
   proc reallocArray*[T](a: var Array[T] | Array[T], newLen: Natural, sizeT: int) =
     ArrayMod.realloc(a.handle, newLen, sizeT)
