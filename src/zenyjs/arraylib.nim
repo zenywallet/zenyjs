@@ -186,6 +186,12 @@ when defined(js):
       var y = newUint8Array(Module.HEAPU8.buffer, pData, arrayObj[0].to(int))
       for i in 0..<a.len:
         y[i] = a[i]
+    elif T is int or T is uint or T is cint or T is cuint:
+      result = newArray[T](a.len)
+      let d = newDataView(Module.HEAPU8.buffer, result.handle.to(cint), 12)
+      let y = newUint32Array(Module.HEAPU8.buffer, d.getUint32(8, true).to(int), d.getUint32(0, true).to(int))
+      for i in 0..<a.len:
+        y[i] = a[i]
     else:
       discard
 
