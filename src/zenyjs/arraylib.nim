@@ -28,6 +28,8 @@ when defined(js):
   proc `=copy`*[T](a: var Array[T]; b: Array[T]) =
     if a.handle == b.handle: return
     when T is Ordinal:
+      `=destroy`(a)
+      wasMoved(a)
       discard ArrayMod.newArrayT(b.len, csizeof(T), a.handle)
       var p32 = b.handle.to(cint) div 4
       var uint8Array = newUint8Array(Module.HEAPU8.buffer, Module.HEAPU32[p32 + 2].to(int), Module.HEAPU32[p32].to(int) * csizeof(T)).to(Uint8Array)
