@@ -193,7 +193,7 @@ when defined(js):
       for i in 0..<a.len:
         y[i] = a[i]
     else:
-      discard
+      raise newException(ArrayError, "unsupported type " & $typeof(T))
 
   proc concat*[T](arrays: varargs[Array[T]]): Array[T] =
     var allLen = 0
