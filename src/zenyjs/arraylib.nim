@@ -35,7 +35,7 @@ when defined(js):
       var uint8Array = newUint8Array(Module.HEAPU8.buffer, Module.HEAPU32[p32 + 2].to(int), Module.HEAPU32[p32].to(int) * csizeof(T)).to(Uint8Array)
       Module.HEAPU8.set(uint8Array, Module.HEAPU32[a.handle.to(cint) div 4 + 2].to(int))
     else:
-      raise newException(ArrayError, "unsupported =copy")
+      raise newException(ArrayError, "unsupported =copy " & $typeof(T))
 
   proc `=sink`*[T](a: var Array[T]; b: Array[T]) =
     `=destroy`(a)
@@ -195,7 +195,7 @@ when defined(js):
       for i in 0..<a.len:
         y[i] = a[i]
     else:
-      raise newException(ArrayError, "unsupported type " & $typeof(T))
+      raise newException(ArrayError, "unsupported @^ " & $typeof(T))
 
   proc concat*[T](arrays: varargs[Array[T]]): Array[T] =
     var allLen = 0
