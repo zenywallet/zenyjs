@@ -10,6 +10,8 @@ when defined(js):
   var ArrayMod = JsObject{}
   var Module: JsObject
 
+  template csizeof*(T: typedesc): int = sizeof(T)
+
   type
     ArrayError* = object of CatchableError
 
@@ -24,7 +26,14 @@ when defined(js):
       x.handle = jsNull
 
   proc `=copy`*[T](a: var Array[T]; b: Array[T]) =
-    raise newException(ArrayError, "unsupported =copy")
+    if a.handle == b.handle: return
+    when T is Ordinal:
+      discard ArrayMod.newArrayT(b.len, csizeof(T), a.handle)
+      var p32 = b.handle.to(cint) div 4
+      var uint8Array = newUint8Array(Module.HEAPU8.buffer, Module.HEAPU32[p32 + 2].to(int), Module.HEAPU32[p32].to(int) * csizeof(T)).to(Uint8Array)
+      Module.HEAPU8.set(uint8Array, Module.HEAPU32[a.handle.to(cint) div 4 + 2].to(int))
+    else:
+      raise newException(ArrayError, "unsupported =copy")
 
   proc `=sink`*[T](a: var Array[T]; b: Array[T]) =
     `=destroy`(a)
@@ -53,7 +62,6 @@ when defined(js):
       handle*: JsObject
     InternalExportedTxOut* {.deprecated: "use tx_types.TxOut instead".} = TxOut
 
-  template csizeof*(T: typedesc): int = sizeof(T)
   template csizeof*(T: typedesc[Hash | Script | Sig]): int = 16
   template csizeof*(T: typedesc[TxIn]): int = 48
   template csizeof*(T: typedesc[TxOut | InternalExportedTxOut]): int = 24
