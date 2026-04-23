@@ -240,14 +240,30 @@ when defined(js):
       raise
 
   proc tx*(txIn: TxIn): Hash =
-    cast[Hash](Array[byte](handle: txIn.handle))
+    let a = newDataView(Module.HEAPU8.buffer, txIn.handle.to(cint), 12)
+    let len = a.getUint32(0, true).to(int)
+    let p = a.getUint32(8, true).to(int)
+    let d = newUint8Array(Module.HEAPU8.buffer, p, len)
+    esult.handle = Module.malloc(12)
+    discard ArrayMod.newArrayT(len, csizeof(byte), result.handle)
+    let a2 = newDataView(Module.HEAPU8.buffer, result.handle.to(cint), 12)
+    let p2 = a2.getUint32(8, true).to(int)
+    discard Module.HEAPU8.set(d, p2)
 
   proc n*(txIn: TxIn): uint32 =
     let d = newDataView(Module.HEAPU8.buffer, txIn.handle.to(cint) + csizeof(Hash), csizeof(uint32))
     d.getUint32(0, true).to(uint32)
 
   proc sig*(txIn: TxIn): Sig =
-    cast[Sig](Array[byte](handle: (txIn.handle.to(cint) + csizeof(Hash) + csizeof(uint32) + 4).toJs))
+    let a = newDataView(Module.HEAPU8.buffer, (txIn.handle.to(cint) + csizeof(Hash) + csizeof(uint32) + 4), 12)
+    let len = a.getUint32(0, true).to(int)
+    let p = a.getUint32(8, true).to(int)
+    let d = newUint8Array(Module.HEAPU8.buffer, p, len)
+    result.handle = Module.malloc(12)
+    discard ArrayMod.newArrayT(len, csizeof(byte), result.handle)
+    let a2 = newDataView(Module.HEAPU8.buffer, result.handle.to(cint), 12)
+    let p2 = a2.getUint32(8, true).to(int)
+    discard Module.HEAPU8.set(d, p2)
 
   proc sequence*(txIn: TxIn): uint32 =
     let d = newDataView(Module.HEAPU8.buffer, txIn.handle.to(cint) + csizeof(Hash) +
