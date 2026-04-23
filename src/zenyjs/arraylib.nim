@@ -271,6 +271,7 @@ when defined(js):
     d.getUint32(0, true).to(uint32)
 
   proc `tx=`*(txIn: TxIn, txid: Hash) =
+    let destroyArray = Array[byte](handle: txIn.handle)
     let s = newUint8Array(Module.HEAPU8.buffer, txid.handle.to(cint), 12)
     Module.HEAPU8.set(s, txIn.handle.to(cint))
 
@@ -279,8 +280,10 @@ when defined(js):
     d.setUint32(0, n, true)
 
   proc `sig=`*(txIn: TxIn, sig: Sig) =
+    let p = txIn.handle.to(cint) + csizeof(Hash) + csizeof(uint32) + 4
+    let destroyArray = Array[byte](handle: p.toJs)
     let s = newUint8Array(Module.HEAPU8.buffer, sig.handle.to(cint), 12)
-    Module.HEAPU8.set(s, txIn.handle.to(cint) + csizeof(Hash) + csizeof(uint32) + 4)
+    Module.HEAPU8.set(s, p)
 
   proc `sequence=`*(txIn: TxIn, sequence: uint32) =
     let d = newDataView(Module.HEAPU8.buffer, txIn.handle.to(cint) + csizeof(Hash) +
