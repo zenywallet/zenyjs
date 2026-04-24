@@ -144,14 +144,7 @@ when defined(js):
   proc `$`*(data: Flags): string = $cast[uint8](data)
 
   proc `$`*(txIn: TxIn): string =
-    let txid = cast[Hash](Array[byte](handle: txIn.handle))
-    let d = newDataView(Module.HEAPU8.buffer, txIn.handle.to(cint) + csizeof(Hash), csizeof(uint32))
-    let n = d.getUint32(0, true).to(uint32)
-    let sig = cast[Sig](Array[byte](handle: (txIn.handle.to(cint) + csizeof(Hash) + csizeof(uint32) + 4).toJs))
-    let d2 = newDataView(Module.HEAPU8.buffer, txIn.handle.to(cint) + csizeof(Hash) +
-                        csizeof(uint32) + 4 + csizeof(Sig), csizeof(uint32))
-    let sequence = d2.getUint32(0, true).to(uint32)
-    "(tx: " & $txid & ", n: " & $n & ", sig: " & $sig & ", sequence: " & $sequence & ")"
+    "(tx: " & $txIn.tx & ", n: " & $txIn.n & ", sig: " & $txIn.sig & ", sequence: " & $txIn.sequence & ")"
 
   proc `$`*(txOut: TxOut): string =
     let d = newDataView(Module.HEAPU8.buffer, txOut.handle.to(cint), csizeof(uint64))
