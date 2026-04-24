@@ -147,9 +147,7 @@ when defined(js):
     "(tx: " & $txIn.tx & ", n: " & $txIn.n & ", sig: " & $txIn.sig & ", sequence: " & $txIn.sequence & ")"
 
   proc `$`*(txOut: TxOut): string =
-    let d = newDataView(Module.HEAPU8.buffer, txOut.handle.to(cint), csizeof(uint64))
-    let script = cast[Script](Array[byte](handle: (txOut.handle.to(cint) + csizeof(uint64)).toJs))
-    "(value: " & $d.getBigUint64(0, true).to(uint64) & ", script: " & $script & ")"
+    "(value: " & $txOut.value & ", script: " & $txOut.script & ")"
 
 else:
   when defined(emscripten):
