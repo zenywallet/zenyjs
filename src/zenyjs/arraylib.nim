@@ -618,6 +618,7 @@ else:
     result.cap = len
 
   proc newArray*[T](a: var Array[T], len: Natural) =
+    `=destroy`(a)
     a.data = cast[typeof(a.data)](allocShared0(sizeof(T) * len))
     a.len = len
     a.cap = len
@@ -628,6 +629,7 @@ else:
     result.cap = len
 
   proc newArrayUninitialized*[T](a: var Array[T], len: Natural): Array[T] =
+    `=destroy`(a)
     a.data = cast[typeof(a.data)](allocShared(sizeof(T) * len))
     a.len = len
     a.cap = len
@@ -638,6 +640,7 @@ else:
     result.cap = len
 
   proc newArrayOfCap*[T](a: var Array[T], len: Natural) =
+    `=destroy`(a)
     a.data = cast[typeof(a.data)](allocShared0(sizeof(T) * len))
     a.len = 0
     a.cap = len
