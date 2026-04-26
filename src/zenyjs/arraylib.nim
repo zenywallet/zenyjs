@@ -102,6 +102,8 @@ when defined(js):
   proc newArray*[T](x: var Array[T], len: JsObject) =
     x = newArray[T](len)
 
+  proc newArray*[T](x: var Array[T]) = x.init()
+
   proc len*[T](x: Array[T]): int = Module.HEAPU32[x.handle.to(cint) div 4].to(int)
 
   proc cap*[T](x: Array[T]): int = Module.HEAPU32[(x.handle.to(cint) + 4) div 4].to(int)
