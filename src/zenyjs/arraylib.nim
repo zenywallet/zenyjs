@@ -623,6 +623,12 @@ else:
     a.len = len
     a.cap = len
 
+  proc newArray*[T](a: var Array[T]) =
+    `=destroy`(a)
+    a.data = nil
+    a.len = 0
+    a.cap = 0
+
   proc newArrayUninitialized*[T](len: Natural): Array[T] =
     result.data = cast[typeof(result.data)](allocShared(sizeof(T) * len))
     result.len = len
