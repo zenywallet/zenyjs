@@ -68,12 +68,14 @@ when defined(js):
   template csizeof*(T: typedesc[TxIn]): int = 48
   template csizeof*(T: typedesc[TxOut | InternalExportedTxOut]): int = 24
   template csizeof*(T: typedesc[Array[byte]]): int = 16
+  template csizeof*(T: typedesc[string]): int = 8
 
   proc init*(module: JsObject) =
     Module = module
     ArrayMod.newArrayT = Module.cwrap("array_new", jsNull, [NumVar, NumVar, NumVar])
     ArrayMod.destroy = Module.cwrap("array_destroy", jsNull, [NumVar])
     ArrayMod.realloc = Module.cwrap("array_realloc", jsNull, [NumVar, NumVar, NumVar])
+    ArrayMod.setString = Module.cwrap("array_setstring", jsNull, [NumVar, NumVar, NumVar])
 
   proc newArray*[T](len: Natural): Array[T] =
     when not T is byte: raise
@@ -355,6 +357,13 @@ when defined(js):
       let p = a.getUint32(8, true).to(int) + i * csizeof(T)
       let s = newUint8Array(Module.HEAPU8.buffer, y.handle.to(cint), 12)
       Module.HEAPU8.set(s, p)
+    elif T is string or T is cstring:
+      withStack:
+        var strUint8Array = strToUint8Array(y.cstring)
+        var p = Module.stackAlloc(strUint8Array.length.to(int) + 1)
+        Module.HEAPU8.set(strUint8Array, p)
+        Module.HEAPU8[p.to(int) + strUint8Array.length.to(int)] = 0
+        ArrayMod.setString(x.handle.to(cint), i, p)
     else:
       raise
 
@@ -490,7 +499,8 @@ when defined(js):
 
 else:
   when defined(emscripten):
-    const EXPORTED_FUNCTIONS* = ["_array_new", "_array_destroy", "_array_realloc"]
+    const EXPORTED_FUNCTIONS* = ["_array_new", "_array_destroy", "_array_realloc",
+      "_array_setstring"]
 
   import std/json
 
@@ -851,3 +861,7 @@ else:
         x.cap = nextCap(newLen)
         x.data = reallocShared0(x.data, sizeT * x.len, sizeT * x.cap)
       x.len = newLen
+
+    proc setString*(x: var ArrayPointer, i: int, data: cstring) {.exportc: "array_setstring".} =
+      var a = cast[ptr Array[string]](addr x)
+      a[i] = $data
