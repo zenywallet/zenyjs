@@ -499,10 +499,6 @@ else:
       len*, cap*: int
       data* {.align(8).}: ptr UncheckedArray[T]
 
-    ArrayPointer* = object
-      len*, cap*: int
-      data* {.align(8).}: pointer
-
   when defined(emscripten):
     proc `=destroy`*[T](x: var Array[T]) =
       if x.cap > 0:
@@ -558,6 +554,10 @@ else:
     a.data = b.data
 
   type
+    ArrayPointer* = object
+      len*, cap*: int
+      data* {.align(8).}: pointer
+
     ArrayByte* = Array[byte]
 
   template toOpenArray*[T](x: Array[T]): openArray[T] = toOpenArray(x.data, 0, x.len - 1)
