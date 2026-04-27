@@ -65,7 +65,7 @@ when defined(js):
     InternalExportedTxOut* {.deprecated: "use tx_types.TxOut instead".} = TxOut
 
   template csizeof*(T: typedesc[Hash | Script | Sig]): int = 16
-  template csizeof*(T: typedesc[TxIn]): int = 48
+  template csizeof*(T: typedesc[TxIn | InternalExportedTxIn]): int = 48
   template csizeof*(T: typedesc[TxOut | InternalExportedTxOut]): int = 24
   template csizeof*(T: typedesc[Array[byte]]): int = 16
   template csizeof*(T: typedesc[string]): int = 8
