@@ -490,6 +490,14 @@ when defined(js):
     for i in 0..<a.len:
       yield (i, a[i])
 
+  proc join*(a: Array[string], sep: string = ""): cstring =
+    if a.len > 0:
+      result.add(a[0])
+      for i in 1..<a.len:
+        result.add(sep & a[i])
+    else:
+      result = ""
+
   template borrowArrayProc*(typ: typedesc) =
     proc len*(x: typ): int {.borrow.}
     proc cap*(x: typ): int {.borrow.}
