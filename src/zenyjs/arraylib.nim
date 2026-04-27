@@ -246,7 +246,7 @@ when defined(js):
     let len = a.getUint32(0, true).to(int)
     let p = a.getUint32(8, true).to(int)
     let d = newUint8Array(Module.HEAPU8.buffer, p, len)
-    esult.handle = Module.malloc(12)
+    result.handle = Module.malloc(12)
     discard ArrayMod.newArrayT(len, csizeof(byte), result.handle)
     let a2 = newDataView(Module.HEAPU8.buffer, result.handle.to(cint), 12)
     let p2 = a2.getUint32(8, true).to(int)
