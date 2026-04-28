@@ -319,8 +319,10 @@ when defined(js):
     d.setBigUint64(0, value, true)
 
   proc `script=`*(txOut: TxOut, script: Script) =
+    let p = txOut.handle.to(cint) + csizeof(uint64)
+    let destroyArray = Array[byte](handle: p.toJs)
     let s = newUint8Array(Module.HEAPU8.buffer, script.handle.to(cint), 12)
-    Module.HEAPU8.set(s, txOut.handle.to(cint) + csizeof(uint64))
+    Module.HEAPU8.set(s, p)
 
   converter toTxOut*(txOut: TxOutObj): TxOut =
     let p = Module.malloc(csizeof(TxOut))
