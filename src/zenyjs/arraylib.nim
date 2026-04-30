@@ -246,6 +246,10 @@ when defined(js):
       let a2 = newDataView(Module.HEAPU8.buffer, p, 12)
       var uint8Array = newUint8Array(Module.HEAPU8.buffer, a2.getUint32(4, true).to(int) + 4, a2.getUint32(0, true).to(int))
       result = $uint8ArrayToStr(uint8Array)
+    elif T is int or T is uint or T is cint or T is cuint:
+      let a = newDataView(Module.HEAPU8.buffer, x.handle.to(cint), 12)
+      let d = newDataView(Module.HEAPU8.buffer, a.getUint32(8, true).to(int) + i * csizeof(T), csizeof(T))
+      result = d.getUint32(0, true).to(T)
     else:
       raise
 
