@@ -304,6 +304,20 @@ else:
       s.add(a)
     concat(s)
 
+  proc toBytesBE*[T](obj: openArray[T]): Array[byte] =
+    var s: Array[Array[byte]]
+    for val in obj:
+      var b = val.toBytesBE
+      s.add(b)
+    concat(s)
+
+  proc toBytesBE*[T](obj: Array[T]): Array[byte] =
+    var s: Array[Array[byte]]
+    for val in obj:
+      var b = val.toBytesBE
+      s.add(b)
+    concat(s)
+
   proc toBytesBE*(obj: ref tuple | ref object | ptr tuple | ptr object): Array[byte] =
     var s: Array[Array[byte]]
     for val in obj[].fields:
