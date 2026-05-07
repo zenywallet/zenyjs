@@ -253,6 +253,12 @@ when defined(js):
     else:
       raise
 
+  proc `$`*(a: Array[uint]): string =
+    result = "@^[" & $a[0]
+    for i in 1..<a.len:
+      result.add(", " & $a[i])
+    result.add("]")
+
   proc tx*(txIn: TxIn): Hash =
     let a = newDataView(Module.HEAPU8.buffer, txIn.handle.to(cint), 12)
     let len = a.getUint32(0, true).to(int)
