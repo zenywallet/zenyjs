@@ -78,12 +78,10 @@ when defined(js):
     ArrayMod.setString = Module.cwrap("array_setstring", jsNull, [NumVar, NumVar, NumVar])
 
   proc newArray*[T](len: Natural): Array[T] =
-    when not T is byte: raise
     result.handle = Module.malloc(12)
     discard ArrayMod.newArrayT(len, csizeof(T), result.handle)
 
   proc newArray*[T](len: JsObject): Array[T] =
-    when not T is byte: raise
     result.handle = Module.malloc(12)
     discard ArrayMod.newArrayT(len, csizeof(T), result.handle)
 
