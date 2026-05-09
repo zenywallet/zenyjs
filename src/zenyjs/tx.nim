@@ -390,6 +390,9 @@ else:
   proc txToBytes*(txh: TxHandle, result: var Array[byte]) {.exportc: "tx_toBytes".} =
     result = refTx(txh).toBytes
 
+converter Sig*(s: Script): Sig = cast[Sig](s)
+converter Sig*(args: varargs[Array[byte], toBytes]): Sig = cast[Sig](concat(args))
+
 
 when isMainModule:
   import ../zenyjs
