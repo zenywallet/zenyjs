@@ -124,7 +124,7 @@ when defined(js):
 
   proc Bytes*(args: varargs[Array[byte], toBytes]): Array[byte] = concat(args)
 
-  proc PushData*(args: varargs[Array[byte], toBytes]): PushData = cast[PushData](concat(args.toBytes))
+  proc PushData*(args: varargs[Array[byte], toBytes]): PushData = cast[PushData](concat(args))
 
 else:
   import std/sequtils
@@ -392,8 +392,8 @@ else:
   proc toHash160*(x: openArray[byte]): Hash160 {.inline.} = Hash160(x.toArray)
 
   converter toPushData*(args: tuple | object): PushData = cast[PushData](concat(args.toBytes))
-  converter toPushData*(args: varargs[Array[byte], toBytes]): PushData = cast[PushData](concat(args.toBytes))
-  proc PushData*(args: varargs[Array[byte], toBytes]): PushData = cast[PushData](concat(args.toBytes))
+  converter toPushData*(args: varargs[Array[byte], toBytes]): PushData = cast[PushData](concat(args))
+  proc PushData*(args: varargs[Array[byte], toBytes]): PushData = cast[PushData](concat(args))
 
   when not defined(CSTRING_SAFE):
     proc toString*(s: seq[byte]): string = cast[string](s)
