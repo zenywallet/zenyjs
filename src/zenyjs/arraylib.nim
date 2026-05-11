@@ -30,6 +30,7 @@ when defined(js):
     when T is Ordinal:
       `=destroy`(a)
       wasMoved(a)
+      a.newArray()
       discard ArrayMod.newArrayT(b.len, csizeof(T), a.handle)
       var p32 = b.handle.to(cint) div 4
       var uint8Array = newUint8Array(Module.HEAPU8.buffer, Module.HEAPU32[p32 + 2].to(int), Module.HEAPU32[p32].to(int) * csizeof(T)).to(Uint8Array)
