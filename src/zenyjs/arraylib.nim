@@ -884,7 +884,8 @@ else:
       result.len = len
       result.cap = len
 
-    proc destroy*(x: var ArrayPointer) {.exportc: "array_destroy".} = `=destroy`(x)
+    proc destroy*(x: var ArrayPointer) {.exportc: "array_destroy".} =
+      `=destroy`(cast[ptr Array[byte]](addr x)[])
 
     proc realloc*(x: var ArrayPointer, newLen, sizeT: int) {.exportc: "array_realloc".} =
       if newLen > x.cap:
