@@ -23,7 +23,7 @@ when defined(js):
     if not x.handle.isNull:
       ArrayMod.destroy(x.handle)
       Module.free(x.handle)
-      x.handle = jsNull
+      #x.handle = jsNull # wasMoved
 
   proc `=copy`*[T](a: var Array[T]; b: Array[T]) =
     if a.handle == b.handle: return
