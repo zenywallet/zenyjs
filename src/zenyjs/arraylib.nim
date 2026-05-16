@@ -233,9 +233,9 @@ when defined(js):
     result.handle = p.toJs
 
   proc `[]`*(x: ArrayTxOutHandle; i: Natural): TxOut =
-      let a = newDataView(Module.HEAPU8.buffer, x.handle.to(cint), 12)
-      let p = a.getUint32(8, true).to(int) + i * csizeof(TxOut)
-      result.handle = p.toJs
+    let a = newDataView(Module.HEAPU8.buffer, x.handle.to(cint), 12)
+    let p = a.getUint32(8, true).to(int) + i * csizeof(TxOut)
+    result.handle = p.toJs
 
   proc len*(x: ArrayTxInHandle | ArrayTxOutHandle): int =
       let a = newDataView(Module.HEAPU8.buffer, x.handle.to(cint), 12)
