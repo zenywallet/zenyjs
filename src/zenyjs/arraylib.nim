@@ -65,6 +65,9 @@ when defined(js):
       handle*: JsObject
     InternalExportedTxOut* {.deprecated: "use tx_types.TxOut instead".} = TxOut
 
+    ArrayTxInHandle* = distinct JsObject
+    ArrayTxOutHandle* = distinct JsObject
+
   template csizeof*(T: typedesc[Hash | Script | Sig]): int = 16
   template csizeof*(T: typedesc[TxIn | InternalExportedTxIn]): int = 48
   template csizeof*(T: typedesc[TxOut | InternalExportedTxOut]): int = 24
@@ -221,6 +224,18 @@ when defined(js):
       for item in a:
         result[i] = item
         inc(i)
+
+  proc handle*(x: ArrayTxInHandle | ArrayTxOutHandle): JsObject = cast[JsObject](x)
+
+  proc `[]`*(x: ArrayTxInHandle; i: Natural): TxIn =
+    let a = newDataView(Module.HEAPU8.buffer, x.handle.to(cint), 12)
+    let p = a.getUint32(8, true).to(int) + i * csizeof(TxIn)
+    result.handle = p.toJs
+
+  proc `[]`*(x: ArrayTxOutHandle; i: Natural): TxOut =
+      let a = newDataView(Module.HEAPU8.buffer, x.handle.to(cint), 12)
+      let p = a.getUint32(8, true).to(int) + i * csizeof(TxOut)
+      result.handle = p.toJs
 
   proc `[]`*[T](x: Array[T]; i: Natural): T =
     when T is byte:

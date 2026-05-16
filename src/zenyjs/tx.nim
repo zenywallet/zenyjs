@@ -127,11 +127,11 @@ when defined(js):
     var p8 = tx.handle.to(cint)
     Module.HEAPU8[p8 + 4] = flags.uint8
 
-  proc ins*(tx: var Tx): Array[TxIn] =
-    result.handle = (tx.handle.to(cint) + 8).toJs
+  proc ins*(tx: var Tx): ArrayTxInHandle =
+    (tx.handle.to(cint) + 8).toJs.ArrayTxInHandle
 
-  proc outs*(tx: var Tx): Array[TxOut] =
-    result.handle = (tx.handle.to(cint) + 24).toJs
+  proc outs*(tx: var Tx): ArrayTxOutHandle =
+    (tx.handle.to(cint) + 24).toJs.ArrayTxOutHandle
 
   proc locktime*(tx: var Tx): uint32 =
     var p32 = tx.handle.to(cint) div 4
