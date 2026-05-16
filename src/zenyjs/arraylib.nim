@@ -237,6 +237,14 @@ when defined(js):
       let p = a.getUint32(8, true).to(int) + i * csizeof(TxOut)
       result.handle = p.toJs
 
+  proc len*(x: ArrayTxInHandle | ArrayTxOutHandle): int =
+      let a = newDataView(Module.HEAPU8.buffer, x.handle.to(cint), 12)
+      a.getUint32(0, true).to(int)
+
+  proc high*(x: ArrayTxInHandle | ArrayTxOutHandle): int = x.len - 1
+
+  proc low*(x: ArrayTxInHandle | ArrayTxOutHandle): int = 0
+
   proc `[]`*[T](x: Array[T]; i: Natural): T =
     when T is byte:
       let a = newDataView(Module.HEAPU8.buffer, x.handle.to(cint), 12)
