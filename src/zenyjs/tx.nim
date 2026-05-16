@@ -143,10 +143,10 @@ when defined(js):
 
   proc `$`*(data: Flags): string = $cast[uint8](data)
 
-  proc `$`*(txIn: TxIn): string =
+  proc `$`*(txIn: TxIn | TxInHandle): string =
     "(tx: " & $txIn.tx & ", n: " & $txIn.n & ", sig: " & $txIn.sig & ", sequence: " & $txIn.sequence & ")"
 
-  proc `$`*(txOut: TxOut): string =
+  proc `$`*(txOut: TxOut | TxOutHandle): string =
     "(value: " & $txOut.value & ", script: " & $txOut.script & ")"
 
 else:

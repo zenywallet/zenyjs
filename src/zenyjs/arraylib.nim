@@ -67,6 +67,8 @@ when defined(js):
 
     ArrayTxInHandle* = distinct JsObject
     ArrayTxOutHandle* = distinct JsObject
+    TxInHandle* = distinct JsObject
+    TxOutHandle* = distinct JsObject
 
   template csizeof*(T: typedesc[Hash | Script | Sig]): int = 16
   template csizeof*(T: typedesc[TxIn | InternalExportedTxIn]): int = 48
@@ -226,16 +228,19 @@ when defined(js):
         inc(i)
 
   proc handle*(x: ArrayTxInHandle | ArrayTxOutHandle): JsObject = cast[JsObject](x)
+  proc handle*(x: TxInHandle | TxOutHandle): JsObject = cast[JsObject](x)
+  converter toTxInHandle(j: JsObject): TxInHandle = j.TxInHandle
+  converter toTxOutHandle(j: JsObject): TxOutHandle = j.TxOutHandle
 
-  proc `[]`*(x: ArrayTxInHandle; i: Natural): TxIn =
+  proc `[]`*(x: ArrayTxInHandle; i: Natural): TxInHandle =
     let a = newDataView(Module.HEAPU8.buffer, x.handle.to(cint), 12)
     let p = a.getUint32(8, true).to(int) + i * csizeof(TxIn)
-    result.handle = p.toJs
+    p.toJs
 
-  proc `[]`*(x: ArrayTxOutHandle; i: Natural): TxOut =
+  proc `[]`*(x: ArrayTxOutHandle; i: Natural): TxOutHandle =
     let a = newDataView(Module.HEAPU8.buffer, x.handle.to(cint), 12)
     let p = a.getUint32(8, true).to(int) + i * csizeof(TxOut)
-    result.handle = p.toJs
+    p.toJs
 
   proc len*(x: ArrayTxInHandle | ArrayTxOutHandle): int =
       let a = newDataView(Module.HEAPU8.buffer, x.handle.to(cint), 12)
@@ -281,7 +286,7 @@ when defined(js):
       result.add(", " & $a[i])
     result.add("]")
 
-  proc tx*(txIn: TxIn): Hash =
+  proc tx*(txIn: TxIn | TxInHandle): Hash =
     let a = newDataView(Module.HEAPU8.buffer, txIn.handle.to(cint), 12)
     let len = a.getUint32(0, true).to(int)
     let p = a.getUint32(8, true).to(int)
@@ -292,11 +297,11 @@ when defined(js):
     let p2 = a2.getUint32(8, true).to(int)
     discard Module.HEAPU8.set(d, p2)
 
-  proc n*(txIn: TxIn): uint32 =
+  proc n*(txIn: TxIn | TxInHandle): uint32 =
     let d = newDataView(Module.HEAPU8.buffer, txIn.handle.to(cint) + csizeof(Hash), csizeof(uint32))
     d.getUint32(0, true).to(uint32)
 
-  proc sig*(txIn: TxIn): Sig =
+  proc sig*(txIn: TxIn | TxInHandle): Sig =
     let a = newDataView(Module.HEAPU8.buffer, (txIn.handle.to(cint) + csizeof(Hash) + csizeof(uint32) + 4), 12)
     let len = a.getUint32(0, true).to(int)
     let p = a.getUint32(8, true).to(int)
@@ -307,12 +312,12 @@ when defined(js):
     let p2 = a2.getUint32(8, true).to(int)
     discard Module.HEAPU8.set(d, p2)
 
-  proc sequence*(txIn: TxIn): uint32 =
+  proc sequence*(txIn: TxIn | TxInHandle): uint32 =
     let d = newDataView(Module.HEAPU8.buffer, txIn.handle.to(cint) + csizeof(Hash) +
                         csizeof(uint32) + 4 + csizeof(Sig), csizeof(uint32))
     d.getUint32(0, true).to(uint32)
 
-  proc `tx=`*(txIn: TxIn, txid: Hash) =
+  proc `tx=`*(txIn: TxIn | TxInHandle, txid: Hash) =
     let h = txIn.handle.to(cint)
     let a = newDataView(Module.HEAPU8.buffer, h, 12)
     let len = a.getUint32(0, true).to(int)
@@ -324,11 +329,11 @@ when defined(js):
     let d = newUint8Array(Module.HEAPU8.buffer, p2, len2)
     discard Module.HEAPU8.set(d, p)
 
-  proc `n=`*(txIn: TxIn, n: uint32) =
+  proc `n=`*(txIn: TxIn | TxInHandle, n: uint32) =
     let d = newDataView(Module.HEAPU8.buffer, txIn.handle.to(cint) + csizeof(Hash), csizeof(uint32))
     d.setUint32(0, n, true)
 
-  proc `sig=`*(txIn: TxIn, sig: Sig) =
+  proc `sig=`*(txIn: TxIn | TxInHandle, sig: Sig) =
     let h = txIn.handle.to(cint) + csizeof(Hash) + csizeof(uint32) + 4
     let a = newDataView(Module.HEAPU8.buffer, h, 12)
     let len = a.getUint32(0, true).to(int)
@@ -340,7 +345,7 @@ when defined(js):
     let d = newUint8Array(Module.HEAPU8.buffer, p2, len2)
     discard Module.HEAPU8.set(d, p)
 
-  proc `sequence=`*(txIn: TxIn, sequence: uint32) =
+  proc `sequence=`*(txIn: TxIn | TxInHandle, sequence: uint32) =
     let d = newDataView(Module.HEAPU8.buffer, txIn.handle.to(cint) + csizeof(Hash) +
                         csizeof(uint32) + 4 + csizeof(Sig), csizeof(uint32))
     d.setUint32(0, sequence, true)
@@ -358,18 +363,18 @@ when defined(js):
     d2.setUint32(0, txIn.sequence, true)
     result.handle = p
 
-  proc value*(txOut: TxOut): uint64 =
+  proc value*(txOut: TxOut | TxOutHandle): uint64 =
     let d = newDataView(Module.HEAPU8.buffer, txOut.handle.to(cint), csizeof(uint64))
     d.getBigUint64(0, true).to(uint64)
 
-  proc script*(txOut: TxOut): Script =
+  proc script*(txOut: TxOut | TxOutHandle): Script =
     cast[Script](Array[byte](handle: (txOut.handle.to(cint) + csizeof(uint64)).toJs))
 
-  proc `value=`*(txOut: TxOut, value: uint64) =
+  proc `value=`*(txOut: TxOut | TxOutHandle, value: uint64) =
     let d = newDataView(Module.HEAPU8.buffer, txOut.handle.to(cint), csizeof(uint64))
     d.setBigUint64(0, value, true)
 
-  proc `script=`*(txOut: TxOut, script: Script) =
+  proc `script=`*(txOut: TxOut | TxOutHandle, script: Script) =
     let p = txOut.handle.to(cint) + csizeof(uint64)
     let destroyArray = Array[byte](handle: p.toJs)
     let s = newUint8Array(Module.HEAPU8.buffer, script.handle.to(cint), 12)
