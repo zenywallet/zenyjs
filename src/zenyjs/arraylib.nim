@@ -302,7 +302,7 @@ when defined(js):
     d.getUint32(0, true).to(uint32)
 
   proc sig*(txIn: TxIn | TxInHandle): Sig =
-    let a = newDataView(Module.HEAPU8.buffer, (txIn.handle.to(cint) + csizeof(Hash) + csizeof(uint32) + 4), 12)
+    let a = newDataView(Module.HEAPU8.buffer, txIn.handle.to(cint) + csizeof(Hash) + csizeof(uint32) + 4, 12)
     let len = a.getUint32(0, true).to(int)
     let p = a.getUint32(8, true).to(int)
     let d = newUint8Array(Module.HEAPU8.buffer, p, len)
