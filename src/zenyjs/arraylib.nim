@@ -368,17 +368,31 @@ when defined(js):
     d.getBigUint64(0, true).to(uint64)
 
   proc script*(txOut: TxOut | TxOutHandle): Script =
-    cast[Script](Array[byte](handle: (txOut.handle.to(cint) + csizeof(uint64)).toJs))
+    let a = newDataView(Module.HEAPU8.buffer, (txOut.handle.to(cint) + csizeof(uint64)), 12)
+    let len = a.getUint32(0, true).to(int)
+    let p = a.getUint32(8, true).to(int)
+    let d = newUint8Array(Module.HEAPU8.buffer, p, len)
+    result.handle = Module.malloc(12)
+    discard ArrayMod.newArrayT(len, csizeof(byte), result.handle)
+    let a2 = newDataView(Module.HEAPU8.buffer, result.handle.to(cint), 12)
+    let p2 = a2.getUint32(8, true).to(int)
+    discard Module.HEAPU8.set(d, p2)
 
   proc `value=`*(txOut: TxOut | TxOutHandle, value: uint64) =
     let d = newDataView(Module.HEAPU8.buffer, txOut.handle.to(cint), csizeof(uint64))
     d.setBigUint64(0, value, true)
 
   proc `script=`*(txOut: TxOut | TxOutHandle, script: Script) =
-    let p = txOut.handle.to(cint) + csizeof(uint64)
-    let destroyArray = Array[byte](handle: p.toJs)
-    let s = newUint8Array(Module.HEAPU8.buffer, script.handle.to(cint), 12)
-    Module.HEAPU8.set(s, p)
+    let h = txOut.handle.to(cint) + csizeof(uint64)
+    let a = newDataView(Module.HEAPU8.buffer, h, 12)
+    let len = a.getUint32(0, true).to(int)
+    let a2 = newDataView(Module.HEAPU8.buffer, script.handle.to(cint), 12)
+    let len2 = a2.getUint32(0, true).to(int)
+    let p2 = a2.getUint32(8, true).to(int)
+    ArrayMod.realloc(h.toJs, len2, sizeof(byte))
+    let p = a.getUint32(8, true).to(int)
+    let d = newUint8Array(Module.HEAPU8.buffer, p2, len2)
+    discard Module.HEAPU8.set(d, p)
 
   converter toTxOut*(txOut: TxOutObj): TxOut =
     let p = Module.malloc(csizeof(TxOut))
