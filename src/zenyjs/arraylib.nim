@@ -444,6 +444,25 @@ when defined(js):
     else:
       raise
 
+  proc `[]=`*(x: ArrayTxInHandle; i: Natural; y: sink TxIn) =
+    let a = newDataView(Module.HEAPU8.buffer, x.handle.to(cint), 12)
+    let p = a.getUint32(8, true).to(int) + i * csizeof(TxIn)
+    let d = newDataView(Module.HEAPU8.buffer, p, csizeof(TxIn))
+    let tx = newUint8Array(Module.HEAPU8.buffer, y.tx.handle.to(cint), 12)
+    Module.HEAPU8.set(tx, p)
+    d.setUint32(csizeof(Hash), y.n, true)
+    let sig = newUint8Array(Module.HEAPU8.buffer, y.sig.handle.to(cint), 12)
+    Module.HEAPU8.set(sig, p  + csizeof(Hash) + csizeof(uint32) + 4)
+    d.setUint32(csizeof(Hash) + csizeof(uint32) + 4 + csizeof(Sig), y.sequence, true)
+
+  proc `[]=`*(x: ArrayTxOutHandle; i: Natural; y: sink TxOut) =
+    let a = newDataView(Module.HEAPU8.buffer, x.handle.to(cint), 12)
+    let p = a.getUint32(8, true).to(int) + i * csizeof(TxOut)
+    let d = newDataView(Module.HEAPU8.buffer, p, csizeof(uint64))
+    d.setBigUint64(0, y.value, true)
+    let s = newUint8Array(Module.HEAPU8.buffer, y.script.handle.to(cint), 12)
+    Module.HEAPU8.set(s, p + csizeof(uint64))
+
   proc `[]`*[T](a: Array[T]; i: BackwardsIndex): T {.inline.} =
     a[a.len - int(i) + low(a)]
 
