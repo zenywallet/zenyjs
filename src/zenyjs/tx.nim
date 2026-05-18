@@ -149,6 +149,15 @@ when defined(js):
   proc `$`*(txOut: TxOut | TxOutHandle): string =
     "(value: " & $txOut.value & ", script: " & $txOut.script & ")"
 
+  proc `$`*(a: ArrayTxInHandle | ArrayTxOutHandle): string =
+    if a.len > 0:
+      result = "@^[" & $a[0]
+      for i in 1..<a.len:
+        result.add(", " & $a[i])
+      result.add("]")
+    else:
+      result = "@^[]"
+
 else:
   when defined(emscripten):
     const EXPORTED_FUNCTIONS* = ["_tx_newTx", "_tx_toTx", "_tx_stripWitness",
