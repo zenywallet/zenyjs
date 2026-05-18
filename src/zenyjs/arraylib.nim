@@ -444,14 +444,14 @@ when defined(js):
     else:
       raise
 
-  proc `[]=`*(x: ArrayTxInHandle; i: Natural; y: sink TxIn) =
+  proc `[]=`*(x: ArrayTxInHandle; i: Natural; y: sink TxIn | sink TxInObj) =
     let a = x[i]
     a.tx = y.tx
     a.n = y.n
     a.sig = y.sig
     a.sequence = y.sequence
 
-  proc `[]=`*(x: ArrayTxOutHandle; i: Natural; y: sink TxOut) =
+  proc `[]=`*(x: ArrayTxOutHandle; i: Natural; y: sink TxOut | sink TxOutObj) =
     let a = x[i]
     a.script = y.script
     a.value = y.value
