@@ -564,6 +564,24 @@ when defined(js):
       for i, a in y:
         x[curLen + i] = a
 
+  proc add*(x: ArrayTxInHandle; y: sink TxIn | sink TxInObj) =
+    if x.handle.isNull:
+      raise newException(ArrayError, "array is nil")
+    else:
+      let curLen = x.len
+      let newLen = curLen + 1
+      ArrayMod.realloc(x.handle, newLen, csizeof(TxIn))
+      x[curLen] = y
+
+  proc add*(x: ArrayTxOutHandle; y: sink TxOut | sink TxOutObj) =
+    if x.handle.isNull:
+      raise newException(ArrayError, "array is nil")
+    else:
+      let curLen = x.len
+      let newLen = curLen + 1
+      ArrayMod.realloc(x.handle, newLen, csizeof(TxOut))
+      x[curLen] = y
+
   proc toSeq*[T](x: Array[T]): seq[T] =
     result.newSeq(x.len)
     for i in 0..<x.len:
