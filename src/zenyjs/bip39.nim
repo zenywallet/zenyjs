@@ -64,7 +64,7 @@ template entropyToMnemonic*(entropy: Array[byte], lang: untyped): Array[string] 
 
 proc normalizeMnemonic*(mnemonic: Array[string]): string = mnemonic.join(" ").toNFKD()
 
-proc plainMnemonic*(mnemonic: Array[string]): string = mnemonic.join(" ")
+proc plainMnemonic*(mnemonic: Array[string]): string = mnemonic.join(" ") # NFC NFKC
 
 proc mnemonicToSeed*(mnemonic: string, passphrase: string = ""): Array[byte] =
   if not mnemonic.isNFKD:
