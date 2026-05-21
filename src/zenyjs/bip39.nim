@@ -1,5 +1,6 @@
 # Copyright (c) 2026 zenywallet
 
+import std/strutils
 import normalize
 import arraylib
 import bytes
