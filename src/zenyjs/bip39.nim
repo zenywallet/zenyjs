@@ -270,7 +270,7 @@ when isMainModule:
         var mnemonic = entropyToMnemonic(entropy, lang)
         var bip39Seed = mnemonicToSeed(normalizeMnemonic(mnemonic))
         echo "entropy: ", entropy
-        echo "mnemonic: ", mnemonic
+        echo "mnemonic: ", plainMnemonic(mnemonic)
         echo "bip39 seed: ", bip39Seed
 
         var entropy2 = mnemonicToEntropy(mnemonic, lang)
