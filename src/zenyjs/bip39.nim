@@ -1,7 +1,6 @@
 # Copyright (c) 2026 zenywallet
 
 import std/strutils
-import normalize
 import arraylib
 import bytes
 
@@ -113,6 +112,7 @@ when defined(js):
     wordIdsToEntropy(wordIds)
 
 else:
+  import normalize
   import br_hash
 
   proc pbkdf2_bip39*(key: ptr UncheckedArray[byte], keySize: uint32,
