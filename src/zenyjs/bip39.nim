@@ -12,7 +12,7 @@ when defined(js):
   import jslib except Array
 
   type
-    LangWords* = array[2048, string]
+    LangWords* = array[2048, cstring]
 
   var Bip39Mod = JsObject{}
   var Module: JsObject
@@ -33,7 +33,7 @@ when defined(js):
   proc wordIdsToMnemonic*(wordIds: Array[uint], lang: LangWords): Array[string] =
     result.newArray(wordIds.len)
     for i, w in wordIds:
-      result[i] = lang[w]
+      result[i] = $lang[w]
 
   template entropyToMnemonic*(entropy: Array[byte], lang: untyped): Array[string] =
     entropy.entropyToWordIds().wordIdsToMnemonic(lang)

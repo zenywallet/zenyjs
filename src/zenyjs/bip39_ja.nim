@@ -1,6 +1,14 @@
 # Copyright (c) 2026 zenywallet
 
-const words* = [
+import macros
+
+macro wordsType(): untyped =
+  when defined(js):
+    quote do: cstring
+  else:
+    quote do: string
+
+const words*: array[2048, wordsType()] = [
   "あいこくしん", "あいさつ", "あいだ", "あおぞら", "あかちゃん", "あきる", "あけがた", "あける",
   "あこがれる", "あさい", "あさひ", "あしあと", "あじわう", "あずかる", "あずき", "あそぶ",
   "あたえる", "あたためる", "あたりまえ", "あたる", "あつい", "あつかう", "あっしゅく", "あつまり",

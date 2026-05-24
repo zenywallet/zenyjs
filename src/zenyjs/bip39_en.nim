@@ -1,6 +1,14 @@
 # Copyright (c) 2026 zenywallet
 
-const words* = [
+import macros
+
+macro wordsType(): untyped =
+  when defined(js):
+    quote do: cstring
+  else:
+    quote do: string
+
+const words*: array[2048, wordsType()] = [
   "abandon", "ability", "able", "about", "above", "absent", "absorb", "abstract",
   "absurd", "abuse", "access", "accident", "account", "accuse", "achieve", "acid",
   "acoustic", "acquire", "across", "act", "action", "actor", "actress", "actual",
