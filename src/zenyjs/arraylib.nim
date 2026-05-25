@@ -177,10 +177,8 @@ when defined(js):
   proc `==`*[T](x: Array[T], y: Array[T]): bool =
     if x.len != y.len:
       return false
-    let xa = x.toUint8Array
-    let ya = y.toUint8Array
-    for f in 0..<x.len:
-      if xa[f] != ya[f]:
+    for i in 0..<x.len:
+      if x[i] != y[i]:
         return false
     result = true
 
