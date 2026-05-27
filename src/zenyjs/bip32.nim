@@ -27,7 +27,7 @@ when defined(js):
   var Bip32Mod = JsObject{}
   var Module: JsObject
 
-  proc init*(module: JsObject) =
+  proc bip32_init*(module: JsObject) =
     Module = module
     Bip32Mod.free = Module.cwrap("bip32_free", jsNull, [NumVar])
     Bip32Mod.duplicate = Module.cwrap("bip32_duplicate", NumVar, [NumVar])
@@ -46,6 +46,8 @@ when defined(js):
     Bip32Mod.xpubEx = Module.cwrap("bip32_xpub_c_ex", NumVar, [NumVar, NumVar])
     Bip32Mod.addressEx = Module.cwrap("bip32_address_ex", NumVar, [NumVar, NumVar, NumVar])
     Bip32Mod.segwitAddressEx = Module.cwrap("bip32_segwitAddress_ex", NumVar, [NumVar, NumVar, NumVar])
+
+  template init*(module: JsObject) = bip32_init(module)
 
   proc duplicate(handle: JsObject): JsObject =
     result = Bip32Mod.duplicate(handle)

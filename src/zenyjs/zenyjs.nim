@@ -75,8 +75,8 @@ when defined(js):
     loadModule(proc(module: JsObject) =
       when declared(arraylib):
         arraylib.init(module)
-      when declared(bip32):
-        bip32.init(module)
+      when declared(bip32_init):
+        bip32_init(module)
       when declared(deoxy):
         deoxy.init(module)
       when declared(tx_init):
