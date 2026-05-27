@@ -8,10 +8,12 @@ when defined(js):
   var Basd58Mod = JsObject{}
   var Module: JsObject
 
-  proc init*(module: JsObject) =
+  proc base58_init*(module: JsObject) =
     Module = module
     Basd58Mod.enc = Module.cwrap("base58_enc", jsNull, [NumVar, NumVar])
     Basd58Mod.dec = Module.cwrap("base58_dec", jsNull, [NumVar, NumVar])
+
+  template init*(module: JsObject) = base58_init(module)
 
   proc enc*(src: Array[byte]): cstring =
     var dst = newArray[byte]()

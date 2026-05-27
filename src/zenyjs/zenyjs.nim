@@ -83,8 +83,8 @@ when defined(js):
         tx_init(module)
       when declared(address_init):
         address_init(module)
-      when declared(base58):
-        base58.init(module)
+      when declared(base58_init):
+        base58_init(module)
       when declared(eckey):
         eckey.init(module)
       when declared(bip47):
