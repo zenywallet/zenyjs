@@ -93,6 +93,8 @@ when defined(js):
         utils.init(module)
       when declared(otp):
         otp.init(module)
+      when declared(bip39_init):
+        bip39_init(module)
       discard (proc() {.async.} = body)()
     )
 
@@ -108,6 +110,7 @@ elif defined(emscripten):
   import bip47
   import utils
   import otp
+  import bip39
 
   const ZENYJS_MODULE_NAME = "ZenyJS"
   {.passL: "-s EXPORT_NAME=" & ZENYJS_MODULE_NAME.}
@@ -155,6 +158,9 @@ elif defined(emscripten):
         bracket.add(newLit(functionName))
     when declared(otp.EXPORTED_FUNCTIONS):
       for functionName in otp.EXPORTED_FUNCTIONS:
+        bracket.add(newLit(functionName))
+    when declared(bip39.EXPORTED_FUNCTIONS):
+      for functionName in bip39.EXPORTED_FUNCTIONS:
         bracket.add(newLit(functionName))
     result.add(
       nnkConstSection.newTree(

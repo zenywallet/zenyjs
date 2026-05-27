@@ -17,7 +17,7 @@ when defined(js):
   var Bip39Mod = JsObject{}
   var Module: JsObject
 
-  proc init*(module: JsObject) =
+  proc bip39_init*(module: JsObject) =
     Module = module
     Bip39Mod.entropyToWordIds = Module.cwrap("bip39_etoids", jsNull, [NumVar, NumVar])
     Bip39Mod.normalizeMnemonic = Module.cwrap("bip39_norm", jsNull, [NumVar, NumVar])
@@ -25,6 +25,8 @@ when defined(js):
     Bip39Mod.isNFKD = Module.cwrap("bip39_isnfdk", NumVar, [NumVar])
     Bip39Mod.wordIdsToEntropy = Module.cwrap("bip39_idstoe", NumVar, [NumVar, NumVar])
     Bip39Mod.toNFKC = Module.cwrap("bip39_tonfkc", jsNull, [NumVar, NumVar])
+
+  template init*(module: JsObject) = bip39_init(module)
 
   proc entropyToWordIds*(entropy: Array[byte]): Array[uint] =
     result.newArray()
