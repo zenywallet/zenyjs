@@ -23,7 +23,7 @@ when defined(js):
     Bip39Mod.normalizeMnemonic = Module.cwrap("bip39_norm", jsNull, [NumVar, NumVar])
     Bip39Mod.pbkdf2 = Module.cwrap("bip39_pbkdf2", jsNull, [NumVar, NumVar, NumVar, NumVar])
     Bip39Mod.isNFKD = Module.cwrap("bip39_isnfdk", NumVar, [NumVar])
-    Bip39Mod.wordIdsToEntropy = Module.cwrap("bip39_idstoe", jsNull, [NumVar, NumVar])
+    Bip39Mod.wordIdsToEntropy = Module.cwrap("bip39_idstoe", NumVar, [NumVar, NumVar])
     Bip39Mod.toNFKC = Module.cwrap("bip39_tonfkc", jsNull, [NumVar, NumVar])
 
   proc entropyToWordIds*(entropy: Array[byte]): Array[uint] =
@@ -77,7 +77,11 @@ when defined(js):
 
   proc wordIdsToEntropy*(wordIds: Array[uint]): Array[byte] =
     result.newArray()
-    discard Bip39Mod.wordIdsToEntropy(wordIds.handle, result.handle)
+    var ret = Bip39Mod.wordIdsToEntropy(wordIds.handle, result.handle)
+    if ret.to(cint) == 1:
+      raise newException(Bip39Error, "error: empty word id list")
+    elif ret.to(cint) == 2:
+      raise newException(Bip39Error, "error: checksum invalid entropy")
 
   proc toNFKC(s: cstring): string =
     var ret = newArray[byte]()
@@ -244,8 +248,38 @@ else:
 
     proc bip39_isnfdk(s: string): bool {.exportc.} = s.isNFKD
 
-    proc wordIdsToEntropy*(wordIds: var Array[uint], result: var Array[byte]) {.exportc: "bip39_idstoe".} =
-      result = wordIdsToEntropy(wordIds)
+    proc wordIdsToEntropy2(wordIds: Array[uint]): tuple[ret: Array[byte], err: int] =
+      if wordIds.len > 0:
+        result.ret.add(0)
+      else:
+        result.err = 1
+        return
+      var pos = 0
+
+      for i, w in wordIds:
+        pos = (11 * i) mod 8 + 3
+        result.ret[^1] = result.ret[^1] or (w shr pos).uint8
+        if pos >= 8:
+          result.ret.add(((w and (1.uint shl pos - 1)) shr (pos - 8)).uint8)
+          result.ret.add(((w and (1.uint shl (pos - 8) - 1)) shl (16 - pos)).uint8)
+        else:
+          result.ret.add(((w and (1.uint shl pos - 1)) shl (8 - pos)).uint8)
+      if pos == 8:
+        result.ret.setLen(result.ret.len - 1)
+
+      var entropyLen = result.ret.len - 1
+      var checkSumLen = wordIds.len * 11 mod 8
+      if checkSumLen == 0: checkSumLen = 8
+      var checkSum = result.ret[^1].uint shr (8 - checkSumLen)
+      result.ret.setLen(entropyLen)
+      var sha256hash = sha256(cast[ptr UncheckedArray[byte]](addr result.ret[0]), result.ret.len.uint32).toBytes
+      var sha256CheckSum = sha256hash[0].uint shr (8 - checkSumLen)
+      if checkSum != sha256CheckSum:
+        result.err = 2
+        return
+
+    proc wordIdsToEntropy*(wordIds: var Array[uint], ret: var Array[byte]): int {.exportc: "bip39_idstoe".} =
+      (ret, result) = wordIdsToEntropy2(wordIds)
 
     proc bip39_tonfkc(s: string, result: var Array[byte]) {.exportc.} =
       result = s.toNFKC().toBytes
