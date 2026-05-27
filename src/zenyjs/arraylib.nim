@@ -264,7 +264,14 @@ when defined(js):
     elif T is Array[byte]:
       let a = newDataView(Module.HEAPU8.buffer, x.handle.to(cint), 12)
       let p = a.getUint32(8, true).to(int) + i * csizeof(T)
-      result.handle = p.toJs
+      let a2 = newDataView(Module.HEAPU8.buffer, p, 12)
+      let p2 = a2.getUint32(8, true).to(int)
+      let a2len = a2.getUint32(0, true).to(int)
+      let d = newUint8Array(Module.HEAPU8.buffer, p2, a2len)
+      result.newArray(a2len)
+      let ra = newDataView(Module.HEAPU8.buffer, result.handle.to(cint), 12)
+      let rp = ra.getUint32(8, true).to(int)
+      discard Module.HEAPU8.set(d, rp)
     elif T is string:
       let a = newDataView(Module.HEAPU8.buffer, x.handle.to(cint), 12)
       let p = a.getUint32(8, true).to(int) + i * csizeof(T)
