@@ -33,6 +33,7 @@ when defined(js):
   borrowArrayProc(PublicKeyObj)
 
   var EckeyMod = JsObject{}
+  var ArrayMod = JsObject{}
   var Module: JsObject
 
   proc init*(module: JsObject) =
@@ -50,6 +51,46 @@ when defined(js):
     EckeyMod.verify = Module.cwrap("eckey_verify", NumVar, [NumVar, NumVar, NumVar])
     EckeyMod.tweakAdd_prv = Module.cwrap("eckey_tweakAdd_prv", jsNull, [NumVar, NumVar, NumVar])
     EckeyMod.tweakAdd_pubobj = Module.cwrap("eckey_tweakAdd_pubobj", jsNull, [NumVar, NumVar, NumVar])
+
+    ArrayMod.newArrayT = Module.cwrap("array_new", jsNull, [NumVar, NumVar, NumVar])
+    ArrayMod.destroy = Module.cwrap("array_destroy", jsNull, [NumVar])
+    ArrayMod.realloc = Module.cwrap("array_realloc", jsNull, [NumVar, NumVar, NumVar])
+    ArrayMod.setString = Module.cwrap("array_setstring", jsNull, [NumVar, NumVar, NumVar])
+
+  template csizeof*(T: typedesc[PrivateKey | PublicKey]): int = 16
+
+  template defineArrayExt(T: typedesc) {.dirty.} =
+    proc `[]=`*(x: var Array[T] | Array[T]; i: Natural; y: sink T) =
+      let a = newDataView(Module.HEAPU8.buffer, x.handle.to(cint), 12)
+      let p = a.getUint32(8, true).to(int) + i * csizeof(T)
+      ArrayMod.realloc(p, y.len, csizeof(byte))
+      let ya = newDataView(Module.HEAPU8.buffer, y.handle.to(cint), 12)
+      let yp = ya.getUint32(8, true).to(int)
+      let s = newUint8Array(Module.HEAPU8.buffer, yp, y.len)
+      let a2 = newDataView(Module.HEAPU8.buffer, p, 12)
+      let p2 = a2.getUint32(8, true).to(int)
+      Module.HEAPU8.set(s, p2)
+
+    proc `[]`*(x: Array[T]; i: Natural): T =
+      let a = newDataView(Module.HEAPU8.buffer, x.handle.to(cint), 12)
+      let p = a.getUint32(8, true).to(int) + i * csizeof(T)
+      let a2 = newDataView(Module.HEAPU8.buffer, p, 12)
+      let p2 = a2.getUint32(8, true).to(int)
+      let a2len = a2.getUint32(0, true).to(int)
+      let d = newUint8Array(Module.HEAPU8.buffer, p2, a2len)
+      result = cast[T](newArray[Array[byte]](a2len))
+      let ra = newDataView(Module.HEAPU8.buffer, result.handle.to(cint), 12)
+      let rp = ra.getUint32(8, true).to(int)
+      discard Module.HEAPU8.set(d, rp)
+
+    proc `@^`*[IDX](a: sink array[IDX, T]): Array[T] =
+      echo "@^ T ", typeof(T)
+      result = newArray[T](a.len)
+      for i in 0..<a.len:
+        result[i] = a[i]
+
+  defineArrayExt(PrivateKey)
+  defineArrayExt(PublicKey)
 
   proc ecPubKeyCreate*(privateKey: PrivateKey): Uint8Array =
     withStack:
