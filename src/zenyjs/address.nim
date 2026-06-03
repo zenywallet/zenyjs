@@ -32,6 +32,8 @@ when defined(js):
     AddressMod.getAddress2 = Module.cwrap("getAddress2_c", jsNull, [NumVar, NumVar, NumVar])
     AddressMod.getSegwitAddress = Module.cwrap("getSegwitAddress_c", jsNull, [NumVar, NumVar, NumVar])
     AddressMod.getSegwitAddress2 = Module.cwrap("getSegwitAddress2_c", jsNull, [NumVar, NumVar, NumVar])
+    AddressMod.getNativeSegwitAddress = Module.cwrap("getNativeSegwitAddress_c", jsNull, [NumVar, NumVar, NumVar])
+    AddressMod.getNativeSegwitAddress2 = Module.cwrap("getNativeSegwitAddress2_c", jsNull, [NumVar, NumVar, NumVar])
     AddressMod.wif = Module.cwrap("wif_c", jsNull, [NumVar, NumVar, NumVar])
     AddressMod.prv = Module.cwrap("prv_c", jsNull, [NumVar, NumVar, NumVar])
     AddressMod.getScript = Module.cwrap("getScript_c", jsNull, [NumVar, NumVar, NumVar])
@@ -79,6 +81,21 @@ when defined(js):
   proc getSegwitAddress*(networkId: NetworkId, pub: PublicKey): cstring =
     var ret = newArray[byte]()
     AddressMod.getSegwitAddress2(networkId, pub.handle, ret.handle)
+    result = ret.toString()
+
+  proc getNativeSegwitAddress*(network: Network, pub: PublicKey): cstring =
+    withStack:
+      var nw = strToUint8Array(cstring($(%network)))
+      var pnw = Module.stackAlloc(nw.length.to(int) + 1)
+      Module.HEAPU8.set(nw, pnw)
+      Module.HEAPU8[pnw.to(int) + nw.length.to(int)] = 0
+      var ret = newArray[byte]()
+      AddressMod.getNativeSegwitAddress(pnw, pub.handle, ret.handle)
+      result = ret.toString()
+
+  proc getNativeSegwitAddress*(networkId: NetworkId, pub: PublicKey): cstring =
+    var ret = newArray[byte]()
+    AddressMod.getNativeSegwitAddress2(networkId, pub.handle, ret.handle)
     result = ret.toString()
 
   proc wif*(networkId: NetworkId, prv: PrivateKey): cstring =
@@ -146,13 +163,18 @@ when defined(js):
   template toSegwitAddress*(pub: Array[byte], networkId: NetworkId = defaultNetworkId): cstring = getSegwitAddress(networkId, pub)
   template toSegwitAddress*(pub: Array[byte], network: Network): cstring = getSegwitAddress(network, pub)
 
+  template toNativeSegwitAddress*(pub: Array[byte], networkId: NetworkId = defaultNetworkId): cstring = getNativeSegwitAddress(networkId, pub)
+  template toNativeSegwitAddress*(pub: Array[byte], network: Network): cstring = getNativeSegwitAddress(network, pub)
+
 else:
   type
     Wif* = string
 
   when defined(emscripten):
     const EXPORTED_FUNCTIONS* = ["_address_checkAddress", "_getAddress_c", "_getAddress2_c",
-      "_getSegwitAddress_c", "_getSegwitAddress2_c", "_wif_c", "_prv_c", "_getScript_c",
+      "_getSegwitAddress_c", "_getSegwitAddress2_c",
+      "_getNativeSegwitAddress_c", "_getNativeSegwitAddress2_c",
+      "_wif_c", "_prv_c", "_getScript_c",
       "_p2pkh_script_c", "_p2sh_script_c", "_p2wpkh_script_c"]
 
   import std/json
@@ -217,6 +239,9 @@ else:
   proc getSegwitAddress*(network: NetWork | NetworkId, pub: Array[byte]): string {.inline.} =
     network.p2wpkh_address(ripemd160hash(pub))
 
+  proc getNativeSegwitAddress*(network: NetWork | NetworkId, pub: Array[byte]): string {.inline.} =
+    network.p2wpkh_address(ripemd160hash(pub))
+
   proc getAddress_c*(networkString: cstring, pub: Array[byte], retStringArray: var Array[byte]) {.exportc: "$1".} =
     var networkJson = parseJson($networkString)
     var network: Network = networkJson.to(Network)
@@ -231,6 +256,14 @@ else:
     retStringArray = network.p2wpkh_address(ripemd160hash(pub)).toBytes
 
   proc getSegwitAddress2_c*(networkId: NetworkId, pub: Array[byte], retStringArray: var Array[byte]) {.exportc: "$1".} =
+    retStringArray = networkId.getNetwork.p2wpkh_address(ripemd160hash(pub)).toBytes
+
+  proc getNativeSegwitAddress_c*(networkString: cstring, pub: Array[byte], retStringArray: var Array[byte]) {.exportc: "$1".} =
+    var networkJson = parseJson($networkString)
+    var network: Network = networkJson.to(Network)
+    retStringArray = network.p2wpkh_address(ripemd160hash(pub)).toBytes
+
+  proc getNativeSegwitAddress2_c*(networkId: NetworkId, pub: Array[byte], retStringArray: var Array[byte]) {.exportc: "$1".} =
     retStringArray = networkId.getNetwork.p2wpkh_address(ripemd160hash(pub)).toBytes
 
   proc getAddress*(network: NetWork | NetworkId, hash160: Hash160, addressType: AddressType): string =
@@ -256,6 +289,9 @@ else:
 
   template toSegwitAddress*(pub: Array[byte], networkId: NetworkId = defaultNetworkId): string = getSegwitAddress(networkId, pub)
   template toSegwitAddress*(pub: Array[byte], network: Network): string = getSegwitAddress(network, pub)
+
+  template toNativeSegwitAddress*(pub: Array[byte], networkId: NetworkId = defaultNetworkId): string = getNativeSegwitAddress(networkId, pub)
+  template toNativeSegwitAddress*(pub: Array[byte], network: Network): string = getNativeSegwitAddress(network, pub)
 
   proc getAddressHash160*(script: Script | Chunks): tuple[hash160: Hash160, addressType: AddressType] =
     when script is Script:

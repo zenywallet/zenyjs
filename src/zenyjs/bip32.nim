@@ -43,10 +43,12 @@ when defined(js):
     Bip32Mod.derive = Module.cwrap("bip32_derive", NumVar, [NumVar, NumVar])
     Bip32Mod.address = Module.cwrap("bip32_address", NumVar, [NumVar, NumVar])
     Bip32Mod.segwitAddress = Module.cwrap("bip32_segwitAddress", NumVar, [NumVar, NumVar])
+    Bip32Mod.nativeSegwitAddress = Module.cwrap("bip32_nativeSegwitAddress", NumVar, [NumVar, NumVar])
     Bip32Mod.xprvEx = Module.cwrap("bip32_xprv_c_ex", NumVar, [NumVar, NumVar])
     Bip32Mod.xpubEx = Module.cwrap("bip32_xpub_c_ex", NumVar, [NumVar, NumVar])
     Bip32Mod.addressEx = Module.cwrap("bip32_address_ex", NumVar, [NumVar, NumVar, NumVar])
     Bip32Mod.segwitAddressEx = Module.cwrap("bip32_segwitAddress_ex", NumVar, [NumVar, NumVar, NumVar])
+    Bip32Mod.nativeSegwitAddressEx = Module.cwrap("bip32_nativeSegwitAddress_ex", NumVar, [NumVar, NumVar, NumVar])
 
     config.init(module)
 
@@ -156,6 +158,12 @@ when defined(js):
     var s = a.slice(0, a.indexOf(0)).uint8ArrayToStr()
     return s
 
+  proc getNativeSegwitAddress*(networkId: NetworkId, node: HDNode): cstring =
+    var p = Bip32Mod.nativeSegwitAddress(node.handle, networkId.int)
+    var a = newUint8Array(Module.HEAPU8.buffer, p.to(int), 256)
+    var s = a.slice(0, a.indexOf(0)).uint8ArrayToStr()
+    return s
+
   proc address*(node: HDNode, networkId: NetworkId = 0.NetworkId): cstring =
     var p = Bip32Mod.address(node.handle, networkId.int)
     var a = newUint8Array(Module.HEAPU8.buffer, p.to(int), 256)
@@ -164,6 +172,12 @@ when defined(js):
 
   proc segwitAddress*(node: HDNode, networkId: NetworkId = 0.NetworkId): cstring =
     var p = Bip32Mod.segwitAddress(node.handle, networkId.int)
+    var a = newUint8Array(Module.HEAPU8.buffer, p.to(int), 256)
+    var s = a.slice(0, a.indexOf(0)).uint8ArrayToStr()
+    return s
+
+  proc nativeSegwitAddress*(node: HDNode, networkId: NetworkId = 0.NetworkId): cstring =
+    var p = Bip32Mod.nativeSegwitAddress(node.handle, networkId.int)
     var a = newUint8Array(Module.HEAPU8.buffer, p.to(int), 256)
     var s = a.slice(0, a.indexOf(0)).uint8ArrayToStr()
     return s
@@ -184,13 +198,23 @@ when defined(js):
     var s = a.uint8ArrayToStr()
     return s
 
+  proc nativeSegwitAddressEx*(node: HDNode, networkId: NetworkId = 0.NetworkId): cstring =
+    var p = Module.malloc(4)
+    var size = Bip32Mod.nativeSegwitAddressEx(node.handle, networkId.int, p)
+    var outBuf = newUint32Array(Module.HEAPU32.buffer, p.to(int), 1)[0]
+    var a = newUint8Array(Module.HEAPU8.buffer, outBuf.to(int), size.to(int)).slice()
+    var s = a.uint8ArrayToStr()
+    return s
+
 else:
   when defined(emscripten):
     const EXPORTED_FUNCTIONS* = ["_bip32_free", "_bip32_master", "_bip32_master_buf",
                                 "_bip32_xprv_c", "_bip32_xpub_c", "_bip32_prv", "_bip32_pub", "_bip32_node",
-                                "_bip32_hardened", "_bip32_derive", "_bip32_address", "_bip32_segwitAddress",
+                                "_bip32_hardened", "_bip32_derive", "_bip32_address",
+                                "_bip32_segwitAddress", "_bip32_nativeSegwitAddress",
                                 "_bip32_duplicate", "_bip32_xprv_c_ex", "_bip32_xpub_c_ex",
-                                "_bip32_address_ex", "_bip32_segwitAddress_ex"]
+                                "_bip32_address_ex", "_bip32_segwitAddress_ex"
+                                , "_bip32_nativeSegwitAddress_ex"]
 
   import std/sequtils
   import br_hash
@@ -218,6 +242,7 @@ else:
       xpub: cstring
       address: cstring
       segwitAddress: cstring
+      nativeSegwitAddress: cstring
 
     HDNode* = ptr HDNodeObj
 
@@ -232,6 +257,8 @@ else:
   converter toChainCode*(s: Array[byte]): ChainCode {.inline.} = ChainCode(s)
 
   proc free*(node: HDNode) {.exportc: "bip32_$1".} =
+    if not node.nativeSegwitAddress.isNil:
+      node.nativeSegwitAddress.deallocShared()
     if not node.segwitAddress.isNil:
       node.segwitAddress.deallocShared()
     if not node.address.isNil:
@@ -466,6 +493,10 @@ else:
     var network = getNetwork(networkId)
     result = node.publicKey.toSegwitAddress(network)
 
+  proc getNativeSegwitAddress*(networkId: NetworkId, node: HDNode): string =
+    var network = getNetwork(networkId)
+    result = node.publicKey.toNativeSegwitAddress(network)
+
   proc address*(node: HDNode, networkId: NetworkId): cstring {.exportc: "bip32_$1".} =
     var network = getNetwork(networkId)
     var s = node.publicKey.toAddress(network)
@@ -475,6 +506,11 @@ else:
     var network = getNetwork(networkId)
     var s = node.publicKey.toSegwitAddress(network)
     node.segwitAddress.set(s)
+
+  proc nativeSegwitAddress*(node: HDNode, networkId: NetworkId): cstring {.exportc: "bip32_$1".} =
+    var network = getNetwork(networkId)
+    var s = node.publicKey.toNativeSegwitAddress(network)
+    node.nativeSegwitAddress.set(s)
 
   proc address*(node: HDNode, networkId: NetworkId, outAddress: ptr cstring): cint {.exportc: "bip32_$1_ex".} =
     var network = getNetwork(networkId)
@@ -488,4 +524,11 @@ else:
     var s = node.publicKey.toSegwitAddress(network)
     node.segwitAddress.set(s)
     outAddress[] = node.segwitAddress
+    result = s.len.cint
+
+  proc nativeSegwitAddress*(node: HDNode, networkId: NetworkId, outAddress: ptr cstring): cint {.exportc: "bip32_$1_ex".} =
+    var network = getNetwork(networkId)
+    var s = node.publicKey.toNativeSegwitAddress(network)
+    node.nativeSegwitAddress.set(s)
+    outAddress[] = node.nativeSegwitAddress
     result = s.len.cint
