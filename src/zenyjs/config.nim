@@ -89,9 +89,10 @@ when defined(js):
       ConfigMod.setNetworks(p)
 
   proc config_init*(module: JsObject) =
-    Module = module
-    ConfigMod.setNetworks = Module.cwrap("setNetworks", jsNull, [NumVar])
-    setNetworks(networkList)
+    if Object.keys(ConfigMod.toJs).length.to(int) == 0:
+      Module = module
+      ConfigMod.setNetworks = Module.cwrap("setNetworks", jsNull, [NumVar])
+      setNetworks(networkList)
 
   template init*(module: JsObject) = config_init(module)
 
