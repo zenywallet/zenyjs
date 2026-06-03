@@ -180,4 +180,5 @@ elif defined(emscripten):
   {.passL: "-s EXPORTED_RUNTIME_METHODS='" & $DEFAULT_EXPORTED_RUNTIME_METHODS & "'".}
 
 else:
-  template ready*(body: untyped) = body
+  template ready*(body: untyped) =
+    block: body
