@@ -17,6 +17,7 @@ when defined(js):
   import arraylib
   import eckey
   import address
+  import config
 
   type
     HDNode* = object
@@ -46,6 +47,8 @@ when defined(js):
     Bip32Mod.xpubEx = Module.cwrap("bip32_xpub_c_ex", NumVar, [NumVar, NumVar])
     Bip32Mod.addressEx = Module.cwrap("bip32_address_ex", NumVar, [NumVar, NumVar, NumVar])
     Bip32Mod.segwitAddressEx = Module.cwrap("bip32_segwitAddress_ex", NumVar, [NumVar, NumVar, NumVar])
+
+    config.init(module)
 
   template init*(module: JsObject) = bip32_init(module)
 
