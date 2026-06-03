@@ -88,10 +88,12 @@ when defined(js):
       Module.HEAPU8[p.to(int) + networksStringUint8Array.length.to(int)] = 0
       ConfigMod.setNetworks(p)
 
-  proc init*(module: JsObject) =
+  proc config_init*(module: JsObject) =
     Module = module
     ConfigMod.setNetworks = Module.cwrap("setNetworks", jsNull, [NumVar])
     setNetworks(networkList)
+
+  template init*(module: JsObject) = config_init(module)
 
 elif defined(emscripten):
   const EXPORTED_FUNCTIONS* = ["_setNetworks"]

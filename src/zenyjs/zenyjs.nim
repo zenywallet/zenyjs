@@ -95,6 +95,8 @@ when defined(js):
         otp.init(module)
       when declared(bip39_init):
         bip39_init(module)
+      when declared(config_init):
+        config_init(module)
       discard (proc() {.async.} = body)()
     )
 
