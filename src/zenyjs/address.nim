@@ -237,7 +237,7 @@ else:
     network.p2pkh_address(ripemd160hash(pub))
 
   proc getSegwitAddress*(network: NetWork | NetworkId, pub: Array[byte]): string {.inline.} =
-    network.p2wpkh_address(ripemd160hash(pub))
+    network.p2sh_p2wpkh_address(ripemd160hash(pub))
 
   proc getNativeSegwitAddress*(network: NetWork | NetworkId, pub: Array[byte]): string {.inline.} =
     network.p2wpkh_address(ripemd160hash(pub))
@@ -253,10 +253,10 @@ else:
   proc getSegwitAddress_c*(networkString: cstring, pub: Array[byte], retStringArray: var Array[byte]) {.exportc: "$1".} =
     var networkJson = parseJson($networkString)
     var network: Network = networkJson.to(Network)
-    retStringArray = network.p2wpkh_address(ripemd160hash(pub)).toBytes
+    retStringArray = network.p2sh_p2wpkh_address(ripemd160hash(pub)).toBytes
 
   proc getSegwitAddress2_c*(networkId: NetworkId, pub: Array[byte], retStringArray: var Array[byte]) {.exportc: "$1".} =
-    retStringArray = networkId.getNetwork.p2wpkh_address(ripemd160hash(pub)).toBytes
+    retStringArray = networkId.getNetwork.p2sh_p2wpkh_address(ripemd160hash(pub)).toBytes
 
   proc getNativeSegwitAddress_c*(networkString: cstring, pub: Array[byte], retStringArray: var Array[byte]) {.exportc: "$1".} =
     var networkJson = parseJson($networkString)
