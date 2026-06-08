@@ -90,6 +90,12 @@ proc toNumber*(a: Uint64): int = a.toJs.toNumber().to(int)  # last 32 bits are d
 proc toString*(a: Uint64): cstring = a.toString(10).to(cstring)
 proc `$`*(a: Uint64): string = $a.toString()
 
+converter toUint64*(a: Uint64): uint64 =
+  a.a00.uint64 or
+  a.a16.uint64 shl 16 or
+  a.a32.uint64 shl 32 or
+  a.a48.uint64 shl 48
+
 
 when isMainModule:
   var a = newUint64(9)
@@ -105,8 +111,10 @@ when isMainModule:
 
   var val = newUint64("18446744073709551615")
   console.log(val.toString, val.toUint8Array)
+  echo val.uint64
   val = val / newUint64(255)
   console.log(val.toString, val.toUint8Array)
+  echo val.uint64
 
   block jsobj_number:
     var x = 12345.toJs
