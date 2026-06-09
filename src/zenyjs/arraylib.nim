@@ -140,9 +140,10 @@ when defined(js):
   proc toBytes*(x: Array[byte]): Array[byte] = x
 
   proc toBytes*(uint8Array: Uint8Array): Array[byte] =
-    var arrayLen = uint8Array.length
-    result = newArray[byte](arrayLen)
-    discard Module.HEAPU8.set(uint8Array, result.data.cint)
+    result.newArray(uint8Array.length.to(int))
+    let a = newDataView(Module.HEAPU8.buffer, result.handle.to(cint), 12)
+    let p = a.getUint32(8, true).to(int)
+    discard Module.HEAPU8.set(uint8Array, p)
 
   proc toBytes*(s: cstring): Array[byte] =
     var uint8Array = strToUint8Array(s)
