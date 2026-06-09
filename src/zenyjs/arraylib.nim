@@ -447,7 +447,7 @@ when defined(js):
         Module.HEAPU8.set(strUint8Array, p)
         Module.HEAPU8[p.to(int) + strUint8Array.length.to(int)] = 0
         ArrayMod.setString(x.handle.to(cint), i, p)
-    elif T is uint:
+    elif T is uint or T is uint32:
       let a = newDataView(Module.HEAPU8.buffer, x.handle.to(cint), 12)
       let p = a.getUint32(8, true).to(int) + i * csizeof(T)
       let d = newDataView(Module.HEAPU8.buffer, p, csizeof(T))
