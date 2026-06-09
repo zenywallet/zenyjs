@@ -452,6 +452,11 @@ when defined(js):
       let p = a.getUint32(8, true).to(int) + i * csizeof(T)
       let d = newDataView(Module.HEAPU8.buffer, p, csizeof(T))
       d.setUint32(0, y, true)
+    elif T is int or T is int32:
+      let a = newDataView(Module.HEAPU8.buffer, x.handle.to(cint), 12)
+      let p = a.getUint32(8, true).to(int) + i * csizeof(T)
+      let d = newDataView(Module.HEAPU8.buffer, p, csizeof(T))
+      d.setInt32(0, y, true)
     else:
       raise
 
