@@ -85,7 +85,9 @@ proc toUint8Array*(a: Uint64): Uint8Array =
     a.a32 and 0xff'u8, a.a32 shr 8,
     a.a48 and 0xff'u8, a.a48 shr 8].toJs)
 
-proc toNumber*(a: Uint64): int = a.toJs.toNumber().to(int)  # last 32 bits are dropped
+proc toNumber*(a: Uint64): int =
+  {.warning: "last 32 bits are dropped".}
+  a.toJs.toNumber().to(int)
 
 proc toString*(a: Uint64): cstring = a.toString(10).to(cstring)
 proc `$`*(a: Uint64): string = $a.toString()
