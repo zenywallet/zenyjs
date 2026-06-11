@@ -495,6 +495,49 @@ when defined(js):
       result[idx] = a[i]
       inc(idx)
 
+  type
+    ArrayPointer*[T] = distinct JsObject
+
+  proc `[]`*[T](x: var Array[T], i: Natural): ArrayPointer[T] =
+    let a = newDataView(Module.HEAPU8.buffer, x.handle.to(cint), 12)
+    cast[result.type]((a.getUint32(8, true).to(int) + i * csizeof(T)).toJs)
+
+  converter toByte*[T: byte](x: ArrayPointer[T]): byte =
+    let d = newDataView(Module.HEAPU8.buffer, cast[JsObject](x).to(cint), 1)
+    d.getUint8(0, true).to(byte)
+
+  converter toUint*[T: uint | uint32](x: ArrayPointer[T]): uint =
+    let d = newDataView(Module.HEAPU8.buffer, cast[JsObject](x).to(cint), 4)
+    d.getUint32(0, true).to(uint)
+
+  converter toInt*[T: int | int32](x: ArrayPointer[T]): int =
+    let d = newDataView(Module.HEAPU8.buffer, cast[JsObject](x).to(cint), 4)
+    d.getInt32(0, true).to(int)
+
+  proc inc*(x: ArrayPointer[byte]; y: SomeInteger = 1) =
+    let d = newDataView(Module.HEAPU8.buffer, cast[JsObject](x).to(cint), 1)
+    d.setUint8(0, d.getUint8(0).to(byte) + y.byte, true)
+
+  proc dec*(x: ArrayPointer[byte]; y: SomeInteger = 1) =
+    let d = newDataView(Module.HEAPU8.buffer, cast[JsObject](x).to(cint), 1)
+    d.setUint8(0, d.getUint8(0).to(byte) - y.byte, true)
+
+  proc inc*(x: ArrayPointer[uint] | ArrayPointer[uint32]; y: SomeInteger = 1) =
+    let d = newDataView(Module.HEAPU8.buffer, cast[JsObject](x).to(cint), 4)
+    d.setUint32(0, d.getUint32(0, true).to(uint) + y.uint, true)
+
+  proc dec*(x: ArrayPointer[uint] | ArrayPointer[uint32]; y: SomeInteger = 1) =
+    let d = newDataView(Module.HEAPU8.buffer, cast[JsObject](x).to(cint), 4)
+    d.setUint32(0, d.getUint32(0, true).to(uint) - y.uint, true)
+
+  proc inc*(x: ArrayPointer[int] | ArrayPointer[int32]; y: SomeInteger = 1) =
+    let d = newDataView(Module.HEAPU8.buffer, cast[JsObject](x).to(cint), 4)
+    d.setInt32(0, d.getInt32(0, true).to(int) + y.int, true)
+
+  proc dec*(x: ArrayPointer[int] | ArrayPointer[int32]; y: SomeInteger = 1) =
+    let d = newDataView(Module.HEAPU8.buffer, cast[JsObject](x).to(cint), 4)
+    d.setInt32(0, d.getInt32(0, true).to(int) - y.int, true)
+
   proc add*[T](x: var Array[T]; y: sink Array[T]) =
     if x.handle.isNull:
       x.newArray(y.len)
