@@ -47,6 +47,7 @@ when defined(js):
     EckeyMod.pubObj_prv = Module.cwrap("eckey_pubObj_prv", jsNull, [NumVar, NumVar])
     EckeyMod.pubObj_pub = Module.cwrap("eckey_pubObj_pub", jsNull, [NumVar, NumVar])
     EckeyMod.sign = Module.cwrap("eckey_sign", jsNull, [NumVar, NumVar, NumVar])
+    EckeyMod.signNonce = Module.cwrap("eckey_signNonce", jsNull, [NumVar, NumVar, NumVar, NumVar])
     EckeyMod.verify_obj = Module.cwrap("eckey_verify_obj", NumVar, [NumVar, NumVar, NumVar])
     EckeyMod.verify = Module.cwrap("eckey_verify", NumVar, [NumVar, NumVar, NumVar])
     EckeyMod.tweakAdd_prv = Module.cwrap("eckey_tweakAdd_prv", jsNull, [NumVar, NumVar, NumVar])
@@ -136,6 +137,10 @@ when defined(js):
     result = newArray[byte]()
     EckeyMod.sign(privateKey.handle, hash32.handle, result.handle)
 
+  proc signNonce*(privateKey: PrivateKey, hash32: Array[byte], nonce32: Array[byte]): Array[byte] =
+    result = newArray[byte]()
+    EckeyMod.signNonce(privateKey.handle, hash32.handle, nonce32.handle, result.handle)
+
   proc verify*(publicKeyObj: PublicKeyObj, hash: Array[byte], der: Array[byte]): bool =
     (EckeyMod.verify_obj(publicKeyObj.handle, hash.handle, der.handle) > 0.toJs).to(bool)
 
@@ -168,7 +173,7 @@ else:
     const EXPORTED_FUNCTIONS* = ["_eckey_ecPubKeyCreate", "_eckey_ecPubKeySerializeCompressed",
       "_eckey_ecPubKeySerializeUncompressed", "_eckey_pubUncompressed",
       "_eckey_pub", "_eckey_pub_obj", "_eckey_pubObj_prv", "_eckey_pubObj_pub",
-      "_eckey_sign", "_eckey_verify_obj", "_eckey_verify",
+      "_eckey_sign", "_eckey_signNonce", "_eckey_verify_obj", "_eckey_verify",
       "_eckey_tweakAdd_prv", "_eckey_tweakAdd_pubobj"]
 
   import secp256k1
@@ -276,7 +281,22 @@ else:
     der.setLen(derLen)
     result = der
 
+  proc signNonce*(privateKey: PrivateKey, hash32: Array[byte] | Hash, nonce32: Array[byte]): Array[byte] =
+    var sig: secp256k1_ecdsa_signature
+    let priv = cast[ptr uint8](addr cast[ptr Array[byte]](unsafeAddr privateKey)[][0])
+    if secp256k1_ecdsa_sign(ctx(), addr sig, cast[ptr uint8](unsafeAddr cast[Array[byte]](hash32)[0]), priv,
+                            secp256k1_nonce_function_rfc6979, unsafeAddr nonce32[0]) != 1:
+      raise newException(EcError, "secp256k1_ecdsa_sign")
+    var der = newArray[byte](72)
+    var derLen = 72.csize_t
+    if secp256k1_ecdsa_signature_serialize_der(ctx(), cast[ptr uint8](addr der[0]), addr derLen, addr sig) != 1:
+      raise newException(EcError, "secp256k1_ecdsa_signature_serialize_der")
+    der.setLen(derLen)
+    result = der
+
   proc sign*(privateKey: PrivateKey, hash32: Hash): Array[byte] {.returnToLastParam, exportc: "eckey_$1".}
+
+  proc signNonce*(privateKey: PrivateKey, hash32: Hash, nonce32: Array[byte]): Array[byte] {.returnToLastParam, exportc: "eckey_$1".}
 
   proc verify*(publicKeyObj: PublicKeyObj, hash: Hash, der: Array[byte]): bool {.exportc: "eckey_$1_obj".} =
     var sig: secp256k1_ecdsa_signature
