@@ -141,6 +141,22 @@ when defined(js):
     var p32 = tx.handle.to(cint) div 4
     Module.HEAPU32[p32 + 14] = locktime
 
+  iterator items*(a: ArrayTxInHandle): TxInHandle =
+    for i in 0..<a.len:
+      yield a[i]
+
+  iterator pairs*(a: ArrayTxInHandle): tuple[key: int, val: TxInHandle] =
+    for i in 0..<a.len:
+      yield (i, a[i])
+
+  iterator items*(a: ArrayTxOutHandle): TxOutHandle =
+    for i in 0..<a.len:
+      yield a[i]
+
+  iterator pairs*(a: ArrayTxOutHandle): tuple[key: int, val: TxOutHandle] =
+    for i in 0..<a.len:
+      yield (i, a[i])
+
   proc `$`*(data: Flags): string = $cast[uint8](data)
 
   proc `$`*(txIn: TxIn | TxInHandle): string =
