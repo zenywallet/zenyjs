@@ -514,6 +514,16 @@ when defined(js):
     let d = newDataView(Module.HEAPU8.buffer, cast[JsObject](x).to(cint), 4)
     d.getInt32(0, true).to(int)
 
+  converter toArrayByte*[T: Array[byte]](x: ArrayPointer[T]): Array[byte] =
+    let a = newDataView(Module.HEAPU8.buffer, cast[JsObject](x).to(cint), 12)
+    let alen = a.getUint32(0, true).to(int)
+    let p = a.getUint32(8, true).to(int)
+    let d = newUint8Array(Module.HEAPU8.buffer, p, alen)
+    result.newArray(alen)
+    let ra = newDataView(Module.HEAPU8.buffer, result.handle.to(cint), 12)
+    let rp = ra.getUint32(8, true).to(int)
+    discard Module.HEAPU8.set(d, rp)
+
   proc inc*(x: ArrayPointer[byte]; y: SomeInteger = 1) =
     let d = newDataView(Module.HEAPU8.buffer, cast[JsObject](x).to(cint), 1)
     d.setUint8(0, d.getUint8(0).to(byte) + y.byte, true)
