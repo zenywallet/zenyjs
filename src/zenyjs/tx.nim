@@ -111,33 +111,33 @@ when defined(js):
     TxMod.toBytesTx(tx.handle, a.handle)
     result = a
 
-  proc ver*(tx: var Tx): int32 =
+  proc ver*(tx: Tx): int32 =
     var p32 = tx.handle.to(cint) div 4
     Module.HEAPU32[p32].to(int32)
 
-  proc `ver=`*(tx: var Tx, val: int32) =
+  proc `ver=`*(tx: Tx, val: int32) =
     var p32 = tx.handle.to(cint) div 4
     Module.HEAPU32[p32] = val
 
-  proc flags*(tx: var Tx): Flags =
+  proc flags*(tx: Tx): Flags =
     var p8 = tx.handle.to(cint)
     Module.HEAPU8[p8 + 4].to(uint8).Flags
 
-  proc `flags=`*(tx: var Tx, flags: Flags) =
+  proc `flags=`*(tx: Tx, flags: Flags) =
     var p8 = tx.handle.to(cint)
     Module.HEAPU8[p8 + 4] = flags.uint8
 
-  proc ins*(tx: var Tx): ArrayTxInHandle =
+  proc ins*(tx: Tx): ArrayTxInHandle =
     (tx.handle.to(cint) + 8).toJs.ArrayTxInHandle
 
-  proc outs*(tx: var Tx): ArrayTxOutHandle =
+  proc outs*(tx: Tx): ArrayTxOutHandle =
     (tx.handle.to(cint) + 24).toJs.ArrayTxOutHandle
 
-  proc locktime*(tx: var Tx): uint32 =
+  proc locktime*(tx: Tx): uint32 =
     var p32 = tx.handle.to(cint) div 4
     Module.HEAPU32[p32 + 14].to(uint32)
 
-  proc `locktime=`*(tx: var Tx, locktime: uint32) =
+  proc `locktime=`*(tx: Tx, locktime: uint32) =
     var p32 = tx.handle.to(cint) div 4
     Module.HEAPU32[p32 + 14] = locktime
 
