@@ -137,7 +137,7 @@ when defined(js):
     result = newArray[byte]()
     EckeyMod.sign(privateKey.handle, hash32.handle, result.handle)
 
-  proc signNonce*(privateKey: PrivateKey, hash32: Array[byte], nonce32: Array[byte]): Array[byte] =
+  proc sign*(privateKey: PrivateKey, hash32: Array[byte], nonce32: Array[byte]): Array[byte] =
     result = newArray[byte]()
     EckeyMod.signNonce(privateKey.handle, hash32.handle, nonce32.handle, result.handle)
 
@@ -149,6 +149,9 @@ when defined(js):
 
   template sign*(privateKey: PrivateKey, hash32: Hash): Array[byte] =
     sign(privateKey, cast[Array[byte]](hash32))
+
+  template sign*(privateKey: PrivateKey, hash32: Hash, nonce32: Array[byte]): Array[byte] =
+    sign(privateKey, cast[Array[byte]](hash32), nonce32)
 
   template verify*(publicKeyObj: PublicKeyObj, hash: Hash, der: Array[byte]): bool =
     verify(publicKeyObj, cast[Array[byte]](hash), der)
@@ -281,7 +284,7 @@ else:
     der.setLen(derLen)
     result = der
 
-  proc signNonce*(privateKey: PrivateKey, hash32: Array[byte] | Hash, nonce32: Array[byte]): Array[byte] =
+  proc sign*(privateKey: PrivateKey, hash32: Array[byte] | Hash, nonce32: Array[byte]): Array[byte] =
     var sig: secp256k1_ecdsa_signature
     let priv = cast[ptr uint8](addr cast[ptr Array[byte]](unsafeAddr privateKey)[][0])
     if secp256k1_ecdsa_sign(ctx(), addr sig, cast[ptr uint8](unsafeAddr cast[Array[byte]](hash32)[0]), priv,
@@ -294,9 +297,11 @@ else:
     der.setLen(derLen)
     result = der
 
-  proc sign*(privateKey: PrivateKey, hash32: Hash): Array[byte] {.returnToLastParam, exportc: "eckey_$1".}
+  proc eckey_sign*(privateKey: PrivateKey, hash32: Hash, result: var Array[byte]) {.exportc: "eckey_sign".} =
+    result = sign(privateKey, hash32)
 
-  proc signNonce*(privateKey: PrivateKey, hash32: Hash, nonce32: Array[byte]): Array[byte] {.returnToLastParam, exportc: "eckey_$1".}
+  proc eckey_signNonce*(privateKey: PrivateKey, hash32: Hash, nonce32: Array[byte], result: var Array[byte]) {.exportc: "eckey_signNonce".} =
+    result = sign(privateKey, hash32, nonce32)
 
   proc verify*(publicKeyObj: PublicKeyObj, hash: Hash, der: Array[byte]): bool {.exportc: "eckey_$1_obj".} =
     var sig: secp256k1_ecdsa_signature
