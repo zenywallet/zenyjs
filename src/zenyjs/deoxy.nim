@@ -49,20 +49,19 @@ when defined(js):
     if not deoxy.ready: return false
     var size = data.length.to(cint)
     var p = Module.malloc(size)
-    Module.HEAPU8.set(data, p)
-    var pOutBuf = Module.malloc(4)
-    var pOutBufLen = Module.malloc(4)
-    var retEncrypt = DeoxyMod.cipherEncrypt(deoxy.stream, p, size, pOutBuf, pOutBufLen)
-    if retEncrypt.to(bool):
-      var outBuf = newUint32Array(Module.HEAPU32.buffer, pOutBuf.to(int), 1)[0]
-      var outBufLen = newUint32Array(Module.HEAPU32.buffer, pOutBufLen.to(int), 1)[0]
-      var outData = newUint8Array(Module.HEAPU8.buffer, outBuf.to(int), outBufLen.to(int))
-      result = deoxy.rawSend(outData)
-    else:
-      result = false
-    Module.free(pOutBufLen)
-    Module.free(pOutBuf)
-    Module.free(p)
+    withStack:
+      var p = Module.stackAlloc(size)
+      Module.HEAPU8.set(data, p)
+      var pOutBuf = Module.stackAlloc(4)
+      var pOutBufLen = Module.stackAlloc(4)
+      var retEncrypt = DeoxyMod.cipherEncrypt(deoxy.stream, p, size, pOutBuf, pOutBufLen)
+      if retEncrypt.to(bool):
+        var outBuf = newUint32Array(Module.HEAPU32.buffer, pOutBuf.to(int), 1)[0]
+        var outBufLen = newUint32Array(Module.HEAPU32.buffer, pOutBufLen.to(int), 1)[0]
+        var outData = newUint8Array(Module.HEAPU8.buffer, outBuf.to(int), outBufLen.to(int))
+        result = deoxy.rawSend(outData)
+      else:
+        result = false
 
   proc connect0*(deoxy: ref Deoxy; url: cstring; protocols: JsObject;
                 onOpen: proc(evt: JsObject); onReady: proc(evt: JsObject);
@@ -102,32 +101,29 @@ when defined(js):
     deoxy.ws.onmessage = proc(evt: JsObject) =
       var data = newUint8Array(evt.data)
       var size = data.length.to(cint)
-      var p = Module.malloc(size)
-      Module.HEAPU8.set(data, p)
-      var pOutBuf = Module.malloc(4)
-      var pOutBufLen = Module.malloc(4)
-      var retProcess = DeoxyMod.cipherProcess(deoxy.stream, p, size, pOutBuf, pOutBufLen).to(int)
+      withStack:
+        var p = Module.stackAlloc(size)
+        Module.HEAPU8.set(data, p)
+        var pOutBuf = Module.stackAlloc(4)
+        var pOutBufLen = Module.stackAlloc(4)
+        var retProcess = DeoxyMod.cipherProcess(deoxy.stream, p, size, pOutBuf, pOutBufLen).to(int)
 
-      template getOutData() {.dirty.} =
-        var outBuf = newUint32Array(Module.HEAPU32.buffer, pOutBuf.to(int), 1)[0]
-        var outBufLen = newUint32Array(Module.HEAPU32.buffer, pOutBufLen.to(int), 1)[0]
-        var outData = newUint8Array(Module.HEAPU8.buffer, outBuf.to(int), outBufLen.to(int))
+        template getOutData() {.dirty.} =
+          var outBuf = newUint32Array(Module.HEAPU32.buffer, pOutBuf.to(int), 1)[0]
+          var outBufLen = newUint32Array(Module.HEAPU32.buffer, pOutBufLen.to(int), 1)[0]
+          var outData = newUint8Array(Module.HEAPU8.buffer, outBuf.to(int), outBufLen.to(int))
 
-      if retProcess == CipherProcessMode.Recv.int:
-        getOutData()
-        onRecv(evt, outData)
-      elif retProcess == CipherProcessMode.SendPub.int or retProcess == CipherProcessMode.SendReady.int:
-        getOutData()
-        let sendRet = deoxy.rawSend(outData)
-        if not sendRet:
-          raise newException(CipherError, "rawSend failed")
-        if retProcess == CipherProcessMode.SendReady.int:
-          deoxy.ready = true
-          onReady(evt)
-
-      Module.free(pOutBufLen)
-      Module.free(pOutBuf)
-      Module.free(p)
+        if retProcess == CipherProcessMode.Recv.int:
+          getOutData()
+          onRecv(evt, outData)
+        elif retProcess == CipherProcessMode.SendPub.int or retProcess == CipherProcessMode.SendReady.int:
+          getOutData()
+          let sendRet = deoxy.rawSend(outData)
+          if not sendRet:
+            raise newException(CipherError, "rawSend failed")
+          if retProcess == CipherProcessMode.SendReady.int:
+            deoxy.ready = true
+            onReady(evt)
 
   template connect*(deoxy: ref Deoxy; url: cstring; protocols: JsObject;
                     onOpen, onReady, onRecv, onClose, onError: untyped) =
