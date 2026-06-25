@@ -48,7 +48,6 @@ when defined(js):
   proc send*(deoxy: ref Deoxy; data: Uint8Array): bool {.discardable.} =
     if not deoxy.ready: return false
     var size = data.length.to(cint)
-    var p = Module.malloc(size)
     withStack:
       var p = Module.stackAlloc(size)
       Module.HEAPU8.set(data, p)
