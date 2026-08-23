@@ -48,9 +48,9 @@ when defined(js):
   proc send*(deoxy: ref Deoxy; data: Uint8Array): bool {.discardable.} =
     if not deoxy.ready: return false
     var size = data.length.to(cint)
+    var p = Module.malloc(size)
+    Module.HEAPU8.set(data, p)
     withStack:
-      var p = Module.stackAlloc(size)
-      Module.HEAPU8.set(data, p)
       var pOutBuf = Module.stackAlloc(4)
       var pOutBufLen = Module.stackAlloc(4)
       var retEncrypt = DeoxyMod.cipherEncrypt(deoxy.stream, p, size, pOutBuf, pOutBufLen)
@@ -61,6 +61,7 @@ when defined(js):
         result = deoxy.rawSend(outData)
       else:
         result = false
+    Module.free(p)
 
   proc connect0*(deoxy: ref Deoxy; url: cstring; protocols: JsObject;
                 onOpen: proc(evt: JsObject); onReady: proc(evt: JsObject);
