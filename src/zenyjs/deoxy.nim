@@ -100,9 +100,9 @@ when defined(js):
     deoxy.ws.onmessage = proc(evt: JsObject) =
       var data = newUint8Array(evt.data)
       var size = data.length.to(cint)
+      var p = Module.malloc(size)
+      Module.HEAPU8.set(data, p)
       withStack:
-        var p = Module.stackAlloc(size)
-        Module.HEAPU8.set(data, p)
         var pOutBuf = Module.stackAlloc(4)
         var pOutBufLen = Module.stackAlloc(4)
         var retProcess = DeoxyMod.cipherProcess(deoxy.stream, p, size, pOutBuf, pOutBufLen).to(int)
@@ -123,6 +123,7 @@ when defined(js):
           if retProcess == CipherProcessMode.SendReady.int:
             deoxy.ready = true
             onReady(evt)
+      Module.free(p)
 
   template connect*(deoxy: ref Deoxy; url: cstring; protocols: JsObject;
                     onOpen, onReady, onRecv, onClose, onError: untyped) =
