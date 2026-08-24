@@ -441,12 +441,12 @@ when defined(js):
       let p2 = a2.getUint32(8, true).to(int)
       Module.HEAPU8.set(s, p2)
     elif T is string or T is cstring:
-      withStack:
-        var strUint8Array = strToUint8Array(y.cstring)
-        var p = Module.stackAlloc(strUint8Array.length.to(int) + 1)
-        Module.HEAPU8.set(strUint8Array, p)
-        Module.HEAPU8[p.to(int) + strUint8Array.length.to(int)] = 0
-        ArrayMod.setString(x.handle.to(cint), i, p)
+      var strUint8Array = strToUint8Array(y.cstring)
+      var p = Module.malloc(strUint8Array.length.to(int) + 1)
+      Module.HEAPU8.set(strUint8Array, p)
+      Module.HEAPU8[p.to(int) + strUint8Array.length.to(int)] = 0
+      ArrayMod.setString(x.handle.to(cint), i, p)
+      Module.free(p)
     elif T is uint or T is uint32:
       let a = newDataView(Module.HEAPU8.buffer, x.handle.to(cint), 12)
       let p = a.getUint32(8, true).to(int) + i * csizeof(T)
