@@ -39,7 +39,10 @@ Or
 
 ## Update
     git pull
-    nimble uninstall zenyjs --inclDeps --verbose; nimble install --verbose
+    nimble uninstall zenyjs --inclDeps --verbose
+    nimble depsAll
+    nimble zenyjs
+    nimble install --verbose
 
 ## Quick Trial
 *sample.nim*
@@ -57,7 +60,7 @@ zenyjs.ready:
   echo "prv: ", pair.prv
   echo "pub: ", pair.pub
   echo "address: ", BitZeny_mainnet.getAddress(pair.pub)
-  echo "segwit address(bech32): ", BitZeny_mainnet.getSegwitAddress(pair.pub)
+  echo "native segwit address: ", BitZeny_mainnet.getNativeSegwitAddress(pair.pub)
   echo "wif: ", BitZeny_mainnet.wif(pair.prv)
 ```
 
@@ -126,8 +129,6 @@ server(ssl = true, ip = "127.0.0.1", port = 8009):
     get "/js/app.js": App.js.content("js").response
     get "/js/zenyjs.wasm": App.wasm.content("wasm").response
     "Not found".addHeader(Status404).send
-
-serverStart()
 ```
 
     nim c -r -d:release --threads:on --mm:orc server.nim
@@ -147,6 +148,10 @@ ZenyJS needs to be reinstalled.
 
 > *Error: internal error: ("genAddr: 2", skTemp)*  
 > *Error: nim js failed*
+
+This issue has been fixed in Nim version 2.2.10
+
+Workaround for earlier versions:
 ```sh
 $ choosenim show
   Selected: 1.6.14
@@ -191,6 +196,18 @@ nim c koch.nim
 ./koch boot -d:release
 ```
 See [Bootstrapping the compiler](https://nim-lang.github.io/Nim/intern.html#bootstrapping-the-compiler) for detail.
+
+> *Error: attempting to call undeclared routine: 'realloc'*
+
+    import zenyjs/core
+
+> *TypeError: Cannot read properties of null (reading 'malloc')*
+```nim
+import zenyjs
+
+zenyjs.ready:
+  ...
+```
 
 ## Custom Coin Networks
 Set the coin parameters in the `networks:` block.
@@ -267,7 +284,7 @@ import zenyjs/bip39_en
 const en = bip39_en.words
 
 zenyjs.ready:
-  var entropy = cryptSeed(24)
+  var entropy = cryptSeed(32)
   var mnemonic = entropyToMnemonic(entropy, en)
   var bip39Seed = mnemonicToSeed(normalizeMnemonic(mnemonic), passphrase = "")
   echo "entropy: ", entropy
@@ -300,19 +317,25 @@ zenyjs.ready:
   var outputScript1 = BitZeny_mainnet.getScript("ZqDF1JhpkoK8zjNxYozYHCuy7rafhiFFga")
   var prv0 = PrivateKey(Hex("7008e08494e78a4576595c08372ef08ff3c5a5fb669d04ab688af5ec05d4e419"))
   var prv1 = PrivateKey(Hex("b416f75b5dc0679154c6d1d8fd0932816eaee59782d8f67fb3465ca0662f267b"))
+  var emptySig: Sig
 
   var tx = newTx()
   tx.ver = 2'i32
-  tx.ins.add (tx: txid0, n: n0, sig: inputScript0.Sig, sequence: 0xffffffff'u32)
-  tx.ins.add (tx: txid1, n: n1, sig: inputScript1.Sig, sequence: 0xffffffff'u32)
+  tx.ins.add (tx: txid0, n: n0, sig: emptySig, sequence: 0xffffffff'u32)
+  tx.ins.add (tx: txid1, n: n1, sig: emptySig, sequence: 0xffffffff'u32)
   tx.outs.add (value: 39390000'u64, script: outputScript0)
   tx.outs.add (value: 610000'u64 - 372'u64, script: outputScript1)
 
-  var txSignHash = sha256d((tx, SIGHASH_ALL.uint32).toBytes)
-  var signDer0 = sign(prv0, txSignHash)
+  tx.ins[0].sig = inputScript0.Sig
+  var txSignHash0 = sha256d((tx, SIGHASH_ALL.uint32).toBytes)
+  tx.ins[0].sig = emptySig
+  tx.ins[1].sig = inputScript1.Sig
+  var txSignHash1 = sha256d((tx, SIGHASH_ALL.uint32).toBytes)
+
+  var signDer0 = sign(prv0, txSignHash0)
   var sig0 = Sig(PushData(signDer0, SIGHASH_ALL.uint8), PushData(prv0.pub))
   tx.ins[0].sig = sig0
-  var signDer1 = sign(prv1, txSignHash)
+  var signDer1 = sign(prv1, txSignHash1)
   var sig1 = Sig(PushData(signDer1, SIGHASH_ALL.uint8), PushData(prv1.pub))
   tx.ins[1].sig = sig1
 
