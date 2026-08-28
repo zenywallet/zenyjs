@@ -45,6 +45,8 @@ when defined(js):
     Tx* = object
       handle*: JsObject
 
+    TxHandle* = distinct JsObject
+
   var TxMod* = JsObject{}
 
   proc `=destroy`*(tx: var Tx) =
@@ -61,6 +63,8 @@ when defined(js):
     `=destroy`(a)
     if not b.handle.isNil:
       a.handle = b.handle
+
+  converter toTxHandle*(tx: Tx): TxHandle = tx.handle.TxHandle
 
 else:
   import custom
