@@ -47,6 +47,8 @@ when defined(js):
 
     TxHandle* = distinct JsObject
 
+  template csizeof*(T: typedesc[Tx]): int = 12
+
   var TxMod* = JsObject{}
 
   proc `=destroy`*(tx: var Tx) =
