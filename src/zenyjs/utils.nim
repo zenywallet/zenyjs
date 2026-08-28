@@ -4,11 +4,17 @@ when defined(js):
   import std/jsffi
   import jslib except Array
   import arraylib
+  import bytes
+  import hash
 
   type
     Hash20Array* = Uint8Array
     Hash32Array* = Uint8Array
     Hash64Array* = Uint8Array
+
+  converter toHash*(h: Hash20Array): Hash = cast[Uint8Array](h).toBytes.Hash
+  converter toHash*(h: Hash32Array): Hash = cast[Uint8Array](h).toBytes.Hash
+  converter toHash*(h: Hash64Array): Hash = cast[Uint8Array](h).toBytes.Hash
 
   var Utils = JsObject{}
   var Module: JsObject
@@ -57,11 +63,17 @@ else:
 
   import json, strutils, br_hash
   import arraylib
+  import bytes
+  import hash
 
   type
     Hash20Array* = array[20, byte]
     Hash32Array* = array[32, byte]
     Hash64Array* = array[64, byte]
+
+  converter toHash*(h: Hash20Array): Hash = cast[array[20, byte]](h).toBytes.Hash
+  converter toHash*(h: Hash32Array): Hash = cast[array[32, byte]](h).toBytes.Hash
+  converter toHash*(h: Hash64Array): Hash = cast[array[64, byte]](h).toBytes.Hash
 
   proc toJson*(val: uint64): JsonNode =
     if val > 9007199254740991'u64:
