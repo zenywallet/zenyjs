@@ -1,17 +1,10 @@
 # Copyright (c) 2023 zenywallet
 
-when (compiles do: import zenyjs):
-  import zenyjs
-  import zenyjs/core
-  import zenyjs/random
-  import zenyjs/eckey
-  import zenyjs/address
-else:
-  import ../src/zenyjs
-  import ../src/zenyjs/core
-  import ../src/zenyjs/random
-  import ../src/zenyjs/eckey
-  import ../src/zenyjs/address
+import zenyjs
+import zenyjs/core
+import zenyjs/random
+import zenyjs/eckey
+import zenyjs/address
 
 networksDefault()
 
@@ -20,5 +13,5 @@ zenyjs.ready:
   echo "prv: ", pair.prv
   echo "pub: ", pair.pub
   echo "address: ", BitZeny_mainnet.getAddress(pair.pub)
-  echo "segwit address(bech32): ", BitZeny_mainnet.getSegwitAddress(pair.pub)
+  echo "native segwit address: ", BitZeny_mainnet.getNativeSegwitAddress(pair.pub)
   echo "wif: ", BitZeny_mainnet.wif(pair.prv)
