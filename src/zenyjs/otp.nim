@@ -33,17 +33,18 @@ when defined(js):
   var Module: JsObject
 
   proc generateCounter*(totp: Totp, counter: Uint64): cstring =
+    var ret = newArray[byte]()
+    var totpKeyHex = Totp(key: totp.key.toHex, digit: totp.digit, timestep: totp.timestep, algo: totp.algo)
+    var totpStringUint8Array = strToUint8Array(cstring($(%totpKeyHex)))
+    var pTotp = Module.malloc(totpStringUint8Array.length.to(int) + 1)
+    Module.HEAPU8.set(totpStringUint8Array, pTotp)
+    Module.HEAPU8[pTotp.to(int) + totpStringUint8Array.length.to(int)] = 0
     withStack:
-      var ret = newArray[byte]()
-      var totpKeyHex = Totp(key: totp.key.toHex, digit: totp.digit, timestep: totp.timestep, algo: totp.algo)
-      var totpStringUint8Array = strToUint8Array(cstring($(%totpKeyHex)))
-      var pTotp = Module.stackAlloc(totpStringUint8Array.length.to(int) + 1)
-      Module.HEAPU8.set(totpStringUint8Array, pTotp)
-      Module.HEAPU8[pTotp.to(int) + totpStringUint8Array.length.to(int)] = 0
       var pCuonter = Module.stackAlloc(8)
       Module.HEAPU8.set(counter.toUint8Array, pCuonter)
       discard OtpMod.generateCounter(pTotp, pCuonter, ret.handle)
       result = ret.toString()
+    Module.free(pTotp)
 
   proc generateCounter*(totp: Totp, counter: uint64): cstring =
     generateCounter(totp, newUint64(counter))
