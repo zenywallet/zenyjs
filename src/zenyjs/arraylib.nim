@@ -326,7 +326,6 @@ when defined(js):
   proc `tx=`*(txIn: TxIn | TxInHandle, txid: Hash) =
     let h = txIn.handle.to(cint)
     let a = newDataView(Module.HEAPU8.buffer, h, 12)
-    let len = a.getUint32(0, true).to(int)
     let a2 = newDataView(Module.HEAPU8.buffer, txid.handle.to(cint), 12)
     let len2 = a2.getUint32(0, true).to(int)
     let p2 = a2.getUint32(8, true).to(int)
@@ -342,7 +341,6 @@ when defined(js):
   proc `sig=`*(txIn: TxIn | TxInHandle, sig: Sig) =
     let h = txIn.handle.to(cint) + csizeof(Hash) + csizeof(uint32) + 4
     let a = newDataView(Module.HEAPU8.buffer, h, 12)
-    let len = a.getUint32(0, true).to(int)
     let a2 = newDataView(Module.HEAPU8.buffer, sig.handle.to(cint), 12)
     let len2 = a2.getUint32(0, true).to(int)
     let p2 = a2.getUint32(8, true).to(int)
@@ -391,7 +389,6 @@ when defined(js):
   proc `script=`*(txOut: TxOut | TxOutHandle, script: Script) =
     let h = txOut.handle.to(cint) + csizeof(uint64)
     let a = newDataView(Module.HEAPU8.buffer, h, 12)
-    let len = a.getUint32(0, true).to(int)
     let a2 = newDataView(Module.HEAPU8.buffer, script.handle.to(cint), 12)
     let len2 = a2.getUint32(0, true).to(int)
     let p2 = a2.getUint32(8, true).to(int)
