@@ -437,6 +437,16 @@ when defined(js):
       let a2 = newDataView(Module.HEAPU8.buffer, p, 12)
       let p2 = a2.getUint32(8, true).to(int)
       Module.HEAPU8.set(s, p2)
+    elif T is Hash:
+      let a = newDataView(Module.HEAPU8.buffer, x.handle.to(cint), 12)
+      let p = a.getUint32(8, true).to(int) + i * csizeof(T)
+      ArrayMod.realloc(p, cast[Array[byte]](y).len, csizeof(byte))
+      let ya = newDataView(Module.HEAPU8.buffer, y.handle.to(cint), 12)
+      let yp = ya.getUint32(8, true).to(int)
+      let s = newUint8Array(Module.HEAPU8.buffer, yp, cast[Array[byte]](y).len)
+      let a2 = newDataView(Module.HEAPU8.buffer, p, 12)
+      let p2 = a2.getUint32(8, true).to(int)
+      Module.HEAPU8.set(s, p2)
     elif T is string or T is cstring:
       var strUint8Array = strToUint8Array(y.cstring)
       var p = Module.malloc(strUint8Array.length.to(int) + 1)
