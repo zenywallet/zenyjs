@@ -78,32 +78,20 @@ when defined(js):
     (x[6].uint64 shl 48) or (x[7].uint64 shl 56)
 
   proc toBytes*(obj: tuple | object): Array[byte] =
-    var s: Array[Array[byte]]
     for val in obj.fields:
-      var b = val.toBytes
-      s.add(b)
-    concat(s)
+      result.add(val.toBytes)
 
   proc toBytes*[T](obj: openArray[T]): Array[byte] =
-    var s: Array[Array[byte]]
     for val in obj:
-      var b = val.toBytes
-      s.add(b)
-    concat(s)
+      result.add(val.toBytes)
 
   proc toBytes*[T](obj: Array[T]): Array[byte] =
-    var s: Array[Array[byte]]
     for val in obj:
-      var b = val.toBytes
-      s.add(b)
-    concat(s)
+      result.add(val.toBytes)
 
   proc toBytes*(obj: ref tuple | ref object | ptr tuple | ptr object): Array[byte] =
-    var s: Array[Array[byte]]
     for val in obj[].fields:
-      var b = val.toBytes
-      s.add(b)
-    concat(s)
+      result.add(val.toBytes)
 
   proc toReverse*(a: Array[byte]): Array[byte] =
     var x = 0
