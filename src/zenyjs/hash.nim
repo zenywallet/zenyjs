@@ -15,6 +15,9 @@ when defined(js):
   import algorithm
   import hex
 
+  converter toBytes*(o: Hash): Array[byte] {.inline.} =
+    cast[Array[byte]](o)
+
   borrowArrayProc(Hash)
 
   proc `$`*(data: Hash): string =
