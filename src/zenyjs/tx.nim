@@ -92,14 +92,14 @@ when defined(js):
     JSON.parse(a.toString())
 
   proc toJson*(tx: Tx, network: Network): JsonNode =
-    withStack:
-      var nw = strToUint8Array(cstring($(%network)))
-      var pnw = Module.stackAlloc(nw.length.to(int) + 1)
-      Module.HEAPU8.set(nw, pnw)
-      Module.HEAPU8[pnw.to(int) + nw.length.to(int)] = 0
-      var a = newArray[byte]()
-      TxMod.toJsonNetwork(tx.handle, pnw, a.handle)
-      result = parseJson($a.toString)
+    var nw = strToUint8Array(cstring($(%network)))
+    var pnw = Module.malloc(nw.length.to(int) + 1)
+    Module.HEAPU8.set(nw, pnw)
+    Module.HEAPU8[pnw.to(int) + nw.length.to(int)] = 0
+    var a = newArray[byte]()
+    TxMod.toJsonNetwork(tx.handle, pnw, a.handle)
+    result = parseJson($a.toString)
+    Module.free(pnw)
 
   proc toJson*(tx: Tx, networkId: NetworkId): JsonNode =
     var a = newArray[byte]()
