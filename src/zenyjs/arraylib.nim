@@ -19,30 +19,6 @@ when defined(js):
     Array*[T] = object
       handle*: JsObject
 
-  proc `=destroy`*[T](x: var Array[T]) =
-    if not x.handle.isNull:
-      ArrayMod.destroy(x.handle)
-      Module.free(x.handle)
-      #x.handle = jsNull # wasMoved
-
-  proc `=copy`*[T](a: var Array[T]; b: Array[T]) =
-    if a.handle == b.handle: return
-    when T is Ordinal:
-      `=destroy`(a)
-      wasMoved(a)
-      a.newArray()
-      discard ArrayMod.newArrayT(b.len, csizeof(T), a.handle)
-      var p32 = b.handle.to(cint) div 4
-      var uint8Array = newUint8Array(Module.HEAPU8.buffer, Module.HEAPU32[p32 + 2].to(int), Module.HEAPU32[p32].to(int) * csizeof(T)).to(Uint8Array)
-      Module.HEAPU8.set(uint8Array, Module.HEAPU32[a.handle.to(cint) div 4 + 2].to(int))
-    else:
-      raise newException(ArrayError, "unsupported =copy " & $typeof(T))
-
-  proc `=sink`*[T](a: var Array[T]; b: Array[T]) =
-    `=destroy`(a)
-    wasMoved(a)
-    a.handle = b.handle
-
   type
     ArrayByte* = Array[byte]
 
@@ -75,6 +51,30 @@ when defined(js):
   template csizeof*(T: typedesc[TxOut | InternalExportedTxOut]): int = 24
   template csizeof*(T: typedesc[Array[byte]]): int = 16
   template csizeof*(T: typedesc[string]): int = 8
+
+  proc `=destroy`*[T](x: var Array[T]) =
+    if not x.handle.isNull:
+      ArrayMod.destroy(x.handle)
+      Module.free(x.handle)
+      #x.handle = jsNull # wasMoved
+
+  proc `=copy`*[T](a: var Array[T]; b: Array[T]) =
+    if a.handle == b.handle: return
+    when T is Ordinal:
+      `=destroy`(a)
+      wasMoved(a)
+      a.newArray()
+      discard ArrayMod.newArrayT(b.len, csizeof(T), a.handle)
+      var p32 = b.handle.to(cint) div 4
+      var uint8Array = newUint8Array(Module.HEAPU8.buffer, Module.HEAPU32[p32 + 2].to(int), Module.HEAPU32[p32].to(int) * csizeof(T)).to(Uint8Array)
+      Module.HEAPU8.set(uint8Array, Module.HEAPU32[a.handle.to(cint) div 4 + 2].to(int))
+    else:
+      raise newException(ArrayError, "unsupported =copy " & $typeof(T))
+
+  proc `=sink`*[T](a: var Array[T]; b: Array[T]) =
+    `=destroy`(a)
+    wasMoved(a)
+    a.handle = b.handle
 
   proc init*(module: JsObject) =
     Module = module
