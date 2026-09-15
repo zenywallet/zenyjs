@@ -71,6 +71,11 @@ when defined(js):
     else:
       raise newException(ArrayError, "unsupported =copy " & $typeof(T))
 
+  proc `=dup`*[T](x: Array[T]): Array[T] =
+    result.newArray(x.len)
+    for i in 0..<x.len:
+      result[i] = x[i]
+
   proc `=sink`*[T](a: var Array[T]; b: Array[T]) =
     `=destroy`(a)
     wasMoved(a)
