@@ -108,10 +108,12 @@ when defined(js):
   proc newArray*[T](): Array[T] = result.init()
 
   proc newArray*[T](x: var Array[T], len: Natural) =
-    x = newArray[T](len)
+    x.handle = Module.malloc(12)
+    discard ArrayMod.newArrayT(len, csizeof(T), x.handle)
 
   proc newArray*[T](x: var Array[T], len: JsObject) =
-    x = newArray[T](len)
+    x.handle = Module.malloc(12)
+    discard ArrayMod.newArrayT(len, csizeof(T), x.handle)
 
   proc newArray*[T](x: var Array[T]) = x.init()
 
