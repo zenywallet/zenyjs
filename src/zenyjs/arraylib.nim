@@ -10,8 +10,6 @@ when defined(js):
   var ArrayMod = JsObject{}
   var Module: JsObject
 
-  template csizeof*(T: typedesc): int = sizeof(T)
-
   type
     ArrayError* = object of CatchableError
 
@@ -75,6 +73,7 @@ when defined(js):
     TxInHandle* = distinct JsObject
     TxOutHandle* = distinct JsObject
 
+  template csizeof*(T: typedesc): int = sizeof(T)
   template csizeof*(T: typedesc[Hash | Script | Sig]): int = 16
   template csizeof*(T: typedesc[TxIn | InternalExportedTxIn]): int = 48
   template csizeof*(T: typedesc[TxOut | InternalExportedTxOut]): int = 24
