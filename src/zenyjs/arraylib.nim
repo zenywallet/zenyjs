@@ -37,9 +37,15 @@ when defined(js):
       raise newException(ArrayError, "unsupported =copy " & $typeof(T))
 
   proc `=dup`*[T](x: Array[T]): Array[T] =
-    result.newArray(x.len)
-    for i in 0..<x.len:
-      result[i] = x[i]
+    when T is Ordinal:
+      result.newArray(x.len)
+      var p32 = x.handle.to(cint) div 4
+      var uint8Array = newUint8Array(Module.HEAPU8.buffer, Module.HEAPU32[p32 + 2].to(int), Module.HEAPU32[p32].to(int) * csizeof(T)).to(Uint8Array)
+      discard Module.HEAPU8.set(uint8Array, Module.HEAPU32[result.handle.to(cint) div 4 + 2].to(int))
+    else:
+      result.newArray(x.len)
+      for i in 0..<x.len:
+        result[i] = x[i]
 
   proc `=sink`*[T](a: var Array[T]; b: Array[T]) =
     `=destroy`(a)
