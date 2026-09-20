@@ -34,7 +34,11 @@ when defined(js):
       var uint8Array = newUint8Array(Module.HEAPU8.buffer, Module.HEAPU32[p32 + 2].to(int), Module.HEAPU32[p32].to(int) * csizeof(T)).to(Uint8Array)
       Module.HEAPU8.set(uint8Array, Module.HEAPU32[a.handle.to(cint) div 4 + 2].to(int))
     else:
-      raise newException(ArrayError, "unsupported =copy " & $typeof(T))
+      `=destroy`(a)
+      wasMoved(a)
+      a.newArray(b.len)
+      for i in 0..<a.len:
+        a[i] = b[i]
 
   proc `=dup`*[T](x: Array[T]): Array[T] =
     when T is Ordinal:
