@@ -174,6 +174,11 @@ when defined(js):
     else:
       result = "@^[]"
 
+  converter toString*(txh: TxHandle): string =
+    var s = newArray[byte]()
+    TxMod.toString(txh, s.handle)
+    result = $s.toString
+
 else:
   when defined(emscripten):
     const EXPORTED_FUNCTIONS* = ["_tx_newTx", "_tx_toTx", "_tx_stripWitness",
