@@ -130,6 +130,9 @@ when defined(js):
   proc ins*(tx: Tx): ArrayTxInHandle =
     (tx.handle.to(cint) + 8).toJs.ArrayTxInHandle
 
+  proc ins*(h: TxHandle): ArrayTxInHandle =
+    (cast[JsObject](h).to(cint) + 8).toJs.ArrayTxInHandle
+
   proc outs*(tx: Tx): ArrayTxOutHandle =
     (tx.handle.to(cint) + 24).toJs.ArrayTxOutHandle
 
