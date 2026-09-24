@@ -191,6 +191,17 @@ when defined(js):
     let p2 = a2.getUint32(0, true).to(int)
     p2.toJs.TxHandle
 
+  proc `[]=`*(x: var Array[Tx] | Array[Tx]; i: Natural; y: TxHandle) =
+    let a = newDataView(Module.HEAPU8.buffer, x.handle.to(cint), 12)
+    let p = a.getUint32(8, true).to(int) + i * csizeof(Tx)
+    let a2 = newDataView(Module.HEAPU8.buffer, p, 12)
+    let p2 = a2.getUint32(0, true).to(int)
+    let r = a2.getUint32(8, true).to(int)
+    if p2 != 0 and r == 0:
+      TxMod.free(p2.toJs)
+    a2.setUint32(0, TxMod.duplicate(y), true)
+    a2.setUint32(8, 0.toJs, true)
+
 else:
   when defined(emscripten):
     const EXPORTED_FUNCTIONS* = ["_tx_newTx", "_tx_toTx", "_tx_stripWitness",
