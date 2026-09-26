@@ -202,6 +202,16 @@ when defined(js):
     a2.setUint32(0, TxMod.duplicate(y), true)
     a2.setUint32(8, 0.toJs, true)
 
+  proc add*(x: var Array[Tx]; y: var Tx) =
+    if x.handle.isNull:
+      x.newArray(1)
+      x[0] = y.toTxHandle
+    else:
+      let curLen = x.len
+      let newLen = curLen + 1
+      x.reallocArray(newLen, csizeof(Tx))
+      x[curLen] = y.toTxHandle
+
 else:
   when defined(emscripten):
     const EXPORTED_FUNCTIONS* = ["_tx_newTx", "_tx_toTx", "_tx_stripWitness",
