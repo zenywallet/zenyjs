@@ -312,7 +312,7 @@ when defined(js):
       let d = newDataView(Module.HEAPU8.buffer, a.getUint32(8, true).to(int) + i * csizeof(T), csizeof(T))
       result = d.getUint32(0, true).to(T)
     else:
-      raise
+      raise newException(ArrayError, "unsupported [] " & $typeof(T))
 
   proc `$`*(a: Array[uint]): string =
     result = "@^[" & $a[0]
