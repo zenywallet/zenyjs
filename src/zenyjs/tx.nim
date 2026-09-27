@@ -184,7 +184,7 @@ when defined(js):
 
   proc `$`*(txh: TxHandle): string = txh.toString()
 
-  proc `[]`*(x: var Array[Tx], i: Natural): TxHandle =
+  proc `[]`*(x: var Array[Tx] | Array[Tx], i: Natural): TxHandle =
     let a = newDataView(Module.HEAPU8.buffer, x.handle.to(cint), 12)
     let p = a.getUint32(8, true).to(int) + i * csizeof(Tx)
     let a2 = newDataView(Module.HEAPU8.buffer, p, 12)
