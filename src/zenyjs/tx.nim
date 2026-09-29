@@ -455,6 +455,7 @@ else:
 
 converter Sig*(s: Script): Sig = cast[Sig](s)
 converter Sig*(args: varargs[Array[byte], toBytes]): Sig = cast[Sig](concat(args))
+template Sig*(s: Sig): Sig = s
 
 
 when isMainModule:
