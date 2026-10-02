@@ -493,7 +493,7 @@ when defined(js):
       let d = newDataView(Module.HEAPU8.buffer, p, csizeof(T))
       d.setInt32(0, y, true)
     else:
-      raise
+      raise newException(ArrayError, "unsupported []= " & $typeof(T))
 
   proc `[]=`*(x: ArrayTxInHandle; i: Natural; y: sink TxIn | sink TxInObj) =
     let a = x[i]
