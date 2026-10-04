@@ -61,6 +61,7 @@ when defined(js):
     monitorRunDependencies: proc(left: JsObject) = discard
   }
 
+
 elif defined(emscripten):
   import std/os
   import core
