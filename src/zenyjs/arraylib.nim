@@ -497,6 +497,18 @@ when defined(js):
       let p = a.getUint32(8, true).to(int) + i * csizeof(T)
       let d = newDataView(Module.HEAPU8.buffer, p, csizeof(T))
       d.setInt32(0, y, true)
+    elif T is tuple:
+      let a = newDataView(Module.HEAPU8.buffer, x.handle.to(cint), 12)
+      var p = a.getUint32(8, true).to(int) + i * csizeof(T)
+      for val in y.fields:
+        ArrayMod.realloc(p, cast[Array[byte]](val).len, csizeof(byte))
+        let ya = newDataView(Module.HEAPU8.buffer, val.handle.to(cint), 12)
+        let yp = ya.getUint32(8, true).to(int)
+        let s = newUint8Array(Module.HEAPU8.buffer, yp, cast[Array[byte]](val).len)
+        let a2 = newDataView(Module.HEAPU8.buffer, p, 12)
+        let p2 = a2.getUint32(8, true).to(int)
+        Module.HEAPU8.set(s, p2)
+        inc(p, csizeof(typeof(val)))
     else:
       raise newException(ArrayError, "unsupported []= " & $typeof(T))
 
