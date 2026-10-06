@@ -5,6 +5,7 @@ import hex
 when defined(js):
   import std/jsffi
   import std/json
+  import std/typetraits
   import jslib
 
   var ArrayMod = JsObject{}
@@ -501,6 +502,8 @@ when defined(js):
       let a = newDataView(Module.HEAPU8.buffer, x.handle.to(cint), 12)
       var p = a.getUint32(8, true).to(int) + i * csizeof(T)
       for val in y.fields:
+        when distinctBase(val) is not Array[byte]:
+          raise newException(ArrayError, "unsupported []= tuple " & $typeof(T))
         ArrayMod.realloc(p, cast[Array[byte]](val).len, csizeof(byte))
         let ya = newDataView(Module.HEAPU8.buffer, val.handle.to(cint), 12)
         let yp = ya.getUint32(8, true).to(int)
