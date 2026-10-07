@@ -20,6 +20,13 @@ when defined(js):
 
   proc `=destroy`*[T](x: var Array[T]) =
     if not x.handle.isNull:
+      when T is tuple:
+        let a = newDataView(Module.HEAPU8.buffer, x.handle.to(cint), 12)
+        var p = a.getUint32(8, true).to(int)
+        for t in default(T).fields:
+          when distinctBase(t) is Array[byte]:
+            ArrayMod.destroy(p.toJs)
+            inc(p, csizeof(typeof(t)))
       ArrayMod.destroy(x.handle)
       Module.free(x.handle)
       #x.handle = jsNull # wasMoved
