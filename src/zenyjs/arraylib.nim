@@ -324,6 +324,24 @@ when defined(js):
       let a = newDataView(Module.HEAPU8.buffer, x.handle.to(cint), 12)
       let d = newDataView(Module.HEAPU8.buffer, a.getUint32(8, true).to(int) + i * csizeof(T), csizeof(T))
       result = d.getUint32(0, true).to(T)
+    elif T is tuple:
+      let a = newDataView(Module.HEAPU8.buffer, x.handle.to(cint), 12)
+      var p = a.getUint32(8, true).to(int) + i * csizeof(T)
+      for j, t in default(T).fieldPairs:
+        for k, dest in result.fieldPairs:
+          when k == j:
+            when distinctBase(dest) is not Array[byte]:
+              raise newException(ArrayError, "unsupported [] tuple " & $typeof(T))
+            let a2 = newDataView(Module.HEAPU8.buffer, p, 12)
+            let p2 = a2.getUint32(8, true).to(int)
+            let a2len = a2.getUint32(0, true).to(int)
+            let d = newUint8Array(Module.HEAPU8.buffer, p2, a2len)
+            dest.handle = Module.malloc(12)
+            discard ArrayMod.newArrayT(a2len, csizeof(byte), dest.handle)
+            let ra = newDataView(Module.HEAPU8.buffer, dest.handle.to(cint), 12)
+            let rp = ra.getUint32(8, true).to(int)
+            discard Module.HEAPU8.set(d, rp)
+            inc(p, csizeof(typeof(t)))
     else:
       raise newException(ArrayError, "unsupported [] " & $typeof(T))
 
