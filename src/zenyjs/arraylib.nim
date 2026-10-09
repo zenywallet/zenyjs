@@ -27,6 +27,8 @@ when defined(js):
           when distinctBase(t) is Array[byte]:
             ArrayMod.destroy(p.toJs)
             inc(p, csizeof(typeof(t)))
+          else:
+            raise newException(ArrayError, "unsupported =destroy tuple " & $typeof(T))
       ArrayMod.destroy(x.handle)
       Module.free(x.handle)
       #x.handle = jsNull # wasMoved
