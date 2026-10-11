@@ -104,6 +104,11 @@ when defined(js):
     for t in default(T).fields:
       inc(tupleSize, csizeof(typeof(t)))
     tupleSize
+  template csizeof*(T: typedesc[object]): int =
+    var objSize = 0
+    for t in default(T).fields:
+      inc(objSize, csizeof(typeof(t)))
+    objSize
 
   proc init*(module: JsObject) =
     Module = module
