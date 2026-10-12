@@ -98,6 +98,8 @@ when defined(js):
   template csizeof*(T: typedesc[TxIn | InternalExportedTxIn]): int = 48
   template csizeof*(T: typedesc[TxOut | InternalExportedTxOut]): int = 24
   template csizeof*(T: typedesc[Array[byte]]): int = 16
+  template csizeof*(T: typedesc[Array[tuple]]): int = 16
+  template csizeof*(T: typedesc[Array[object]]): int = 16
   template csizeof*(T: typedesc[string]): int = 8
   template csizeof*(T: typedesc[tuple]): int =
     var tupleSize = 0
