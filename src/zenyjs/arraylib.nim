@@ -100,6 +100,7 @@ when defined(js):
   template csizeof*(T: typedesc[Array[byte]]): int = 16
   template csizeof*(T: typedesc[Array[tuple]]): int = 16
   template csizeof*(T: typedesc[Array[object]]): int = 16
+  template csizeof*(T: typedesc[Array]): int = 16
   template csizeof*(T: typedesc[string]): int = 8
   template csizeof*(T: typedesc[tuple]): int =
     var tupleSize = 0
