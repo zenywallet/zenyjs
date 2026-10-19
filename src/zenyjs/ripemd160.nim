@@ -7,6 +7,7 @@ else:
   import ripemd160_native
   import bytes
   import arraylib
+  import utils
 
   proc ripemd160*(data: ptr UncheckedArray[byte], size: uint32): Hash160 {.inline.} =
     result = cast[Hash160](newArray[byte](20))
@@ -29,6 +30,8 @@ else:
   template ripemd160*(data: static openArray[byte]): Hash160 =
     var dataBytes = data.toBytes
     ripemd160(cast[ptr UncheckedArray[byte]](addr dataBytes[0]), dataBytes.len.uint32)
+
+  template ripemd160hash*(pub: Array[byte]): Hash160 = ripemd160(sha256s(pub))
 
 
   when isMainModule:

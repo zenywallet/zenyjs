@@ -224,6 +224,7 @@ else:
   import eckey
   import utils
   import address
+  import ripemd160
   import custom
 
   type

@@ -189,8 +189,6 @@ else:
   import arraylib
   import eckey
 
-  template ripemd160hash*(pub: Array[byte]): Hash160 = ripemd160(sha256s(pub))
-
   proc checkSum(hash160Prefix: Array[byte]): Array[byte] =
     let hashd = sha256d(hash160Prefix)
     result = hashd[0..3].toArray
