@@ -3,6 +3,7 @@
 when defined(js):
   import eckey
   import seed
+  export eckey
   export seed
 
   proc randomKey*(): tuple[prv: PrivateKey, pub: PublicKey] =
