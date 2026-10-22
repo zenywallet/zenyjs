@@ -105,7 +105,8 @@ task ed25519, "copy ed25519":
     exec "cp -r src ../../src/zenyjs/deps/ed25519/"
 
 task depsAll, "Build deps":
-  exec "git submodule update --init"
+  exec "git submodule update --init --remote"
+  exec "git submodule update --init deps/zbar"
   secp256k1Task()
   wasmSecp256k1Task()
   zbarTask()
